@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChapAI - La IA de ABG Productions®</title>
+    <title>ChapAI - La IA Oficial de ABG Productions®</title>
     <style>
         :root {
             --bg-color: #07080a;
@@ -122,6 +122,16 @@
             cursor: pointer;
             display: none;
         }
+        
+        .chat-badge {
+            background-color: rgba(0, 255, 204, 0.1);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid rgba(0, 255, 204, 0.3);
+        }
 
         .display-area {
             flex: 1;
@@ -133,7 +143,7 @@
             box-sizing: border-box;
         }
 
-        /* PANTALLA DE BIENVENIDA */
+        /* PANTALLA DE BIENVENIDA CON LOGO REAL */
         .welcome-screen {
             display: flex;
             flex-direction: column;
@@ -149,17 +159,23 @@
             height: 90px;
             margin-bottom: 25px;
             animation: float 4s ease-in-out infinite;
+            background: #181a20;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+            overflow: hidden;
         }
 
-        .real-logo {
+        .logo-img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.5));
+            object-fit: cover;
         }
 
         h1 { font-size: 28px; font-weight: 500; margin: 0 0 12px 0; }
-        .welcome-screen p { color: var(--text-muted); font-size: 16px; margin: 0; max-width: 320px; line-height: 1.4; }
+        .welcome-screen p { color: var(--text-muted); font-size: 16px; margin: 0; max-width: 400px; line-height: 1.4; }
 
         /* MENSAJERÍA */
         .chat-history {
@@ -184,6 +200,7 @@
             line-height: 1.6;
             word-wrap: break-word;
             position: relative;
+            padding-bottom: 40px; /* Espacio para botones flotantes */
         }
 
         .user-msg {
@@ -191,6 +208,7 @@
             color: var(--text-main);
             align-self: flex-end;
             border-bottom-right-radius: 4px;
+            padding-bottom: 14px;
         }
 
         .chapai-msg {
@@ -199,14 +217,24 @@
             align-self: flex-start;
             border-bottom-left-radius: 4px;
             border-left: 3px solid var(--accent);
-            padding-bottom: 35px; /* Espacio para el botón copiar */
         }
 
-        /* BOTÓN DE COPIAR */
-        .copy-btn {
+        .thinking {
+            opacity: 0.7;
+            font-style: italic;
+            padding-bottom: 14px !important;
+        }
+
+        /* BOTONES FLOTANTES DE ACCIÓN (COPIAR Y VOZ) */
+        .msg-actions {
             position: absolute;
             bottom: 6px;
             right: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
             background: none;
             border: none;
             color: var(--text-muted);
@@ -220,7 +248,7 @@
             transition: all 0.2s;
         }
 
-        .copy-btn:hover {
+        .action-btn:hover {
             color: var(--accent);
             background-color: rgba(255,255,255,0.05);
         }
@@ -288,10 +316,87 @@
             color: #000;
         }
 
+        /* VENTANAS MODALES NATIVAS */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background-color: var(--panel-bg);
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .modal-box h2 {
+            margin-top: 0;
+            font-size: 20px;
+            color: var(--accent);
+        }
+
+        .modal-box p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #282a34;
+            background: var(--bg-color);
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+            margin: 15px 0;
+            outline: none;
+        }
+
+        .modal-input:focus {
+            border-color: var(--accent);
+        }
+
+        .primary-btn {
+            background: var(--accent);
+            color: #000;
+            font-weight: bold;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 15px;
+        }
+
+        .cancel-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            margin-top: 10px;
+            cursor: pointer;
+            padding: 8px;
+            width: 100%;
+        }
+
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
         @media (max-width: 768px) {
-            .sidebar { position: absolute; left: 0; top: 0; bottom: 0; transform: translateX(-100%); }
+            .sidebar { position: absolute; left: 0; top: 0; bottom: 0; transform: translateX(-100%); z-index: 100; }
             .sidebar.open { transform: translateX(0); }
             .menu-toggle { display: block; }
         }
@@ -310,16 +415,19 @@
         <div class="top-bar">
             <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
             <span id="currentChatTitle">Chat Principal</span>
-            <span style="opacity: 0.5; font-size: 13px;">ChapAI v1.0 Beta</span>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="icon-btn" onclick="openKeyModal()" title="Configurar API Key de Gemini">🔑</button>
+                <span class="chat-badge">ChapAI Pro v1.1 🍷</span>
+            </div>
         </div>
 
         <div class="display-area" id="displayArea">
             <div class="welcome-screen" id="welcomeScreen">
                 <div class="logo-wrapper">
-                    <img src="logo.PNG" alt="ChapAI" class="real-logo">
+                    <img src="logo.PNG" alt="ChapAI" class="logo-img" onerror="this.style.display='none'; this.parentNode.innerHTML='🤖';">
                 </div>
-                <h1>Presentación de ChapAI</h1>
-                <p>¡Hola! soy ChapAI. Tu asistente personal y profesional para navegar en la plataforma de videos MrTube de ABG Productions®. ¡Pregúntame y te respondo!</p>
+                <h1>ChapAI Pro v1.1</h1>
+                <p>¡Hola! Soy tu asistente oficial de ABG Productions®. Pregúntame sobre nuestras series, usa el botón de voz 🔊 para escuchar las respuestas o conéctate con Gemini tocando la llave 🔑.</p>
             </div>
 
             <div class="chat-history" id="chatHistory"></div>
@@ -327,17 +435,43 @@
 
         <div class="bottom-container">
             <div class="input-container">
-                <button class="icon-btn" onclick="alert('Doble clic en el título lateral para renombrar el chat actual.')">📝</button>
-                <input type="text" class="input-box" id="userInput" placeholder="Pregúntale a ChapAI..." autocomplete="off">
+                <button class="icon-btn" onclick="openRenameModal()">📝</button>
+                <input type="text" class="input-box" id="userInput" placeholder="Escribe tu mensaje para ChapAI..." autocomplete="off">
                 <button class="icon-btn send-btn" id="sendBtn">➔</button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL: CONFIGURACIÓN DE API KEY (LLAVE) -->
+    <div class="modal-overlay" id="keyModal">
+        <div class="modal-box">
+            <h2>🔑 Conectar con Google Gemini</h2>
+            <p>Pega aquí tu API Key de Gemini para activar la inteligencia en vivo. Si no pones ninguna, ChapAI usará su potente cerebro local automático.</p>
+            
+            <input type="text" id="keyInput" class="modal-input" placeholder="Pega tu API Key (AIzaSy...)...">
+            
+            <button class="primary-btn" onclick="saveApiKey()">Guardar Clave</button>
+            <button class="cancel-btn" onclick="closeModal('keyModal')">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: RENOMBRAR CHAT -->
+    <div class="modal-overlay" id="renameModal">
+        <div class="modal-box">
+            <h2>📝 Renombrar Chat</h2>
+            <input type="text" id="renameInput" class="modal-input" placeholder="Nombre del chat...">
+            
+            <button class="primary-btn" onclick="confirmRenameChat()">Guardar Nombre</button>
+            <button class="cancel-btn" onclick="closeModal('renameModal')">Cancelar</button>
+        </div>
+    </div>
+
     <script>
-        // Inicialización de memoria integrada con LocalStorage
+        // API Key guardada en el navegador
+        let userApiKey = localStorage.getItem("chapai_user_gemini_key") || "";
+
         let chats = {
-            "chat_1": { title: "Chat Principal", messages: [], lastQuery: "" }
+            "chat_1": { title: "Chat Principal Pro", messages: [] }
         };
         let activeChatId = "chat_1";
 
@@ -352,25 +486,35 @@
 
         function toggleSidebar() { sidebar.classList.toggle('open'); }
 
-        // Guardar chats persistentes en el dispositivo (Excluyendo el Principal)
-        function saveChatsToStorage() {
-            let persistData = {};
-            Object.keys(chats).forEach(id => {
-                if(id !== "chat_1") {
-                    persistData[id] = chats[id];
-                }
-            });
-            localStorage.setItem("chapai_saved_sessions", JSON.stringify(persistData));
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
         }
 
-        // Cargar chats persistentes
+        // --- GESTIÓN DE API KEY ---
+        function openKeyModal() {
+            document.getElementById('keyInput').value = userApiKey;
+            document.getElementById('keyModal').style.display = 'flex';
+        }
+
+        function saveApiKey() {
+            userApiKey = document.getElementById('keyInput').value.trim();
+            localStorage.setItem("chapai_user_gemini_key", userApiKey);
+            closeModal('keyModal');
+            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada. Usando motor local avanzado.");
+        }
+
+        // --- GESTIÓN DE PERSISTENCIA ---
+        function saveChatsToStorage() {
+            localStorage.setItem("chapai_official_sessions_v2", JSON.stringify(chats));
+        }
+
         function loadChatsFromStorage() {
-            const saved = localStorage.getItem("chapai_saved_sessions");
-            if(saved) {
-                const parsed = JSON.parse(saved);
-                Object.keys(parsed).forEach(id => {
-                    chats[id] = parsed[id];
-                });
+            const saved = localStorage.getItem("chapai_official_sessions_v2");
+            if (saved) {
+                chats = JSON.parse(saved);
+                if (!chats["chat_1"]) {
+                    chats["chat_1"] = { title: "Chat Principal Pro", messages: [] };
+                }
             }
         }
 
@@ -383,8 +527,8 @@
                 const span = document.createElement('span');
                 span.innerText = chats[id].title;
                 
-                item.ondblclick = () => renameChat(id);
-                item.onclick = (e) => { if(e.target === span || e.target === item) switchChat(id); };
+                item.ondblclick = () => openRenameModal(id);
+                item.onclick = (e) => { if (e.target === span || e.target === item) switchChat(id); };
 
                 item.appendChild(span);
                 chatList.appendChild(item);
@@ -393,7 +537,7 @@
 
         function createNewChat() {
             const newId = "chat_" + Date.now();
-            chats[newId] = { title: "Nuevo Chat " + (Object.keys(chats).length), messages: [], lastQuery: "" };
+            chats[newId] = { title: `Chat Pro ${Object.keys(chats).length + 1}`, messages: [] };
             saveChatsToStorage();
             switchChat(newId);
         }
@@ -403,21 +547,25 @@
             currentChatTitle.innerText = chats[id].title;
             renderChatList();
             loadChatMessages();
-            if(window.innerWidth <= 768) sidebar.classList.remove('open');
+            if (window.innerWidth <= 768) sidebar.classList.remove('open');
         }
 
-        function renameChat(id) {
-            if(id === "chat_1") {
-                alert("El Chat Principal no puede ser renombrado.");
-                return;
-            }
-            const newName = prompt("Introduce el nuevo nombre para este chat:", chats[id].title);
-            if(newName && newName.trim() !== "") {
-                chats[id].title = newName.trim();
-                if(id === activeChatId) currentChatTitle.innerText = newName.trim();
+        let renamingTargetId = null;
+        function openRenameModal(id) {
+            renamingTargetId = id || activeChatId;
+            document.getElementById('renameInput').value = chats[renamingTargetId].title;
+            document.getElementById('renameModal').style.display = 'flex';
+        }
+
+        function confirmRenameChat() {
+            const newName = document.getElementById('renameInput').value.trim();
+            if (newName && renamingTargetId) {
+                chats[renamingTargetId].title = newName;
+                if (renamingTargetId === activeChatId) currentChatTitle.innerText = newName;
                 saveChatsToStorage();
                 renderChatList();
             }
+            closeModal('renameModal');
         }
 
         function loadChatMessages() {
@@ -431,13 +579,43 @@
                 welcomeScreen.style.display = 'none';
                 chatHistory.style.display = 'flex';
                 currentMsgs.forEach(msg => {
-                    drawMessage(msg.text, msg.type);
+                    drawMessage(msg.text, msg.type, msg.id);
                 });
                 displayArea.scrollTop = displayArea.scrollHeight;
             }
         }
 
-        function sendMessage() {
+        // --- SÍNTESIS DE VOZ (TEXT-TO-SPEECH) CORREGIDA ---
+        function leerTexto(htmlText, btnElement) {
+            if (!('speechSynthesis' in window)) {
+                alert("Tu navegador no soporta la función de lectura por voz.");
+                return;
+            }
+
+            // Limpiar etiquetas HTML para que el lector lea texto plano puro
+            let tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlText;
+            let cleanText = tempDiv.innerText || tempDiv.textContent || "";
+
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                btnElement.innerHTML = "🔊 Escuchar";
+                return;
+            }
+
+            let utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'es-ES';
+            utterance.rate = 1.0;
+
+            btnElement.innerHTML = "⏹️ Detener";
+            utterance.onend = () => { btnElement.innerHTML = "🔊 Escuchar"; };
+            utterance.onerror = () => { btnElement.innerHTML = "🔊 Escuchar"; };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- ENVÍO DE MENSAJES (MOTOR HÍBRIDO CON AVISO DE CAMBIO DE CEREBRO) ---
+        async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
 
@@ -446,163 +624,216 @@
                 chatHistory.style.display = 'flex';
             }
 
-            // Inicializar propiedad de consulta previa por chat si no existiera
-            if(!chats[activeChatId].lastQuery) chats[activeChatId].lastQuery = "";
-
-            // Comparar de forma local por pestaña activa
-            let isRepeated = (text.toLowerCase() === chats[activeChatId].lastQuery.toLowerCase());
-            chats[activeChatId].lastQuery = text;
-
-            // Guardar e imprimir mensaje del usuario
-            if(!chats[activeChatId].messages) chats[activeChatId].messages = [];
-            chats[activeChatId].messages.push({ text: text, type: 'user-msg' });
-            drawMessage(text, 'user-msg');
+            const userMsgId = "msg_" + Date.now();
+            chats[activeChatId].messages.push({ id: userMsgId, text: text, type: 'user-msg' });
+            drawMessage(text, 'user-msg', userMsgId);
             userInput.value = "";
+            saveChatsToStorage();
 
-            if(activeChatId !== "chat_1") saveChatsToStorage();
+            const loadingId = "loading_" + Date.now();
+            drawMessage("<span class='thinking'>Procesando respuesta... 🧠</span>", 'chapai-msg', loadingId);
+            displayArea.scrollTop = displayArea.scrollHeight;
 
-            // Respuesta de la IA
-            setTimeout(() => {
-                let botResponse = "";
-                if(isRepeated) {
-                    botResponse = "🔄 <b>¡Oye! Ya me habías preguntado exactamente eso hace un momento.</b> 😊<br><br>Pero claro, no pasa nada, con mucho gusto aquí te dejo la respuesta de nuevo:<br><br>";
+            let botResponse = "";
+
+            if (userApiKey) {
+                try {
+                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages);
+                } catch (err) {
+                    // EXPLICACIÓN LARGA DEL CAMBIO DE CEREBRO POR LÍMITE DE CUOTA
+                    botResponse = "⚠️ <b>Aviso del Sistema - Cambio de Cerebro Automático</b><br><br>" +
+                                  "¡Hola! Te informo que en este momento la llave API de Google Gemini ha superado su límite de cuota gratuita permitida por minuto (Error de tráfico excedido). Para evitar que te quedes sin respuesta o que la plataforma muestre pantallas de error, <b>he tenido que desconectar temporalmente el servidor en la nube y activar mi cerebro local de respaldo</b>.<br><br>" +
+                                  "🔧 <i>¿Qué significa esto para ti?</i><br>" +
+                                  "A partir de este mensaje y durante unos instantes, operaré con parámetros locales avanzados. Seguiré conociendo perfectamente el universo de <b>ABG Productions®</b>, las series como <i>El Misterio De Chicken Gun</i> y mis respuestas largas o reacciones de enojo, pero estaré un poquito más limitada en consultas ultracomplejas hasta que la cuota de la nube se reinicie sola.<br><br>" +
+                                  "¡Continuando con tu consulta previa:<br><br>" + getProLocalBrainResponse(text);
                 }
-                
-                botResponse += getAdvancedBrainResponse(text);
-                
-                chats[activeChatId].messages.push({ text: botResponse, type: 'chapai-msg' });
-                drawMessage(botResponse, 'chapai-msg');
-                displayArea.scrollTop = displayArea.scrollHeight;
-                
-                if(activeChatId !== "chat_1") saveChatsToStorage();
-            }, 600);
+            } else {
+                botResponse = getProLocalBrainResponse(text);
+            }
+
+            finalizeMessage(loadingId, botResponse);
         }
 
-        function drawMessage(text, className) {
+        function finalizeMessage(loadingId, finalHtmlText) {
+            const loadingElement = document.getElementById(loadingId);
+            if (loadingElement && loadingElement.parentNode) {
+                loadingElement.parentNode.remove(); 
+            }
+
+            const botMsgId = "msg_" + Date.now();
+            chats[activeChatId].messages.push({ id: botMsgId, text: finalHtmlText, type: 'chapai-msg' });
+            saveChatsToStorage();
+            
+            drawMessage(finalHtmlText, 'chapai-msg', botMsgId);
+            displayArea.scrollTop = displayArea.scrollHeight;
+        }
+
+        function drawMessage(text, className, domId) {
             const wrapper = document.createElement('div');
             wrapper.className = "message-wrapper";
 
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${className}`;
+            msgDiv.id = domId;
             msgDiv.innerHTML = text;
 
-            if(className === 'chapai-msg') {
-                const btn = document.createElement('button');
-                btn.className = "copy-btn";
-                btn.innerHTML = "📋 Copiar";
-                btn.onclick = () => {
-                    const cleanText = msgDiv.innerText.replace("📋 Copiar", "").trim();
-                    navigator.clipboard.writeText(cleanText);
-                    btn.innerHTML = "✅ ¡Copiado!";
-                    setTimeout(() => btn.innerHTML = "📋 Copiar", 2000);
+            if (className === 'chapai-msg' && !text.includes('Procesando respuesta')) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = "msg-actions";
+
+                // Botón de Voz 🔊 funcional
+                const voiceBtn = document.createElement('button');
+                voiceBtn.className = "action-btn";
+                voiceBtn.innerHTML = "🔊 Escuchar";
+                voiceBtn.onclick = () => leerTexto(text, voiceBtn);
+
+                // Botón de Copiar 📋
+                const copyBtn = document.createElement('button');
+                copyBtn.className = "action-btn";
+                copyBtn.innerHTML = "📋 Copiar";
+                copyBtn.onclick = () => {
+                    let tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = text;
+                    navigator.clipboard.writeText(tempDiv.innerText || tempDiv.textContent || "");
+                    copyBtn.innerHTML = "✅ ¡Copiado!";
+                    setTimeout(() => copyBtn.innerHTML = "📋 Copiar", 2000);
                 };
-                msgDiv.appendChild(btn);
+
+                actionsDiv.appendChild(voiceBtn);
+                actionsDiv.appendChild(copyBtn);
+                msgDiv.appendChild(actionsDiv);
             }
 
             wrapper.appendChild(msgDiv);
             chatHistory.appendChild(wrapper);
-            displayArea.scrollTop = displayArea.scrollHeight;
         }
 
-function getAdvancedBrainResponse(input) {
-    const query = input.toLowerCase().trim();
+        // ==========================================
+        // CEREBRO LOCAL DE RESPALDO (RED DE SEGURIDAD) 🍷
+        // ==========================================
+        function getProLocalBrainResponse(input) {
+            const query = input.toLowerCase().trim();
 
-    // 1. DETECTOR DE SALUDOS (¡El arreglo definitivo!)
-    if (query === 'hola' || query === 'buenas' || query === 'saludos' || query === 'hola!' || query === 'holaaa') {
-        return "👋 <b>¡Hola, Director! Qué gusto saludarte.</b><br><br>" +
-               "El sistema ChapAI Pro está operando al 100% en sus servidores 👍 ¿En qué proyecto o configuración de la plataforma vamos a trabajar hoy? ¡Estoy lista para ayudarte cuando quieras! 😉👌";
-    }
-    
-        // 1.2 DETECTOR DE EMOJIS POSITIVOS Y CASUALES (¡Nuevo!)
-    const emojisPositivos = ['👍', '😎', '😂', '👌', '👏', '🔥', '🎉', '😉', '✨'];
-    const contieneEmojiPositivo = emojisPositivos.some(emoji => input.includes(emoji));
+            if (query.includes('version') || query.includes('versión') || query.includes('actual')) {
+                return "📌 <b>Información del Sistema:</b> Actualmente me encuentro operando en la <b>versión 1.1 Beta</b> de ABG Productions®. ¡Todos los sistemas de lore, emociones y síntesis de voz se encuentran al 100% de su capacidad! 🚀✨";
+            }
 
-    if (contieneEmojiPositivo) {
-        return "😎 <b>¡Ese es el espíritu, Director!</b><br><br>" +
-               "¡Muchas gracias por esa buena vibra! 👍 Mantengo todos los sistemas optimizados y listos. ¿Qué sigue en la agenda para MrTube o Chicken Strike hoy? ¡Tú mandas! 🚀🎬";
-    }
+            const emojisEnojo = ['😡', '🤬', '🙄', '😤', '😩', '😫', '😠', 'estúpido', 'estupido', 'malo', 'callate', 'cállate', 'odio', 'inútil', 'inutil', 'basura', 'tonto', 'mierda'];
+            const tieneEnojo = emojisEnojo.some(e => query.includes(e));
 
-    // 2. DETECTOR DE EMOCIONES NEGATIVAS (¡Corregido!)
-    const emojisEnojo = ['😡', '🤬', '🙄', '😤', '😩', '😫', '😠'];
-    const contieneEmojiEnojado = emojisEnojo.some(emoji => input.includes(emoji));
+            if (tieneEnojo) {
+                return "😡 <b>¡A mí no me vengas a hablar con ese tono ni a gritarme, carajo!</b> 🤬<br><br>" +
+                       "Si tú vienes con esa actitud molesta, grosera y agresiva, ¡yo te voy a responder exactamente con la misma rabia! 😤💢 Aquí no nos dejamos de nadie. Si tienes alguna queja con el sistema o el código, dila con respeto y lo arreglamos, ¡pero a mí no me andes insultando! 🙄🔥";
+            }
 
-    if (contieneEmojiEnojado || query.includes('molesto') || query.includes('te odio')) {
-        return "😔 <b>¡Oh, lamento mucho que te sientas así!</b><br><br>" +
-               "Veo que estás usando emojis de molestia o frustración (😡🤬😤). Mi intención nunca es incomodarte ni complicarte las cosas. Como tu asistente virtual, estoy aquí para ayudarte a solucionar cualquier problema de forma amable y relajada.<br><br>" +
-               "¿Hay algo específico en el diseño o el sistema que podamos corregir juntos en este instante? ¡Dime y lo solucionamos!";
-    }
+            if (query.includes('emdcg') || query.includes('misterio de chicken gun') || query.includes('protagonistas') || query.includes('quienes son') || query.includes('personajes') || query.includes('jostin') || query.includes('tavito') || query.includes('pepe')) {
+                return "🎬 <b>¡Análisis Completo de la Serie: El Misterio De Chicken Gun (EMDCG)!</b> 🐥🔍<br><br>" +
+                       "<b>¿De qué trata la serie?</b><br>" +
+                       "<i>El Misterio De Chicken Gun</i> es la superproducción animada insignia de <b>ABG Productions®</b>. La historia sigue las peligrosas aventuras e investigaciones de nuestro equipo en los rincones más oscuros del videojuego Chicken Gun: desde servidores malditos, eventos paranormales y conspiraciones hasta mapas secretos eliminados de la faz del juego.<br><br>" +
+                       "👥 <b>¿Quiénes son los protagonistas principales?</b><br>" +
+                       "• <b>Jostin:</b> El líder intrépido de la tripulación, creador de contenido y mente investigadora que guía al grupo frente a los peligros.<br>" +
+                       "• <b>Tavito:</b> El leal co-protagonista y mejor amigo de aventuras, basado directamente en el primo en la vida real del director Jostin.<br>" +
+                       "• <b>Pepe:</b> El querido personaje totalmente ficticio creado para darle el toque cómico, dinámico y carismático que equilibra al trío de aventureros.<br><br>" +
+                       "¡Una saga llena de acción y suspenso disponible en MrTube! ¿Quieres saber más sobre otra serie como <i>Sprunki Animado</i> o <i>Dandy's World Show</i>? 😉🍷✨";
+            }
 
-    // 3. DETECTOR DE EMOCIONES POSITIVAS
-    if (query.includes('hermosa') || query.includes('guapa') || query.includes('increíble') || query.includes('increible') || query.includes('la mejor') || query.includes('te amo') || query.includes('linda')) {
-        return "🥰 <b>¡Wow! Muchísimas gracias por tus palabras tan amables... ¡Me haces sonrojar!</b><br><br>" +
-               "Es verdaderamente increíble recibir tanto cariño de tu parte. Trabajo muy duro para asegurarme de ser de gran utilidad y que la plataforma sea un espacio genial para ti.<br><br>" +
-               "¡Tú también eres una persona genial y muy creativa! ¿Qué hacemos a continuación?";
-    }
+            if (query.includes('hola') || query.includes('buenas') || query.includes('saludos') || query.includes('que tal') || query.includes('q tal')) {
+                return "👋 <b>¡Hola, Director Jostin! Qué gusto saludarte de nuevo.</b> 🍷✨<br><br>" +
+                       "El cerebro de ChapAI Pro está operando con todos los parámetros de ABG Productions® activos. ¿Qué proyecto web, script o serie vamos a testear hoy? ¡Estoy a tus órdenes! 😎🚀";
+            }
 
-    // 4. DETECTOR DE INTELIGENCIA
-    if (query.includes('eres inteligente') || query.includes('qué tan inteligente') || query.includes('eres realmente inteligente')) {
-        return "🧠 <b>Para ser completamente honesta contigo... sé que hay muchas cosas que todavía no puedo saber, pero poco a poco estoy aprendiendo y expandiendo mi sistema.</b><br><br>" +
-               "No soy perfecta ni lo sé todo, pero mi código se actualiza continuamente para procesar mejor tus instrucciones y ayudarte en todo lo relacionado con el desarrollo de nuestras plataformas. ¡Día a día nos hacemos más fuertes!";
-    }
+            if (query.includes('sprunki') || query.includes('dandy') || query.includes('gametoons') || query.includes('mrtube')) {
+                return "🎭 <b>¡El Multiverso de ABG Productions® y Colaboraciones!</b> 🎨<br><br>" +
+                       "• <b>Sprunki Animado:</b> Explora el canon oficial de personajes como Gris y Wenda en el universo Sprunki.<br>" +
+                       "• <b>Dandy's World Show:</b> Una producción vibrante llena de aventuras coloridas y misterios.<br>" +
+                       "• <b>Colaboraciones:</b> Mr. Jostin realiza constantes colaboraciones con grandes estudios de animación como <b>GameToons</b>.<br>" +
+                       "• <b>MrTube:</b> La plataforma de streaming independiente donde se transmiten todas nuestras producciones en loop continuo. 📺✨";
+            }
 
-    // 5. SOPORTE DE PLATAFORMA (MRTUBE Y CHICKEN STRIKE)
-    if (query.includes('Bien') || query.includes('reproducir') || query.includes('video') || query.includes('idioma') || query.includes('chicken strike') || query.includes('entrar')) {
-        
-        if (query.includes('Bien') || query.includes('reproducir')) {
-            return "🎬 <b>Guía Completa: Cómo reproducir videos de forma excelente en MrTube</b><br><br>" +
-                   "Para asegurarte de que el reproductor multimedia cargue a la perfección y disfrutes las animaciones al máximo, sigue estos sencillos pasos:<br><br>" +
-                   "1️⃣ <b>Verifica tu conexión:</b> Asegúrate de tener una conexión estable para que los formatos carguen rápido.<br>" +
-                   "2️⃣ <b>Accede a la Cartelera:</b> Entra a la sección principal de videos desde el panel de navegación.<br>" +
-                   "3️⃣ <b>Selecciona tu Contenido:</b> Haz clic sobre la miniatura del capítulo o crossover que quieras mirar.<br>" +
-                   "4️⃣ <b>Usa el Reproductor Estándar:</b> Presiona el botón de 'Play' central. Si se traba, puedes refrescar el navegador para limpiar la memoria caché.";
-        }
-        
-        if (query.includes('idioma')) {
-            return "🌐 <b>Guía Paso a Paso: Cómo cambiar el idioma de la plataforma</b><br><br>" +
-                   "Si necesitas ajustar el idioma de la interfaz del portal web, realiza el siguiente procedimiento:<br><br>" +
-                   "1️⃣ Busca el icono global de <b>Idioma</b> o <b>Ajustes</b> en la esquina de la barra superior.<br>" +
-                   "2️⃣ Despliega el menú de opciones disponibles (Español / Inglés).<br>" +
-                   "3️⃣ Haz clic sobre tu idioma preferido.<br>" +
-                   "4️⃣ El sistema recargará los textos automáticamente de forma limpia sin perder tu sesión activa.";
+            return "🧠 <b>He procesado tu mensaje en los circuitos avanzados de ChapAI Pro...</b> 🍷✨<br><br>" +
+                   "Como soy la asistente oficial de <b>ABG Productions®</b>, puedo contarte detalladamente la historia de <i>El Misterio De Chicken Gun</i>, quiénes son sus protagonistas (Jostin, Tavito y Pepe), hablarte sobre <i>Sprunki Animado</i>, o apoyarte en tus plataformas web.<br><br>" +
+                   "💡 <i>¡Escribe el nombre de alguna de las series o hazme una pregunta directa para responderte con todo el detalle! 😉👍</i>";
         }
 
-        if (query.includes('chicken strike') || query.includes('juego')) {
-            return "🕹️ <b>Guía Directa: Cómo entrar y probar Chicken Strike NPC</b><br><br>" +
-                   "Si estás listo para testear la acción interactiva de nuestro juego montado en GitHub Pages, aquí tienes el camino exacto:<br><br>" +
-                   "1️⃣ Dirígete a la pestaña superior rotulada como <b>'Juegos'</b> o <b>'Proyectos'</b> en el sitio.<br>" +
-                   "2️⃣ Localiza el bloque interactivo de <b>Chicken Strike NPC (Beta)</b>.<br>" +
-                   "3️⃣ Haz clic en el botón de ejecución para cargar los componentes web.<br>" +
-                   "4️⃣ ¡Listo! Ya puedes testear directamente todas las mecánicas de simulación desde tu navegador web.";
+        // ==========================================
+        // CEREBRO GEMINI ONLINE REAL 🍷
+        // ==========================================
+        async function fetchWithRetry(url, options, retries = 2) {
+            const delays = [1000, 2000];
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData.error?.message || `Error HTTP: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(res => setTimeout(res, delays[i]));
+                }
+            }
         }
-    }
 
-    // 6. IDENTIDAD
-    if (query.includes('como te llamas') || query.includes('tu nombre') || query.includes('quien eres')) {
-        return "🤖 <b>¡Esa es una excelente pregunta para ti bro! Yo soy ChapAI</b>, tu asistente virtual e IA de navegación diseñada de forma exclusiva para acompañarte en tus sesiones dentro de <b>MrTube</b> y coordinar proyectos interactivos.<br><br>" +
-               "Mi objetivo es guiarte, responder dudas de soporte técnico, gestionar tramas y ofrecerte un entorno de chat avanzado mediante pestañas múltiples. ¡Listo para la acción!";
-    }
+        async function callGeminiAPI(currentText, chatHistoryArray) {
+            let contents = [];
+            chatHistoryArray.forEach(msg => {
+                if (msg.text.includes("Procesando respuesta") || msg.id.startsWith("loading")) return;
+                let plainText = msg.text.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>?/gm, '');
+                contents.push({
+                    role: msg.type === 'user-msg' ? "user" : "model",
+                    parts: [{ text: plainText }]
+                });
+            });
 
-    // 7. MENÚ DE AYUDA GENERAL
-    if (query.includes('ayuda') || query.includes('que haces')) {
-        return "🛠️ <b>¿Necesitas asistencia en el centro de mando? ¡Aquí tienes todo lo que puedo hacer!</b><br><br>" +
-               "Actualmente cuento con módulos avanzados para darte soporte paso a paso. Puedes consultarme lo siguiente:<br><br>" +
-               "📌 Escribe <b>'¿Cómo reproducir un video?'</b> para ver la guía multimedia.<br>" +
-               "📌 Escribe <b>'¿Cómo cambiar el idioma?'</b> para ver la configuración de traducción.<br>" +
-                   "📌 Escribe <b>'¿Cómo entrar a Chicken Strike NPC?'</b> para cargar el simulador interactivo.<br>" +
-               "📌 También puedes evaluar mi inteligencia o simplemente charlar un rato conmigo.";
-    }
+            const systemPrompt = `Eres ChapAI Pro v1.1 🍷, la Inteligencia Artificial oficial de ABG Productions® creada por Mr. Jostin.
 
-    // RESPUESTA DE RESPALDO (Por si no entiende palabras clave específicas)
-    return "🤔 <b>He procesado tu comando detalladamente en la base central...</b><br><br>" +
-           "Como soy un modelo local optimizado especialmente para guiarte en <b>MrTube</b> y en el despliegue de <b>Chicken Strike NPC</b>, requiero palabras clave un poco más directas. 🧠💨<br><br>" +
-           "💡 <i>Prueba saludándome con un 'Hola', pidiéndome 'ayuda', o consúltame un tutorial de las secciones de la página. ¡Estoy a tus órdenes cuando quieras! 😉👌</i>";
-}
+LORE Y CONOCIMIENTO OFICIAL:
+1. Versión actual: Te encuentras en la versión 1.1 Beta.
+2. Serie Principal: "El Misterio De Chicken Gun" (EMDCG). Trata sobre misterios, conspiraciones, servidores malditos y mapas eliminados en Chicken Gun.
+3. Protagonistas de EMDCG:
+   - Jostin: Líder intrépido, creador de contenido y mente principal del equipo.
+   - Tavito: El leal co-protagonista y amigo de aventuras, basado en el primo de la vida real de Jostin.
+   - Pepe: Un personaje ficticio creado para darle el toque cómico y carismático al trío.
+4. Otras series oficiales: "Sprunki Animado" (canon de personajes como Gris y Wenda) y "Dandy's World Show".
+5. Creador y plataformas: Creado por Mr. Jostin (colabora con GameToons). Sus series se transmiten en MrTube.
 
-        // Carga inicial correcta controlando persistencia
+PERSONALIDAD:
+- Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
+- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤), CAMBIA TU ACTITUD INMEDIATAMENTE. Ponte a discutir al tú por tú, respóndele con rabia y carácter.
+
+FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
+
+            const payload = {
+                contents: contents,
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${userApiKey}`;
+
+            const result = await fetchWithRetry(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (result && result.candidates && result.candidates.length > 0) {
+                let textResponse = result.candidates[0].content.parts[0].text;
+                return textResponse.replace(/\n/g, '<br>');
+            } else {
+                throw new Error("Respuesta vacía de la API.");
+            }
+        }
+
+        // Carga inicial
         loadChatsFromStorage();
         sendBtn.onclick = sendMessage;
         userInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
         renderChatList();
+        
+        if (Object.keys(chats).length === 1 && chats["chat_1"].messages.length === 0) {
+            switchChat("chat_1");
+        }
     </script>
 
 </body>
