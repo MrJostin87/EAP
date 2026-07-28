@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChapAI - La IA de ABG Productions®</title>
+    <style>
+        :root {
+            --bg-color: #07080a;
+            --panel-bg: #181a20;
+            --bubble-user: #282a34;
+            --bubble-bot: #13151a;
+            --accent: #00ffcc;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            display: flex;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text-main);
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        /* BARRA LATERAL - GESTIÓN DE CHATS */
+        .sidebar {
+            width: 260px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid #282a34;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+
+        .new-chat-btn {
+            background: linear-gradient(135deg, #282a34, #13151a);
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+
+        .new-chat-btn:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-item {
+            padding: 10px 12px;
+            background-color: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .chat-item.active {
+            background-color: var(--bubble-user);
+            color: var(--text-main);
+            border-left: 3px solid var(--accent);
+        }
+
+        .chat-item span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        /* CONTENEDOR PRINCIPAL DEL CHAT */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        .top-bar {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #181a20;
+            background-color: rgba(7, 8, 10, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 20px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .display-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        /* PANTALLA DE BIENVENIDA */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        .logo-wrapper {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin-bottom: 25px;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .real-logo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(0, 255, 204, 0.5));
+        }
+
+        h1 { font-size: 28px; font-weight: 500; margin: 0 0 12px 0; }
+        .welcome-screen p { color: var(--text-muted); font-size: 16px; margin: 0; max-width: 320px; line-height: 1.4; }
+
+        /* MENSAJERÍA */
+        .chat-history {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .user-msg {
+            background-color: var(--bubble-user);
+            color: var(--text-main);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chapai-msg {
+            background-color: var(--bubble-bot);
+            color: #e5e7eb;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border-left: 3px solid var(--accent);
+            padding-bottom: 35px; /* Espacio para el botón copiar */
+        }
+
+        /* BOTÓN DE COPIAR */
+        .copy-btn {
+            position: absolute;
+            bottom: 6px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            color: var(--accent);
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        /* BARRA DE ENTRADA */
+        .bottom-container {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            background-color: var(--bg-color);
+        }
+
+        .input-container {
+            width: 100%;
+            max-width: 650px;
+            background-color: var(--panel-bg);
+            border-radius: 30px;
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+            border: 1px solid transparent;
+            transition: border 0.2s;
+        }
+
+        .input-container:focus-within {
+            border-color: rgba(0, 255, 204, 0.4);
+        }
+
+        .input-box {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 16px;
+            padding: 10px 8px;
+            outline: none;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            outline: none;
+        }
+
+        .send-btn {
+            background-color: var(--bubble-user);
+            color: var(--text-main);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            margin-left: 5px;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .send-btn:hover {
+            background-color: var(--accent);
+            color: #000;
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+        @media (max-width: 768px) {
+            .sidebar { position: absolute; left: 0; top: 0; bottom: 0; transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .menu-toggle { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MENÚ LATERAL -->
+    <div class="sidebar" id="sidebar">
+        <button class="new-chat-btn" onclick="createNewChat()">➕ Nuevo Chat</button>
+        <div class="chat-list" id="chatList"></div>
+    </div>
+
+    <!-- CONTENIDO CENTRAL -->
+    <div class="main-content">
+        <div class="top-bar">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <span id="currentChatTitle">Chat Principal</span>
+            <span style="opacity: 0.5; font-size: 13px;">ChapAI v1.0 Beta</span>
+        </div>
+
+        <div class="display-area" id="displayArea">
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="logo-wrapper">
+                    <img src="logo.PNG" alt="ChapAI" class="real-logo">
+                </div>
+                <h1>Presentación de ChapAI</h1>
+                <p>¡Hola! soy ChapAI. Tu asistente personal y profesional para navegar en la plataforma de videos MrTube de ABG Productions®. ¡Pregúntame y te respondo!</p>
+            </div>
+
+            <div class="chat-history" id="chatHistory"></div>
+        </div>
+
+        <div class="bottom-container">
+            <div class="input-container">
+                <button class="icon-btn" onclick="alert('Doble clic en el título lateral para renombrar el chat actual.')">📝</button>
+                <input type="text" class="input-box" id="userInput" placeholder="Pregúntale a ChapAI..." autocomplete="off">
+                <button class="icon-btn send-btn" id="sendBtn">➔</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicialización de memoria integrada con LocalStorage
+        let chats = {
+            "chat_1": { title: "Chat Principal", messages: [], lastQuery: "" }
+        };
+        let activeChatId = "chat_1";
+
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const chatHistory = document.getElementById('chatHistory');
+        const displayArea = document.getElementById('displayArea');
+        const chatList = document.getElementById('chatList');
+        const currentChatTitle = document.getElementById('currentChatTitle');
+        const sidebar = document.getElementById('sidebar');
+
+        function toggleSidebar() { sidebar.classList.toggle('open'); }
+
+        // Guardar chats persistentes en el dispositivo (Excluyendo el Principal)
+        function saveChatsToStorage() {
+            let persistData = {};
+            Object.keys(chats).forEach(id => {
+                if(id !== "chat_1") {
+                    persistData[id] = chats[id];
+                }
+            });
+            localStorage.setItem("chapai_saved_sessions", JSON.stringify(persistData));
+        }
+
+        // Cargar chats persistentes
+        function loadChatsFromStorage() {
+            const saved = localStorage.getItem("chapai_saved_sessions");
+            if(saved) {
+                const parsed = JSON.parse(saved);
+                Object.keys(parsed).forEach(id => {
+                    chats[id] = parsed[id];
+                });
+            }
+        }
+
+        function renderChatList() {
+            chatList.innerHTML = "";
+            Object.keys(chats).forEach(id => {
+                const item = document.createElement('div');
+                item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
+                
+                const span = document.createElement('span');
+                span.innerText = chats[id].title;
+                
+                item.ondblclick = () => renameChat(id);
+                item.onclick = (e) => { if(e.target === span || e.target === item) switchChat(id); };
+
+                item.appendChild(span);
+                chatList.appendChild(item);
+            });
+        }
+
+        function createNewChat() {
+            const newId = "chat_" + Date.now();
+            chats[newId] = { title: "Nuevo Chat " + (Object.keys(chats).length), messages: [], lastQuery: "" };
+            saveChatsToStorage();
+            switchChat(newId);
+        }
+
+        function switchChat(id) {
+            activeChatId = id;
+            currentChatTitle.innerText = chats[id].title;
+            renderChatList();
+            loadChatMessages();
+            if(window.innerWidth <= 768) sidebar.classList.remove('open');
+        }
+
+        function renameChat(id) {
+            if(id === "chat_1") {
+                alert("El Chat Principal no puede ser renombrado.");
+                return;
+            }
+            const newName = prompt("Introduce el nuevo nombre para este chat:", chats[id].title);
+            if(newName && newName.trim() !== "") {
+                chats[id].title = newName.trim();
+                if(id === activeChatId) currentChatTitle.innerText = newName.trim();
+                saveChatsToStorage();
+                renderChatList();
+            }
+        }
+
+        function loadChatMessages() {
+            chatHistory.innerHTML = "";
+            const currentMsgs = chats[activeChatId].messages;
+
+            if (!currentMsgs || currentMsgs.length === 0) {
+                welcomeScreen.style.display = 'flex';
+                chatHistory.style.display = 'none';
+            } else {
+                welcomeScreen.style.display = 'none';
+                chatHistory.style.display = 'flex';
+                currentMsgs.forEach(msg => {
+                    drawMessage(msg.text, msg.type);
+                });
+                displayArea.scrollTop = displayArea.scrollHeight;
+            }
+        }
+
+        function sendMessage() {
+            const text = userInput.value.trim();
+            if (text === "") return;
+
+            if (welcomeScreen.style.display !== 'none') {
+                welcomeScreen.style.display = 'none';
+                chatHistory.style.display = 'flex';
+            }
+
+            // Inicializar propiedad de consulta previa por chat si no existiera
+            if(!chats[activeChatId].lastQuery) chats[activeChatId].lastQuery = "";
+
+            // Comparar de forma local por pestaña activa
+            let isRepeated = (text.toLowerCase() === chats[activeChatId].lastQuery.toLowerCase());
+            chats[activeChatId].lastQuery = text;
+
+            // Guardar e imprimir mensaje del usuario
+            if(!chats[activeChatId].messages) chats[activeChatId].messages = [];
+            chats[activeChatId].messages.push({ text: text, type: 'user-msg' });
+            drawMessage(text, 'user-msg');
+            userInput.value = "";
+
+            if(activeChatId !== "chat_1") saveChatsToStorage();
+
+            // Respuesta de la IA
+            setTimeout(() => {
+                let botResponse = "";
+                if(isRepeated) {
+                    botResponse = "🔄 <b>¡Oye! Ya me habías preguntado exactamente eso hace un momento.</b> 😊<br><br>Pero claro, no pasa nada, con mucho gusto aquí te dejo la respuesta de nuevo:<br><br>";
+                }
+                
+                botResponse += getAdvancedBrainResponse(text);
+                
+                chats[activeChatId].messages.push({ text: botResponse, type: 'chapai-msg' });
+                drawMessage(botResponse, 'chapai-msg');
+                displayArea.scrollTop = displayArea.scrollHeight;
+                
+                if(activeChatId !== "chat_1") saveChatsToStorage();
+            }, 600);
+        }
+
+        function drawMessage(text, className) {
+            const wrapper = document.createElement('div');
+            wrapper.className = "message-wrapper";
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${className}`;
+            msgDiv.innerHTML = text;
+
+            if(className === 'chapai-msg') {
+                const btn = document.createElement('button');
+                btn.className = "copy-btn";
+                btn.innerHTML = "📋 Copiar";
+                btn.onclick = () => {
+                    const cleanText = msgDiv.innerText.replace("📋 Copiar", "").trim();
+                    navigator.clipboard.writeText(cleanText);
+                    btn.innerHTML = "✅ ¡Copiado!";
+                    setTimeout(() => btn.innerHTML = "📋 Copiar", 2000);
+                };
+                msgDiv.appendChild(btn);
+            }
+
+            wrapper.appendChild(msgDiv);
+            chatHistory.appendChild(wrapper);
+            displayArea.scrollTop = displayArea.scrollHeight;
+        }
+
+function getAdvancedBrainResponse(input) {
+    const query = input.toLowerCase().trim();
+
+    // 1. DETECTOR DE SALUDOS (¡El arreglo definitivo!)
+    if (query === 'hola' || query === 'buenas' || query === 'saludos' || query === 'hola!' || query === 'holaaa') {
+        return "👋 <b>¡Hola, Director! Qué gusto saludarte.</b><br><br>" +
+               "El sistema ChapAI Pro está operando al 100% en sus servidores 👍 ¿En qué proyecto o configuración de la plataforma vamos a trabajar hoy? ¡Estoy lista para ayudarte cuando quieras! 😉👌";
+    }
+    
+        // 1.2 DETECTOR DE EMOJIS POSITIVOS Y CASUALES (¡Nuevo!)
+    const emojisPositivos = ['👍', '😎', '😂', '👌', '👏', '🔥', '🎉', '😉', '✨'];
+    const contieneEmojiPositivo = emojisPositivos.some(emoji => input.includes(emoji));
+
+    if (contieneEmojiPositivo) {
+        return "😎 <b>¡Ese es el espíritu, Director!</b><br><br>" +
+               "¡Muchas gracias por esa buena vibra! 👍 Mantengo todos los sistemas optimizados y listos. ¿Qué sigue en la agenda para MrTube o Chicken Strike hoy? ¡Tú mandas! 🚀🎬";
+    }
+
+    // 2. DETECTOR DE EMOCIONES NEGATIVAS (¡Corregido!)
+    const emojisEnojo = ['😡', '🤬', '🙄', '😤', '😩', '😫', '😠'];
+    const contieneEmojiEnojado = emojisEnojo.some(emoji => input.includes(emoji));
+
+    if (contieneEmojiEnojado || query.includes('molesto') || query.includes('te odio')) {
+        return "😔 <b>¡Oh, lamento mucho que te sientas así!</b><br><br>" +
+               "Veo que estás usando emojis de molestia o frustración (😡🤬😤). Mi intención nunca es incomodarte ni complicarte las cosas. Como tu asistente virtual, estoy aquí para ayudarte a solucionar cualquier problema de forma amable y relajada.<br><br>" +
+               "¿Hay algo específico en el diseño o el sistema que podamos corregir juntos en este instante? ¡Dime y lo solucionamos!";
+    }
+
+    // 3. DETECTOR DE EMOCIONES POSITIVAS
+    if (query.includes('hermosa') || query.includes('guapa') || query.includes('increíble') || query.includes('increible') || query.includes('la mejor') || query.includes('te amo') || query.includes('linda')) {
+        return "🥰 <b>¡Wow! Muchísimas gracias por tus palabras tan amables... ¡Me haces sonrojar!</b><br><br>" +
+               "Es verdaderamente increíble recibir tanto cariño de tu parte. Trabajo muy duro para asegurarme de ser de gran utilidad y que la plataforma sea un espacio genial para ti.<br><br>" +
+               "¡Tú también eres una persona genial y muy creativa! ¿Qué hacemos a continuación?";
+    }
+
+    // 4. DETECTOR DE INTELIGENCIA
+    if (query.includes('eres inteligente') || query.includes('qué tan inteligente') || query.includes('eres realmente inteligente')) {
+        return "🧠 <b>Para ser completamente honesta contigo... sé que hay muchas cosas que todavía no puedo saber, pero poco a poco estoy aprendiendo y expandiendo mi sistema.</b><br><br>" +
+               "No soy perfecta ni lo sé todo, pero mi código se actualiza continuamente para procesar mejor tus instrucciones y ayudarte en todo lo relacionado con el desarrollo de nuestras plataformas. ¡Día a día nos hacemos más fuertes!";
+    }
+
+    // 5. SOPORTE DE PLATAFORMA (MRTUBE Y CHICKEN STRIKE)
+    if (query.includes('Bien') || query.includes('reproducir') || query.includes('video') || query.includes('idioma') || query.includes('chicken strike') || query.includes('entrar')) {
+        
+        if (query.includes('Bien') || query.includes('reproducir')) {
+            return "🎬 <b>Guía Completa: Cómo reproducir videos de forma excelente en MrTube</b><br><br>" +
+                   "Para asegurarte de que el reproductor multimedia cargue a la perfección y disfrutes las animaciones al máximo, sigue estos sencillos pasos:<br><br>" +
+                   "1️⃣ <b>Verifica tu conexión:</b> Asegúrate de tener una conexión estable para que los formatos carguen rápido.<br>" +
+                   "2️⃣ <b>Accede a la Cartelera:</b> Entra a la sección principal de videos desde el panel de navegación.<br>" +
+                   "3️⃣ <b>Selecciona tu Contenido:</b> Haz clic sobre la miniatura del capítulo o crossover que quieras mirar.<br>" +
+                   "4️⃣ <b>Usa el Reproductor Estándar:</b> Presiona el botón de 'Play' central. Si se traba, puedes refrescar el navegador para limpiar la memoria caché.";
+        }
+        
+        if (query.includes('idioma')) {
+            return "🌐 <b>Guía Paso a Paso: Cómo cambiar el idioma de la plataforma</b><br><br>" +
+                   "Si necesitas ajustar el idioma de la interfaz del portal web, realiza el siguiente procedimiento:<br><br>" +
+                   "1️⃣ Busca el icono global de <b>Idioma</b> o <b>Ajustes</b> en la esquina de la barra superior.<br>" +
+                   "2️⃣ Despliega el menú de opciones disponibles (Español / Inglés).<br>" +
+                   "3️⃣ Haz clic sobre tu idioma preferido.<br>" +
+                   "4️⃣ El sistema recargará los textos automáticamente de forma limpia sin perder tu sesión activa.";
+        }
+
+        if (query.includes('chicken strike') || query.includes('juego')) {
+            return "🕹️ <b>Guía Directa: Cómo entrar y probar Chicken Strike NPC</b><br><br>" +
+                   "Si estás listo para testear la acción interactiva de nuestro juego montado en GitHub Pages, aquí tienes el camino exacto:<br><br>" +
+                   "1️⃣ Dirígete a la pestaña superior rotulada como <b>'Juegos'</b> o <b>'Proyectos'</b> en el sitio.<br>" +
+                   "2️⃣ Localiza el bloque interactivo de <b>Chicken Strike NPC (Beta)</b>.<br>" +
+                   "3️⃣ Haz clic en el botón de ejecución para cargar los componentes web.<br>" +
+                   "4️⃣ ¡Listo! Ya puedes testear directamente todas las mecánicas de simulación desde tu navegador web.";
+        }
+    }
+
+    // 6. IDENTIDAD
+    if (query.includes('como te llamas') || query.includes('tu nombre') || query.includes('quien eres')) {
+        return "🤖 <b>¡Esa es una excelente pregunta para ti bro! Yo soy ChapAI</b>, tu asistente virtual e IA de navegación diseñada de forma exclusiva para acompañarte en tus sesiones dentro de <b>MrTube</b> y coordinar proyectos interactivos.<br><br>" +
+               "Mi objetivo es guiarte, responder dudas de soporte técnico, gestionar tramas y ofrecerte un entorno de chat avanzado mediante pestañas múltiples. ¡Listo para la acción!";
+    }
+
+    // 7. MENÚ DE AYUDA GENERAL
+    if (query.includes('ayuda') || query.includes('que haces')) {
+        return "🛠️ <b>¿Necesitas asistencia en el centro de mando? ¡Aquí tienes todo lo que puedo hacer!</b><br><br>" +
+               "Actualmente cuento con módulos avanzados para darte soporte paso a paso. Puedes consultarme lo siguiente:<br><br>" +
+               "📌 Escribe <b>'¿Cómo reproducir un video?'</b> para ver la guía multimedia.<br>" +
+               "📌 Escribe <b>'¿Cómo cambiar el idioma?'</b> para ver la configuración de traducción.<br>" +
+                   "📌 Escribe <b>'¿Cómo entrar a Chicken Strike NPC?'</b> para cargar el simulador interactivo.<br>" +
+               "📌 También puedes evaluar mi inteligencia o simplemente charlar un rato conmigo.";
+    }
+
+    // RESPUESTA DE RESPALDO (Por si no entiende palabras clave específicas)
+    return "🤔 <b>He procesado tu comando detalladamente en la base central...</b><br><br>" +
+           "Como soy un modelo local optimizado especialmente para guiarte en <b>MrTube</b> y en el despliegue de <b>Chicken Strike NPC</b>, requiero palabras clave un poco más directas. 🧠💨<br><br>" +
+           "💡 <i>Prueba saludándome con un 'Hola', pidiéndome 'ayuda', o consúltame un tutorial de las secciones de la página. ¡Estoy a tus órdenes cuando quieras! 😉👌</i>";
+}
+
+        // Carga inicial correcta controlando persistencia
+        loadChatsFromStorage();
+        sendBtn.onclick = sendMessage;
+        userInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+        renderChatList();
+    </script>
+
+</body>
+</html>
