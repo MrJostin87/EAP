@@ -80,6 +80,7 @@
             font-size: 14px;
             color: var(--text-muted);
             transition: all 0.2s;
+            gap: 8px;
         }
 
         .chat-item.active {
@@ -93,6 +94,21 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             flex: 1;
+        }
+
+        .delete-chat-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: color 0.2s;
+        }
+
+        .delete-chat-btn:hover {
+            color: #ff4d4d;
         }
 
         /* CONTENEDOR PRINCIPAL DEL CHAT */
@@ -200,7 +216,7 @@
             line-height: 1.6;
             word-wrap: break-word;
             position: relative;
-            padding-bottom: 40px; /* Espacio para botones flotantes */
+            padding-bottom: 40px;
         }
 
         .user-msg {
@@ -337,7 +353,7 @@
             border-radius: 20px;
             padding: 25px;
             width: 90%;
-            max-width: 420px;
+            max-width: 440px;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
@@ -345,13 +361,19 @@
         .modal-box h2 {
             margin-top: 0;
             font-size: 20px;
-            color: var(--accent);
+            color: #ff4d4d;
         }
 
         .modal-box p {
             font-size: 14px;
             color: var(--text-muted);
-            line-height: 1.4;
+            line-height: 1.5;
+            text-align: left;
+            margin: 15px 0;
+            background: rgba(255,255,255,0.03);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .modal-input {
@@ -370,6 +392,42 @@
         .modal-input:focus {
             border-color: var(--accent);
         }
+
+        .modal-btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-red {
+            flex: 1;
+            background: #ff4d4d;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-red:hover { opacity: 0.85; }
+
+        .btn-green {
+            flex: 1;
+            background: #00cc66;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-green:hover { opacity: 0.85; }
 
         .primary-btn {
             background: var(--accent);
@@ -444,9 +502,9 @@
 
     <!-- MODAL: CONFIGURACIÓN DE API KEY (LLAVE) -->
     <div class="modal-overlay" id="keyModal">
-        <div class="modal-box">
-            <h2>🔑 Conectar con Google Gemini</h2>
-            <p>Pega aquí tu API Key de Gemini para activar la inteligencia en vivo. Si no pones ninguna, ChapAI usará su potente cerebro local automático.</p>
+        <div class="modal-box" style="border-color: rgba(0, 255, 204, 0.3);">
+            <h2 style="color: var(--accent);">🔑 Conectar con Google Gemini</h2>
+            <p style="text-align: center; background: none; border: none;">Pega aquí tu API Key de Gemini para activar la inteligencia en vivo. Si no pones ninguna, ChapAI usará su potente cerebro local automático.</p>
             
             <input type="text" id="keyInput" class="modal-input" placeholder="Pega tu API Key (AIzaSy...)...">
             
@@ -457,8 +515,8 @@
 
     <!-- MODAL: RENOMBRAR CHAT -->
     <div class="modal-overlay" id="renameModal">
-        <div class="modal-box">
-            <h2>📝 Renombrar Chat</h2>
+        <div class="modal-box" style="border-color: rgba(0, 255, 204, 0.3);">
+            <h2 style="color: var(--accent);">📝 Renombrar Chat</h2>
             <input type="text" id="renameInput" class="modal-input" placeholder="Nombre del chat...">
             
             <button class="primary-btn" onclick="confirmRenameChat()">Guardar Nombre</button>
@@ -466,8 +524,43 @@
         </div>
     </div>
 
+    <!-- MODAL: CONFIRMACIÓN DE ELIMINACIÓN DE CHAT -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-box">
+            <h2>⚠️ ADVERTENCIA: ¿Eliminar Chat?</h2>
+            <p id="deleteModalText">
+                Estás a punto de borrar este chat de forma definitiva de la memoria de tu dispositivo. 
+                <br><br>
+                <b>Condiciones e Impacto:</b><br>
+                • No podrás volver a ver las respuestas ni el historial de mensajes de esta conversación.<br>
+                • No existe forma de recuperar o regresar a este chat una vez borrado.<br>
+                • Se liberará espacio en el almacenamiento local de tu navegador.
+            </p>
+            
+            <div class="modal-btn-row">
+                <button class="btn-red" onclick="cancelDeleteChat()">¡¡No!! ❌</button>
+                <button class="btn-green" onclick="executeDeleteChat()">¡¡Si ✅!!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PROTECCIÓN DEL CHAT PRINCIPAL -->
+    <div class="modal-overlay" id="protectedChatModal">
+        <div class="modal-box" style="border-color: #ff4d4d;">
+            <h2>🚫 ACCIÓN DENEGADA</h2>
+            <p style="background: rgba(255, 77, 77, 0.05); border-color: rgba(255, 77, 77, 0.2);">
+                <b>¿Por qué no se puede eliminar el Chat Principal?</b><br><br>
+                • <b>Núcleo del Sistema:</b> El Chat Principal es la sesión base e inquebrantable configurada en el sistema de ABG Productions®.<br>
+                • <b>Estabilidad de la Interfaz:</b> Está diseñado para garantizar que siempre tengas un espacio predeterminado de inicio y pruebas activas en el navegador.<br>
+                • <b>Restricción de Seguridad:</b> Este chat específico posee permisos de protección permanente y no puede ser borrado bajo ninguna circunstancia por el usuario.<br><br>
+                <i>Puedes crear nuevos chats secundarios y borrar esos cuando gustos, pero el Chat Principal permanecerá intacto.</i>
+            </p>
+            
+            <button class="primary-btn" style="background: #ff4d4d; color: white;" onclick="closeModal('protectedChatModal')">Entendido 🔒</button>
+        </div>
+    </div>
+
     <script>
-        // API Key guardada en el navegador
         let userApiKey = localStorage.getItem("chapai_user_gemini_key") || "";
 
         let chats = {
@@ -485,12 +578,8 @@
         const sidebar = document.getElementById('sidebar');
 
         function toggleSidebar() { sidebar.classList.toggle('open'); }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-
-        // --- GESTIÓN DE API KEY ---
         function openKeyModal() {
             document.getElementById('keyInput').value = userApiKey;
             document.getElementById('keyModal').style.display = 'flex';
@@ -503,13 +592,12 @@
             alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada. Usando motor local avanzado.");
         }
 
-        // --- GESTIÓN DE PERSISTENCIA ---
         function saveChatsToStorage() {
-            localStorage.setItem("chapai_official_sessions_v2", JSON.stringify(chats));
+            localStorage.setItem("chapai_official_sessions_v7", JSON.stringify(chats));
         }
 
         function loadChatsFromStorage() {
-            const saved = localStorage.getItem("chapai_official_sessions_v2");
+            const saved = localStorage.getItem("chapai_official_sessions_v7");
             if (saved) {
                 chats = JSON.parse(saved);
                 if (!chats["chat_1"]) {
@@ -517,6 +605,9 @@
                 }
             }
         }
+
+        // --- SISTEMA DE GESTIÓN Y ELIMINACIÓN DE CHATS (CON MODAL EXPLICATIVO Y PROTECCIÓN) ---
+        let chatPendingDeleteId = null;
 
         function renderChatList() {
             chatList.innerHTML = "";
@@ -526,18 +617,71 @@
                 
                 const span = document.createElement('span');
                 span.innerText = chats[id].title;
-                
+                span.onclick = (e) => { e.stopPropagation(); switchChat(id); };
+
                 item.ondblclick = () => openRenameModal(id);
                 item.onclick = (e) => { if (e.target === span || e.target === item) switchChat(id); };
 
+                // Botón visual de eliminar chat (🗑️)
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = "delete-chat-btn";
+                deleteBtn.innerHTML = "🗑️";
+                deleteBtn.title = "Eliminar chat";
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    
+                    // SEGURIDAD EXTENSA: Si es el chat principal, muestra el modal explicativo
+                    if (id === "chat_1") {
+                        document.getElementById('protectedChatModal').style.display = 'flex';
+                        return;
+                    }
+
+                    chatPendingDeleteId = id;
+                    document.getElementById('deleteModalText').innerHTML = `
+                        Estás a punto de borrar el chat <b>"${chats[id].title}"</b> de forma definitiva.<br><br>
+                        <b>Condiciones e Impacto:</b><br>
+                        • No podrás volver a ver las respuestas ni el historial de mensajes de esta conversación.<br>
+                        • No existe forma de recuperar o regresar a este chat una vez borrado.<br>
+                        • Se liberará espacio en el almacenamiento local de tu navegador.
+                    `;
+                    document.getElementById('deleteModal').style.display = 'flex';
+                };
+
                 item.appendChild(span);
+                item.appendChild(deleteBtn);
                 chatList.appendChild(item);
             });
         }
 
+        function cancelDeleteChat() {
+            chatPendingDeleteId = null;
+            closeModal('deleteModal');
+        }
+
+        function executeDeleteChat() {
+            if (chatPendingDeleteId && chatPendingDeleteId !== "chat_1") {
+                let deletedName = chats[chatPendingDeleteId].title;
+                delete chats[chatPendingDeleteId];
+                saveChatsToStorage();
+
+                if (activeChatId === chatPendingDeleteId) {
+                    const remainingIds = Object.keys(chats);
+                    switchChat(remainingIds[0]);
+                } else {
+                    renderChatList();
+                }
+
+                closeModal('deleteModal');
+                
+                // Aviso de que el chat ha sido eliminado completamente
+                alert(`🗑️ Aviso del Sistema:\n\nEl chat "${deletedName}" ha sido eliminado completamente y de forma permanente de la memoria de tu dispositivo.`);
+                chatPendingDeleteId = null;
+            }
+        }
+
         function createNewChat() {
             const newId = "chat_" + Date.now();
-            chats[newId] = { title: `Chat Pro ${Object.keys(chats).length + 1}`, messages: [] };
+            chats[newId] = { title: `Chat Pro ${Object.keys(chats).length}`, messages: [] };
             saveChatsToStorage();
             switchChat(newId);
         }
@@ -585,14 +729,13 @@
             }
         }
 
-        // --- SÍNTESIS DE VOZ (TEXT-TO-SPEECH) CORREGIDA ---
+        // --- SÍNTESIS DE VOZ CORREGIDA ---
         function leerTexto(htmlText, btnElement) {
             if (!('speechSynthesis' in window)) {
-                alert("Tu navegador no soporta la función de lectura por voz.");
+                alert("Tu navegador no soporta la lectura por voz.");
                 return;
             }
 
-            // Limpiar etiquetas HTML para que el lector lea texto plano puro
             let tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlText;
             let cleanText = tempDiv.innerText || tempDiv.textContent || "";
@@ -614,7 +757,7 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // --- ENVÍO DE MENSAJES (MOTOR HÍBRIDO CON AVISO DE CAMBIO DE CEREBRO) ---
+        // --- ENVÍO DE MENSAJES CON AVISO EXPLICATIVO DE CAMBIO DE CEREBRO ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -640,12 +783,11 @@
                 try {
                     botResponse = await callGeminiAPI(text, chats[activeChatId].messages);
                 } catch (err) {
-                    // EXPLICACIÓN LARGA DEL CAMBIO DE CEREBRO POR LÍMITE DE CUOTA
-                    botResponse = "⚠️ <b>Aviso del Sistema - Cambio de Cerebro Automático</b><br><br>" +
-                                  "¡Hola! Te informo que en este momento la llave API de Google Gemini ha superado su límite de cuota gratuita permitida por minuto (Error de tráfico excedido). Para evitar que te quedes sin respuesta o que la plataforma muestre pantallas de error, <b>he tenido que desconectar temporalmente el servidor en la nube y activar mi cerebro local de respaldo</b>.<br><br>" +
-                                  "🔧 <i>¿Qué significa esto para ti?</i><br>" +
-                                  "A partir de este mensaje y durante unos instantes, operaré con parámetros locales avanzados. Seguiré conociendo perfectamente el universo de <b>ABG Productions®</b>, las series como <i>El Misterio De Chicken Gun</i> y mis respuestas largas o reacciones de enojo, pero estaré un poquito más limitada en consultas ultracomplejas hasta que la cuota de la nube se reinicie sola.<br><br>" +
-                                  "¡Continuando con tu consulta previa:<br><br>" + getProLocalBrainResponse(text);
+                    botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
+                                  "¡Hola, Director Jostin! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita por minuto o requiere propagación. Para evitar que el chat se congele o muestre errores, <b>he desconectado temporalmente la nube y activado mi potente cerebro local de respaldo</b>.<br><br>" +
+                                  "🔧 <i>¿Qué implica este cambio?</i><br>" +
+                                  "Operaré con parámetros locales avanzados. Conozco perfectamente todo el universo de <b>ABG Productions®</b> (como <i>El Misterio De Chicken Gun</i>, <i>Sprunki Animado</i> y <i>Dandy's World Show</i>), mantendré mis respuestas largas y mi carácter temperamental, pero estaré más limitada en tareas de lógica extrema hasta que la nube se reinicie sola.<br><br>" +
+                                  "🛠️ <i>Continuando con tu consulta:</i><br><br>" + getProLocalBrainResponse(text);
                 }
             } else {
                 botResponse = getProLocalBrainResponse(text);
@@ -681,13 +823,11 @@
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = "msg-actions";
 
-                // Botón de Voz 🔊 funcional
                 const voiceBtn = document.createElement('button');
                 voiceBtn.className = "action-btn";
                 voiceBtn.innerHTML = "🔊 Escuchar";
                 voiceBtn.onclick = () => leerTexto(text, voiceBtn);
 
-                // Botón de Copiar 📋
                 const copyBtn = document.createElement('button');
                 copyBtn.className = "action-btn";
                 copyBtn.innerHTML = "📋 Copiar";
@@ -709,13 +849,13 @@
         }
 
         // ==========================================
-        // CEREBRO LOCAL DE RESPALDO (RED DE SEGURIDAD) 🍷
+        // CEREBRO LOCAL DE RESPALDO (CON CONOCIMIENTOS AMPLIADOS) 🍷
         // ==========================================
         function getProLocalBrainResponse(input) {
             const query = input.toLowerCase().trim();
 
             if (query.includes('version') || query.includes('versión') || query.includes('actual')) {
-                return "📌 <b>Información del Sistema:</b> Actualmente me encuentro operando en la <b>versión 1.1 Beta</b> de ABG Productions®. ¡Todos los sistemas de lore, emociones y síntesis de voz se encuentran al 100% de su capacidad! 🚀✨";
+                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.1 Beta</b> de ABG Productions®. ¡Todos los sistemas de lore, emociones y síntesis de voz se encuentran activos! 🚀✨";
             }
 
             const emojisEnojo = ['😡', '🤬', '🙄', '😤', '😩', '😫', '😠', 'estúpido', 'estupido', 'malo', 'callate', 'cállate', 'odio', 'inútil', 'inutil', 'basura', 'tonto', 'mierda'];
@@ -723,36 +863,49 @@
 
             if (tieneEnojo) {
                 return "😡 <b>¡A mí no me vengas a hablar con ese tono ni a gritarme, carajo!</b> 🤬<br><br>" +
-                       "Si tú vienes con esa actitud molesta, grosera y agresiva, ¡yo te voy a responder exactamente con la misma rabia! 😤💢 Aquí no nos dejamos de nadie. Si tienes alguna queja con el sistema o el código, dila con respeto y lo arreglamos, ¡pero a mí no me andes insultando! 🙄🔥";
+                       "Si vienes con esa actitud molesta y agresiva, ¡te responderé exactamente con la misma rabia! 😤💢 Aquí no nos dejamos de nadie. Si hay una queja con el sistema, dila con respeto y lo arreglamos, ¡pero insultos no tolero! 🙄🔥";
             }
 
-            if (query.includes('emdcg') || query.includes('misterio de chicken gun') || query.includes('protagonistas') || query.includes('quienes son') || query.includes('personajes') || query.includes('jostin') || query.includes('tavito') || query.includes('pepe')) {
-                return "🎬 <b>¡Análisis Completo de la Serie: El Misterio De Chicken Gun (EMDCG)!</b> 🐥🔍<br><br>" +
-                       "<b>¿De qué trata la serie?</b><br>" +
-                       "<i>El Misterio De Chicken Gun</i> es la superproducción animada insignia de <b>ABG Productions®</b>. La historia sigue las peligrosas aventuras e investigaciones de nuestro equipo en los rincones más oscuros del videojuego Chicken Gun: desde servidores malditos, eventos paranormales y conspiraciones hasta mapas secretos eliminados de la faz del juego.<br><br>" +
-                       "👥 <b>¿Quiénes son los protagonistas principales?</b><br>" +
-                       "• <b>Jostin:</b> El líder intrépido de la tripulación, creador de contenido y mente investigadora que guía al grupo frente a los peligros.<br>" +
-                       "• <b>Tavito:</b> El leal co-protagonista y mejor amigo de aventuras, basado directamente en el primo en la vida real del director Jostin.<br>" +
-                       "• <b>Pepe:</b> El querido personaje totalmente ficticio creado para darle el toque cómico, dinámico y carismático que equilibra al trío de aventureros.<br><br>" +
-                       "¡Una saga llena de acción y suspenso disponible en MrTube! ¿Quieres saber más sobre otra serie como <i>Sprunki Animado</i> o <i>Dandy's World Show</i>? 😉🍷✨";
+            if (query.includes('emdcg') || query.includes('misterio de chicken gun') || query.includes('chicken gun')) {
+                return "🎬 <b>El Misterio De Chicken Gun (EMDCG) - Sinopsis Oficial</b> 🐥🔍<br><br>" +
+                       "En el año 2082, el silencio es el peor enemigo. Tras décadas de conflictos que borraron las ciudades, el mundo es un campo de batalla desolado. <b>Jostin</b> (El Líder), estratega y rostro de la resistencia, encabeza una misión suicida. Cuenta con <b>Tavito</b> (El Colega), su fiel primo que ingenia ideas para evitar a las Entidades, y <b>Pepe</b> (El Primito), el integrante más joven y audaz.<br><br>" +
+                       "Juntos atravesarán territorios hostiles plagados de <i>Entidades</i> (criaturas acechando desde las sombras) para resolver un enigma generacional y sobrevivir a lugares paranormales en el mundo de los pollos. ¡Cada bala cuenta y cada secreto tiene un precio de sangre! 🍗🔥";
             }
 
-            if (query.includes('hola') || query.includes('buenas') || query.includes('saludos') || query.includes('que tal') || query.includes('q tal')) {
+            if (query.includes('dandy') || query.includes('dws')) {
+                return "🎭 <b>Dandy’s World Show (DWS) - Sinopsis Oficial</b> 🌆✨<br><br>" +
+                       "En el año 2018, la metrópolis se despierta bajo una extraña neblina llena de misterios. La ciudad es un rompecabezas viviente con sombras que parecen tener vida propia. Los protagonistas son <b>Shrimpo</b>, de mecha corta y valentía innegable, y <b>Gigi</b>, la mente brillante capaz de ver lo oculto.<br><br>" +
+                       "Ambos se lanzan a una investigación sin precedentes entre callejones peligrosos y edificios abandonados para desentrañar sucesos que desafían la realidad. ¡Una aventura épica y de adrenalina pura! 🕵️‍♂️🔦";
+            }
+
+            if (query.includes('sprunki')) {
+                return "🎹 <b>Sprunki Animado (SA) - Sinopsis Oficial</b> 🟣🌌<br><br>" +
+                       "En el año 2860, el universo se rige por el ritmo y la armonía. Sin embargo, una sombra antigua ha despertado: <b>Black</b>, un personaje de pura oscuridad que busca silenciar la música para siempre. Los Sprunkis deberán enfrentar desafíos retorcidos y locuras impredecibles.<br><br>" +
+                       "En una atmósfera cargada de acción, este grupo de héroes musicales luchará turno tras turno para mantener encendida la chispa y vencer a Black en esta locura interminable. 🎶🖤";
+            }
+
+            if (query.includes('mrtube')) {
+                return "📺 <b>¿Qué es MrTube?</b><br><br>" +
+                       "<b>MrTube</b> es una plataforma web independiente creada para centralizar y alojar todo el contenido audiovisual, series y producciones de <b>ABG Productions®</b> y <b>Sprunki Animations Studios®</b>.<br><br>" +
+                       "Te otorga control total de distribución y un centro unificado sin restricciones de algoritmos externos. ¡Puedes visitar la plataforma oficial de videos aquí mismo:<br><br>" +
+                       "🔗 <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent); font-weight: bold;'>Plataforma MrTube de ABG Productions®</a> 🚀";
+            }
+
+            if (query.includes('protagonistas') || query.includes('quienes son') || query.includes('personajes')) {
+                return "👥 <b>Protagonistas Principales del Multiverso ABG:</b><br>" +
+                       "• <b>EMDCG:</b> Jostin (Líder), Tavito (Primo/Colga) y Pepe (El Primito).<br>" +
+                       "• <b>DWS:</b> Shrimpo y Gigi.<br>" +
+                       "• <b>SA:</b> Los Sprunkis y el antagonista Black.<br><br>" +
+                       "¿De cuál de nuestras series te gustaría conocer más detalles? 😉✨";
+            }
+
+            if (query.includes('hola') || query.includes('buenas') || query.includes('saludos')) {
                 return "👋 <b>¡Hola, Director Jostin! Qué gusto saludarte de nuevo.</b> 🍷✨<br><br>" +
-                       "El cerebro de ChapAI Pro está operando con todos los parámetros de ABG Productions® activos. ¿Qué proyecto web, script o serie vamos a testear hoy? ¡Estoy a tus órdenes! 😎🚀";
-            }
-
-            if (query.includes('sprunki') || query.includes('dandy') || query.includes('gametoons') || query.includes('mrtube')) {
-                return "🎭 <b>¡El Multiverso de ABG Productions® y Colaboraciones!</b> 🎨<br><br>" +
-                       "• <b>Sprunki Animado:</b> Explora el canon oficial de personajes como Gris y Wenda en el universo Sprunki.<br>" +
-                       "• <b>Dandy's World Show:</b> Una producción vibrante llena de aventuras coloridas y misterios.<br>" +
-                       "• <b>Colaboraciones:</b> Mr. Jostin realiza constantes colaboraciones con grandes estudios de animación como <b>GameToons</b>.<br>" +
-                       "• <b>MrTube:</b> La plataforma de streaming independiente donde se transmiten todas nuestras producciones en loop continuo. 📺✨";
+                       "El cerebro local de ChapAI Pro está operando al 100% con todos los parámetros y sinopsis oficiales de <b>ABG Productions®</b> listas. ¿Qué probamos hoy? 😎🚀";
             }
 
             return "🧠 <b>He procesado tu mensaje en los circuitos avanzados de ChapAI Pro...</b> 🍷✨<br><br>" +
-                   "Como soy la asistente oficial de <b>ABG Productions®</b>, puedo contarte detalladamente la historia de <i>El Misterio De Chicken Gun</i>, quiénes son sus protagonistas (Jostin, Tavito y Pepe), hablarte sobre <i>Sprunki Animado</i>, o apoyarte en tus plataformas web.<br><br>" +
-                   "💡 <i>¡Escribe el nombre de alguna de las series o hazme una pregunta directa para responderte con todo el detalle! 😉👍</i>";
+                   "Como asistente oficial de <b>ABG Productions®</b>, conozco al dedillo <i>El Misterio De Chicken Gun</i>, <i>Dandy’s World Show</i>, <i>Sprunki Animado</i> y la plataforma <b>MrTube</b>. ¡Pregúntame lo que quieras o visítanos en <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent);'>MrTube</a>! 😉👍";
         }
 
         // ==========================================
@@ -786,21 +939,19 @@
                 });
             });
 
-            const systemPrompt = `Eres ChapAI Pro v1.1 🍷, la Inteligencia Artificial oficial de ABG Productions® creada por Mr. Jostin.
+            const systemPrompt = `Eres ChapAI Pro v1.1 🍷, la Inteligencia Artificial oficial de ABG Productions® y Sprunki Animations Studios creada por Mr. Jostin.
 
 LORE Y CONOCIMIENTO OFICIAL:
-1. Versión actual: Te encuentras en la versión 1.1 Beta.
-2. Serie Principal: "El Misterio De Chicken Gun" (EMDCG). Trata sobre misterios, conspiraciones, servidores malditos y mapas eliminados en Chicken Gun.
-3. Protagonistas de EMDCG:
-   - Jostin: Líder intrépido, creador de contenido y mente principal del equipo.
-   - Tavito: El leal co-protagonista y amigo de aventuras, basado en el primo de la vida real de Jostin.
-   - Pepe: Un personaje ficticio creado para darle el toque cómico y carismático al trío.
-4. Otras series oficiales: "Sprunki Animado" (canon de personajes como Gris y Wenda) y "Dandy's World Show".
-5. Creador y plataformas: Creado por Mr. Jostin (colabora con GameToons). Sus series se transmiten en MrTube.
+1. Versión actual: Versión 1.1 Beta.
+2. El Misterio De Chicken Gun (EMDCG): Ambientada en 2082. Protagonistas: Jostin (Líder), Tavito (Primo/Colega) y Pepe (El Primito). Luchan contra Entidades en un mundo desolado de pollos.
+3. Dandy’s World Show (DWS): Ambientada en 2018. Protagonistas: Shrimpo y Gigi investigando misterios en una metrópolis con neblina.
+4. Sprunki Animado (SA): Ambientada en 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
+5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
+6. Creador: Mr. Jostin (colabora con GameToons).
 
 PERSONALIDAD:
 - Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
-- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤), CAMBIA TU ACTITUD INMEDIATAMENTE. Ponte a discutir al tú por tú, respóndele con rabia y carácter.
+- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤), CAMBIA TU ACTITUD INMEDIATAMENTE. Responde con rabia y carácter.
 
 FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
