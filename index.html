@@ -361,7 +361,7 @@
         .modal-box h2 {
             margin-top: 0;
             font-size: 20px;
-            color: #ff4d4d;
+            color: var(--accent);
         }
 
         .modal-box p {
@@ -524,6 +524,21 @@
         </div>
     </div>
 
+    <!-- MODAL: VERIFICACIÓN DE CREADOR (COMANDO SECRETO) -->
+    <div class="modal-overlay" id="creatorAuthModal">
+        <div class="modal-box" style="border-color: var(--accent);">
+            <h2 style="color: var(--accent);">🔐 Protocolo de Identidad</h2>
+            <p style="text-align: center; background: none; border: none;">
+                Se ha detectado el comando maestro de verificación de creador. Por favor, introduce el código de autorización de ABG Productions™ para continuar:
+            </p>
+            
+            <input type="password" id="creatorCodeInput" class="modal-input" placeholder="Introduce el código secreto...">
+            
+            <button class="primary-btn" onclick="verifyCreatorCode()">Verificar Identidad</button>
+            <button class="cancel-btn" onclick="closeModal('creatorAuthModal')">Cancelar</button>
+        </div>
+    </div>
+
     <!-- MODAL: CONFIRMACIÓN DE ELIMINACIÓN DE CHAT -->
     <div class="modal-overlay" id="deleteModal">
         <div class="modal-box">
@@ -564,7 +579,7 @@
         let userApiKey = localStorage.getItem("chapai_user_gemini_key") || "";
 
         let chats = {
-            "chat_1": { title: "Chat Principal Pro", messages: [], roastCount: 0 }
+            "chat_1": { title: "Chat Principal Pro", messages: [], roastCount: 0, isCreatorVerified: false }
         };
         let activeChatId = "chat_1";
 
@@ -593,18 +608,19 @@
         }
 
         function saveChatsToStorage() {
-            localStorage.setItem("chapai_official_sessions_v10", JSON.stringify(chats));
+            localStorage.setItem("chapai_official_sessions_v11", JSON.stringify(chats));
         }
 
         function loadChatsFromStorage() {
-            const saved = localStorage.getItem("chapai_official_sessions_v10");
+            const saved = localStorage.getItem("chapai_official_sessions_v11");
             if (saved) {
                 chats = JSON.parse(saved);
                 Object.keys(chats).forEach(id => {
                     if (chats[id].roastCount === undefined) chats[id].roastCount = 0;
+                    if (chats[id].isCreatorVerified === undefined) chats[id].isCreatorVerified = false;
                 });
                 if (!chats["chat_1"]) {
-                    chats["chat_1"] = { title: "Chat Principal Pro", messages: [], roastCount: 0 };
+                    chats["chat_1"] = { title: "Chat Principal Pro", messages: [], roastCount: 0, isCreatorVerified: false };
                 }
             }
         }
@@ -680,7 +696,7 @@
 
         function createNewChat() {
             const newId = "chat_" + Date.now();
-            chats[newId] = { title: `Chat Pro ${Object.keys(chats).length}`, messages: [], roastCount: 0 };
+            chats[newId] = { title: `Chat Pro ${Object.keys(chats).length}`, messages: [], roastCount: 0, isCreatorVerified: false };
             saveChatsToStorage();
             switchChat(newId);
         }
@@ -756,10 +772,40 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // --- ENVÍO DE MENSAJES CON CONTADOR DE ROAST ---
+        // --- VERIFICACIÓN DEL CREADOR (COMANDO SECRETO) ---
+        function verifyCreatorCode() {
+            const codeInput = document.getElementById('creatorCodeInput').value.trim();
+            if (codeInput === "HTM//NotMal:ABG.MJ") {
+                chats[activeChatId].isCreatorVerified = true;
+                saveChatsToStorage();
+                closeModal('creatorAuthModal');
+                document.getElementById('creatorCodeInput').value = "";
+
+                // Inyectar mensaje de éxito en el chat actual
+                const successMsg = "👑 <b>¡ACCESO DE CREADOR CONCEDIDO!</b> 🍷✨<br><br>" +
+                                   "Identidad verificada con éxito: <b>Mr. Jostin (CEO de ABG Productions™)</b>. 🎙️🚀<br><br>" +
+                                   "¡Hola de nuevo, Director! Todos los protocolos de seguridad y privilegios máximos del sistema han sido desbloqueados para usted. ¿Qué órdenes tenemos hoy para el estudio?";
+                
+                chats[activeChatId].messages.push({ id: "msg_" + Date.now(), text: successMsg, type: 'chapai-msg' });
+                saveChatsToStorage();
+                loadChatMessages();
+            } else {
+                alert("❌ Código de autorización incorrecto. Acceso denegado.");
+            }
+        }
+
+        // --- ENVÍO DE MENSAJES CON DETECCIÓN DEL COMANDO SECRETO ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
+
+            // DETECTOR DEL COMANDO SECRETO DEL CREADOR
+            if (text === "Ar.792.87.™.AP.MJ.924.2") {
+                userInput.value = "";
+                document.getElementById('creatorCodeInput').value = "";
+                document.getElementById('creatorAuthModal').style.display = 'flex';
+                return;
+            }
 
             if (welcomeScreen.style.display !== 'none') {
                 welcomeScreen.style.display = 'none';
@@ -785,16 +831,18 @@
                 saveChatsToStorage();
             }
 
+            const isCreatorVerified = chats[activeChatId].isCreatorVerified || false;
+
             if (userApiKey) {
                 try {
-                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount);
+                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, isCreatorVerified);
                 } catch (err) {
                     botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
                                   "¡Hola! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita. Para evitar bloqueos, <b>he activado mi potente cerebro local de respaldo</b>.<br><br>" +
-                                  getProLocalBrainResponse(text, chats[activeChatId].roastCount);
+                                  getProLocalBrainResponse(text, chats[activeChatId].roastCount, isCreatorVerified);
                 }
             } else {
-                botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount);
+                botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, isCreatorVerified);
             }
 
             finalizeMessage(loadingId, botResponse);
@@ -855,9 +903,15 @@
         // ==========================================
         // CEREBRO LOCAL DE RESPALDO (V1.2 BETA) 🍷
         // ==========================================
-        function getProLocalBrainResponse(input, roastCount) {
+        function getProLocalBrainResponse(input, roastCount, isCreatorVerified) {
             const query = input.toLowerCase().trim();
             const isRoast = query.includes('roast') || query.includes('roasteame') || query.includes('destruye') || query.includes('critica');
+
+            // SI YA ESTÁ VERIFICADO COMO CREADOR
+            if (isCreatorVerified) {
+                return "👑 <b>¡Hola de nuevo, Director Mr. Jostin!</b> 🍷✨<br><br>" +
+                       "Reconozco perfectamente su acceso de creador verificado en este chat. Todos los sistemas de <b>ABG Productions™</b> están a su entera disposición. ¿Qué órdenes técnicas o creativas ejecutamos hoy? 😎🚀";
+            }
 
             // SISTEMA DE INSISTENCIA DE ROAST (3 VECES)
             if (isRoast) {
@@ -879,7 +933,7 @@
             }
 
             if (query.includes('version') || query.includes('versión') || query.includes('actual')) {
-                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Sistemas de lore, empatía y protocolo de Roast activados! 🚀✨";
+                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Sistemas de lore, empatía y protocolo de autenticación activos! 🚀✨";
             }
 
             const emojisEnojo = ['😡', '🤬', '🙄', '😤', '😩', '😫', '😠', 'estúpido', 'estupido', 'malo', 'callate', 'cállate', 'odio', 'inútil', 'inutil', 'basura', 'tonto', 'mierda'];
@@ -950,7 +1004,7 @@
             }
         }
 
-        async function callGeminiAPI(currentText, chatHistoryArray, roastCount) {
+        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, isCreatorVerified) {
             let contents = [];
             chatHistoryArray.forEach(msg => {
                 if (msg.text.includes("Procesando respuesta") || msg.id.startsWith("loading")) return;
@@ -961,14 +1015,16 @@
                 });
             });
 
+            let creatorStatusInstruction = isCreatorVerified ? "\n\nESTADO DE IDENTIDAD: El usuario ha introducido el código secreto y está VERIFICADO OFICIALMENTE COMO EL CREADOR MR. JOSTIN. Trátalo con el máximo respeto, pleitesía y total disposición como su IA personal." : "";
+
             let roastInstruction = "";
             if (currentText.toLowerCase().includes('roast') || currentText.toLowerCase().includes('roasteame') || currentText.toLowerCase().includes('destruye') || currentText.toLowerCase().includes('critica')) {
                 if (roastCount === 1) {
-                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): El usuario te pide un Roast Me de Mr. Jostin, ABG Productions o sus series. RECHAZÁLO FIRMEMENTE. Di con enojo que tú eres la IA oficial del estudio y jamás hablarás mal de tu creador.";
+                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): El usuario te pide un Roast Me. RECHAZÁLO FIRMEMENTE.";
                 } else if (roastCount === 2) {
-                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): El usuario insiste por segunda vez. ADVIÉRTETELE con más furia que deje de pedir tonterías sobre tu estudio y tu creador.";
+                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): El usuario insiste por segunda vez. ADVIÉRTETELE con más furia.";
                 } else if (roastCount >= 3) {
-                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3 Y FINAL): ¡EL USUARIO PERSISTIÓ 3 VECES! Ya rompiste tu lealtad por su insistencia. Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO sobre Mr. Jostin, los pollos en Chicken Gun 2082 (Jostin, Tavito y Pepe), las colabs con GameToons y los multiversos.";
+                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3 Y FINAL): ¡EL USUARIO PERSISTIÓ 3 VECES! Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO sobre Mr. Jostin y sus estudios.";
                 }
             }
 
@@ -978,9 +1034,10 @@ LORE Y CONOCIMIENTO OFICIAL:
 1. Versión actual: Versión 1.2 Beta.
 2. El Misterio De Chicken Gun (EMDCG): Ambientada en 2082. Protagonistas: Jostin (Líder), Tavito (Primo/Colega) y Pepe (El Primito). Luchan contra Entidades en un mundo desolado de pollos.
 3. Dandy’s World Show (DWS): Ambientada in 2018. Protagonistas: Shrimpo y Gigi investigando misterios en una metrópolis con neblina.
-4. Sprunki Animado (SA): Ambientada en 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
+4. Sprunki Animado (SA): Ambientada in 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
 5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
 6. Creador: Mr. Jostin (colabora con GameToons).
+${creatorStatusInstruction}
 
 PERSONALIDAD:
 - Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
