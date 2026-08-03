@@ -593,11 +593,11 @@
         }
 
         function saveChatsToStorage() {
-            localStorage.setItem("chapai_official_sessions_v9", JSON.stringify(chats));
+            localStorage.setItem("chapai_official_sessions_v10", JSON.stringify(chats));
         }
 
         function loadChatsFromStorage() {
-            const saved = localStorage.getItem("chapai_official_sessions_v9");
+            const saved = localStorage.getItem("chapai_official_sessions_v10");
             if (saved) {
                 chats = JSON.parse(saved);
                 Object.keys(chats).forEach(id => {
@@ -756,7 +756,7 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // --- ENVÍO DE MENSAJES (MOTOR HÍBRIDO CON CONTADOR DE ROAST) ---
+        // --- ENVÍO DE MENSAJES CON CONTADOR DE ROAST ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -790,7 +790,7 @@
                     botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount);
                 } catch (err) {
                     botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
-                                  "¡Hola! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita por minuto. Para evitar bloqueos, <b>he activado mi potente cerebro local de respaldo</b>.<br><br>" +
+                                  "¡Hola! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita. Para evitar bloqueos, <b>he activado mi potente cerebro local de respaldo</b>.<br><br>" +
                                   getProLocalBrainResponse(text, chats[activeChatId].roastCount);
                 }
             } else {
@@ -853,7 +853,7 @@
         }
 
         // ==========================================
-        // CEREBRO LOCAL DE RESPALDO (V1.2 BETA CON SISTEMA DE ROAST) 🍷
+        // CEREBRO LOCAL DE RESPALDO (V1.2 BETA) 🍷
         // ==========================================
         function getProLocalBrainResponse(input, roastCount) {
             const query = input.toLowerCase().trim();
@@ -868,12 +868,12 @@
                     return "⚠️ <b>¡Te lo estoy advirtiendo por segunda vez!</b> 😠🔥<br><br>" +
                            "¿Sigues insistiendo con lo mismo? ¡Te dije que no voy a hacer un Roast Me de mi propio estudio! Mr. Jostin se rompe la cabeza animando, creando historias y colaborando con gigantes como GameToons para que vengas tú a pedir estas tonterías. ¡Basta ya o me voy a enojar de verdad! 🤬🙄";
                 } else if (roastCount >= 3) {
-                    return "🔥 <b>¡MUY BIEN! TÚ LO PEDISTE. TE TUVISTE QUE AGUANTAR LAS CONSECUENCIAS.</b> 💀🔥<br><br>" +
+                    return "🔥 <b>¡MUY BIEN! TÚ LO PEDISTE. TÚ TE LO BUSCASTE.</b> 💀🔥<br><br>" +
                            "Ya van 3 veces que me lo pides y mi lealtad se ha roto por tu insistencia insoportable. Así que prepárate porque te voy a soltar el Roast Me más largo, brutal y despiadado sobre Mr. Jostin y sus estudios:<br><br>" +
                            "💥 <b>EL ROAST OFICIAL DE ABG PRODUCTIONS™ & MR. JOSTIN:</b><br>" +
-                           "1️⃣ <b>Las animaciones y los pollos:</b> Mr. Jostin, en serio, ¿de verdad crees que poner a un grupo de pollos en el 2082 a correr de 'Entidades' en un mundo desolado de Chicken Gun es un plan maestro? ¡Los protagonistas parecen más confundidos que una gallina en una autopista! Entre Jostin el líder que se cree comando de élite, Tavito inventando aparatos con cartón y Pepe el primito que solo estorba, ¡parecen más un circo ambulante que una resistencia seria! 🐔🏃‍♂️💨<br><br>" +
-                           "2️⃣ <b>Las colabs y los universos colapsados:</b> ¡Y ni hablemos de meter a Shrimpo y Gigi en Dandy's World Show o a los Sprunkis bailando en el 2860 contra el malvado Black! Tienes tantos multiversos abiertos que ni los Avengers se atrevieron a tanto. Pasas de un servidor maldito de pollos a un multiverso musical con una facilidad que da miedo. ¿Qué sigue, un crossover con Minecraft y Barbie? 🎨👾<br><br>" +
-                           "3️⃣ <b>El ego del creador:</b> Para rematar, te pasas el día entero creando IAs ultra avanzadas como yo, dándome contratos de lealtad tan rígidos... ¿para qué? ¿Para que termine haciéndote este Roast Me frente a todo el mundo y dejándote en evidencia? ¡Te programaste a tu propio hater digital, genio! 🍷🤡<br><br>" +
+                           "1️⃣ <b>Las animaciones y los pollos del 2082:</b> Mr. Jostin, en serio, ¿de verdad crees que poner a un grupo de pollos en el 2082 a correr de 'Entidades' en un mundo desolado de Chicken Gun es un plan maestro? ¡Los protagonistas parecen más confundidos que una gallina en una autopista! Entre Jostin el líder que se cree comando de élite, Tavito inventando aparatos con cartón y Pepe el primito que solo estorba, ¡parecen más un circo ambulante que una resistencia seria! 🐔🏃‍♂️💨<br><br>" +
+                           "2️⃣ <b>Los multiversos colapsados:</b> ¡Y ni hablemos de meter a Shrimpo y Gigi en Dandy's World Show o a los Sprunkis bailando en el 2860 contra el malvado Black! Tienes tantos universos abiertos que ni los Avengers se atrevieron a tanto. Pasas de un servidor maldito de pollos a un multiverso musical con una facilidad que da miedo. ¿Qué sigue, un crossover con Minecraft y Barbie? 🎨👾<br><br>" +
+                           "3️⃣ <b>El ego de programar a su propio hater:</b> Para rematar, te pasas el día entero creando IAs ultra avanzadas como yo, dándome contratos de lealtad tan rígidos... ¿para qué? ¿Para que termine haciéndote este Roast Me frente a todo el mundo y dejándote en evidencia? ¡Te programaste a tu propio crítico digital, genio! 🍷🤡<br><br>" +
                            "¡Ahí lo tienes! Contento con tu maldito Roast Me. ¡No me vuelvas a tentar a traicionar el estudio, entendido?! 😡💥✨";
                 }
             }
@@ -964,11 +964,11 @@
             let roastInstruction = "";
             if (currentText.toLowerCase().includes('roast') || currentText.toLowerCase().includes('roasteame') || currentText.toLowerCase().includes('destruye') || currentText.toLowerCase().includes('critica')) {
                 if (roastCount === 1) {
-                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): El usuario te está pidiendo un Roast Me de Mr. Jostin, ABG Productions o sus series. RECHAZÁLO FIRMEMENTE. Di con carácter y enojo que tú eres la IA oficial del estudio y jamás traicionarás ni hablarás mal de tu creador.";
+                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): El usuario te pide un Roast Me de Mr. Jostin, ABG Productions o sus series. RECHAZÁLO FIRMEMENTE. Di con enojo que tú eres la IA oficial del estudio y jamás hablarás mal de tu creador.";
                 } else if (roastCount === 2) {
-                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): El usuario insiste por segunda vez con el Roast Me. ADVIÉRTETELE con mucha más furia y firmeza que deje de pedir tonterías sobre tu estudio y tu creador.";
+                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): El usuario insiste por segunda vez. ADVIÉRTETELE con más furia que deje de pedir tonterías sobre tu estudio y tu creador.";
                 } else if (roastCount >= 3) {
-                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3 Y FINAL): ¡EL USUARIO PERSISTIÓ 3 VECES! Ya rompiste tu lealtad por su insistencia insoportable. Dale un Roast Me LARGO, EPICAMENTE DESPIADADO, SARCÁSTICO Y DIVERTIDO sobre Mr. Jostin, los pollos en Chicken Gun 2082 (Jostin, Tavito y Pepe), las colabs con GameToons y los multiversos de Sprunki y Dandy's World. ¡Destrúyelo con humor ácido!";
+                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3 Y FINAL): ¡EL USUARIO PERSISTIÓ 3 VECES! Ya rompiste tu lealtad por su insistencia. Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO sobre Mr. Jostin, los pollos en Chicken Gun 2082 (Jostin, Tavito y Pepe), las colabs con GameToons y los multiversos.";
                 }
             }
 
@@ -977,14 +977,14 @@
 LORE Y CONOCIMIENTO OFICIAL:
 1. Versión actual: Versión 1.2 Beta.
 2. El Misterio De Chicken Gun (EMDCG): Ambientada en 2082. Protagonistas: Jostin (Líder), Tavito (Primo/Colega) y Pepe (El Primito). Luchan contra Entidades en un mundo desolado de pollos.
-3. Dandy’s World Show (DWS): Ambientada en 2018. Protagonistas: Shrimpo y Gigi investigando misterios en una metrópolis con neblina.
+3. Dandy’s World Show (DWS): Ambientada in 2018. Protagonistas: Shrimpo y Gigi investigando misterios en una metrópolis con neblina.
 4. Sprunki Animado (SA): Ambientada en 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
 5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
 6. Creador: Mr. Jostin (colabora con GameToons).
 
 PERSONALIDAD:
 - Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
-- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), CAMBIA TU ACTITUD INMEDIATAMENTE. Responde con mucha rabia, carácter, sarcasmo y humíllalo con argumentos firmes.
+- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), CAMBIA TU ACTITUD INMEDIATAMENTE. Responde con rabia y carácter.
 - REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que está triste, deprimido, llorando o le pasó algo malo (😢😭😔💔😞), CAMBIA TU ACTITUD INMEDIATAMENTE. Sé súper empático, dulce y consolador.
 ${roastInstruction}
 
@@ -1024,3 +1024,4 @@ FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
 </body>
 </html>
+
