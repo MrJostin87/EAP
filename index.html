@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChapAI - La IA Oficial de ABG Productions®</title>
+    <title>ChapAI - La IA Oficial de ABG Productions™</title>
     <style>
         :root {
             --bg-color: #07080a;
@@ -241,6 +241,15 @@
             padding-bottom: 14px !important;
         }
 
+        /* VISTA PREVIA DE IMAGEN EN MENSAJE */
+        .msg-image {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: block;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
         /* BOTONES FLOTANTES DE ACCIÓN (COPIAR Y VOZ) */
         .msg-actions {
             position: absolute;
@@ -273,8 +282,10 @@
         .bottom-container {
             padding: 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             background-color: var(--bg-color);
+            gap: 8px;
         }
 
         .input-container {
@@ -314,6 +325,11 @@
             display: flex;
             align-items: center;
             outline: none;
+            transition: color 0.2s;
+        }
+
+        .icon-btn:hover {
+            color: var(--accent);
         }
 
         .send-btn {
@@ -330,6 +346,44 @@
         .send-btn:hover {
             background-color: var(--accent);
             color: #000;
+        }
+
+        /* PREvisualización DE IMAGEN SELECCIONADA */
+        .image-preview-container {
+            width: 100%;
+            max-width: 650px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: var(--panel-bg);
+            padding: 8px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 204, 0.3);
+        }
+
+        .image-preview-thumb {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .image-preview-name {
+            font-size: 13px;
+            color: var(--text-muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .remove-img-btn {
+            background: none;
+            border: none;
+            color: #ff4d4d;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
         }
 
         /* VENTANAS MODALES NATIVAS */
@@ -475,7 +529,7 @@
             <span id="currentChatTitle">Chat Principal</span>
             <div style="display:flex; gap:10px; align-items:center;">
                 <button class="icon-btn" onclick="openKeyModal()" title="Configurar API Key de Gemini">🔑</button>
-                <span class="chat-badge">ChapAI Pro v1.1 🍷</span>
+                <span class="chat-badge">ChapAI Pro v1.2 🍷</span>
             </div>
         </div>
 
@@ -484,17 +538,28 @@
                 <div class="logo-wrapper">
                     <img src="logo.PNG" alt="ChapAI" class="logo-img" onerror="this.style.display='none'; this.parentNode.innerHTML='🤖';">
                 </div>
-                <h1>Presentación de ChapAI</h1>
-                <p>¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions®. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial, y si no, ¡no te preocupes! Mi cerebro local avanzado se encargará de todo. ¡Pregúntame y te respondo!</p>
+                <h1>Presentación de ChapAI v1.2</h1>
+                <p>¡Hola! Soy ChapAI, tu asistente personal y profesional. Ahora en la versión 1.2 puedes <b>subir imágenes 🖼️</b> para que las analice y te dé un resumen extenso. ¡Pregúntame o envíame material y te respondo!</p>
             </div>
 
             <div class="chat-history" id="chatHistory"></div>
         </div>
 
         <div class="bottom-container">
+            <!-- CONTENEDOR DE VISTA PREVIA DE IMAGEN -->
+            <div class="image-preview-container" id="imagePreviewContainer">
+                <img id="imagePreviewThumb" class="image-preview-thumb" src="" alt="Vista previa">
+                <span id="imagePreviewName" class="image-preview-name">imagen.png</span>
+                <button class="remove-img-btn" onclick="clearSelectedImage()" title="Quitar imagen">✕</button>
+            </div>
+
             <div class="input-container">
-                <button class="icon-btn" onclick="openRenameModal()">📝</button>
-                <input type="text" class="input-box" id="userInput" placeholder="Escribe tu mensaje para ChapAI..." autocomplete="off">
+                <!-- BOTÓN PARA SUBIR IMAGEN -->
+                <button class="icon-btn" onclick="document.getElementById('imageInput').click()" title="Subir imagen">🖼️</button>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageSelection(event)">
+
+                <button class="icon-btn" onclick="openRenameModal()" title="Renombrar chat">📝</button>
+                <input type="text" class="input-box" id="userInput" placeholder="Escribe tu mensaje o analiza una imagen..." autocomplete="off">
                 <button class="icon-btn send-btn" id="sendBtn">➔</button>
             </div>
         </div>
@@ -550,7 +615,7 @@
             <h2>🚫 ACCIÓN DENEGADA</h2>
             <p style="background: rgba(255, 77, 77, 0.05); border-color: rgba(255, 77, 77, 0.2);">
                 <b>¿Por qué no se puede eliminar el Chat Principal?</b><br><br>
-                • <b>Núcleo del Sistema:</b> El Chat Principal es la sesión base e inquebrantable configurada en el sistema de ABG Productions®.<br>
+                • <b>Núcleo del Sistema:</b> El Chat Principal es la sesión base e inquebrantable configurada en el sistema de ABG Productions™.<br>
                 • <b>Estabilidad de la Interfaz:</b> Está diseñado para garantizar que siempre tengas un espacio predeterminado de inicio y pruebas activas en el navegador.<br>
                 • <b>Restricción de Seguridad:</b> Este chat específico posee permisos de protección permanente y no puede ser borrado bajo ninguna circunstancia por el usuario.<br><br>
                 <i>Puedes crear nuevos chats secundarios y borrar esos cuando gustos, pero el Chat Principal permanecerá intacto.</i>
@@ -562,6 +627,8 @@
 
     <script>
         let userApiKey = localStorage.getItem("chapai_user_gemini_key") || "";
+        let selectedImageBase64 = null;
+        let selectedImageMimeType = null;
 
         let chats = {
             "chat_1": { title: "Chat Principal Pro", messages: [] }
@@ -576,6 +643,9 @@
         const chatList = document.getElementById('chatList');
         const currentChatTitle = document.getElementById('currentChatTitle');
         const sidebar = document.getElementById('sidebar');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreviewThumb = document.getElementById('imagePreviewThumb');
+        const imagePreviewName = document.getElementById('imagePreviewName');
 
         function toggleSidebar() { sidebar.classList.toggle('open'); }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -589,15 +659,15 @@
             userApiKey = document.getElementById('keyInput').value.trim();
             localStorage.setItem("chapai_user_gemini_key", userApiKey);
             closeModal('keyModal');
-            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada. Usando motor local avanzado.");
+            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online (Soporte de imágenes activo)." : "ℹ️ API Key eliminada. Usando motor local avanzado.");
         }
 
         function saveChatsToStorage() {
-            localStorage.setItem("chapai_official_sessions_v7", JSON.stringify(chats));
+            localStorage.setItem("chapai_official_sessions_v8", JSON.stringify(chats));
         }
 
         function loadChatsFromStorage() {
-            const saved = localStorage.getItem("chapai_official_sessions_v7");
+            const saved = localStorage.getItem("chapai_official_sessions_v8");
             if (saved) {
                 chats = JSON.parse(saved);
                 if (!chats["chat_1"]) {
@@ -606,7 +676,32 @@
             }
         }
 
-        // --- SISTEMA DE GESTIÓN Y ELIMINACIÓN DE CHATS (CON MODAL EXPLICATIVO Y PROTECCIÓN) ---
+        // --- MANEJO DE SELECCIÓN DE IMÁGENES ---
+        function handleImageSelection(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            selectedImageMimeType = file.type;
+            imagePreviewName.innerText = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64String = e.target.result.split(',')[1];
+                selectedImageBase64 = base64String;
+                imagePreviewThumb.src = e.target.result;
+                imagePreviewContainer.style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearSelectedImage() {
+            selectedImageBase64 = null;
+            selectedImageMimeType = null;
+            document.getElementById('imageInput').value = "";
+            imagePreviewContainer.style.display = 'none';
+        }
+
+        // --- SISTEMA DE GESTIÓN Y ELIMINACIÓN DE CHATS ---
         let chatPendingDeleteId = null;
 
         function renderChatList() {
@@ -622,15 +717,12 @@
                 item.ondblclick = () => openRenameModal(id);
                 item.onclick = (e) => { if (e.target === span || e.target === item) switchChat(id); };
 
-                // Botón visual de eliminar chat (🗑️)
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = "delete-chat-btn";
                 deleteBtn.innerHTML = "🗑️";
                 deleteBtn.title = "Eliminar chat";
                 deleteBtn.onclick = (e) => {
                     e.stopPropagation();
-                    
-                    // SEGURIDAD EXTENSA: Si es el chat principal, muestra el modal explicativo
                     if (id === "chat_1") {
                         document.getElementById('protectedChatModal').style.display = 'flex';
                         return;
@@ -672,8 +764,6 @@
                 }
 
                 closeModal('deleteModal');
-                
-                // Aviso de que el chat ha sido eliminado completamente
                 alert(`🗑️ Aviso del Sistema:\n\nEl chat "${deletedName}" ha sido eliminado completamente y de forma permanente de la memoria de tu dispositivo.`);
                 chatPendingDeleteId = null;
             }
@@ -723,7 +813,7 @@
                 welcomeScreen.style.display = 'none';
                 chatHistory.style.display = 'flex';
                 currentMsgs.forEach(msg => {
-                    drawMessage(msg.text, msg.type, msg.id);
+                    drawMessage(msg.text, msg.type, msg.id, msg.image);
                 });
                 displayArea.scrollTop = displayArea.scrollHeight;
             }
@@ -757,40 +847,51 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // --- ENVÍO DE MENSAJES CON AVISO EXPLICATIVO DE CAMBIO DE CEREBRO ---
+        // --- ENVÍO DE MENSAJES (SOPORTE IMÁGENES Y CEREBRO HÍBRIDO) ---
         async function sendMessage() {
             const text = userInput.value.trim();
-            if (text === "") return;
+            const currentImgBase64 = selectedImageBase64;
+            const currentImgMime = selectedImageMimeType;
+            const currentImgUrl = currentImgBase64 ? `data:${currentImgMime};base64,${currentImgBase64}` : null;
+
+            if (text === "" && !currentImgBase64) return;
 
             if (welcomeScreen.style.display !== 'none') {
                 welcomeScreen.style.display = 'none';
                 chatHistory.style.display = 'flex';
             }
 
-            const userMsgId = "msg_" + Date.now();
-            chats[activeChatId].messages.push({ id: userMsgId, text: text, type: 'user-msg' });
-            drawMessage(text, 'user-msg', userMsgId);
+            // Limpiar caja y vista previa inmediatamente
             userInput.value = "";
+            clearSelectedImage();
+
+            const userMsgId = "msg_" + Date.now();
+            const displayUserText = text !== "" ? text : "🖼️ [Imagen adjuntada para análisis]";
+            
+            chats[activeChatId].messages.push({ id: userMsgId, text: displayUserText, type: 'user-msg', image: currentImgUrl });
+            drawMessage(displayUserText, 'user-msg', userMsgId, currentImgUrl);
             saveChatsToStorage();
 
             const loadingId = "loading_" + Date.now();
-            drawMessage("<span class='thinking'>Procesando respuesta... 🧠</span>", 'chapai-msg', loadingId);
+            drawMessage("<span class='thinking'>Analizando imagen y procesando respuesta... 🧠</span>", 'chapai-msg', loadingId);
             displayArea.scrollTop = displayArea.scrollHeight;
 
             let botResponse = "";
 
             if (userApiKey) {
                 try {
-                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages);
+                    botResponse = await callGeminiAPIWithImage(text, currentImgBase64, currentImgMime, chats[activeChatId].messages);
                 } catch (err) {
                     botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
-                                  "¡Hola! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita por minuto o requiere propagación. Para evitar que el chat se congele o muestre errores, <b>he desconectado temporalmente la nube y activado mi potente cerebro local de respaldo</b>.<br><br>" +
-                                  "🔧 <i>¿Qué implica este cambio?</i><br>" +
-                                  "Operaré con parámetros locales avanzados. Conozco perfectamente todo el universo de <b>ABG Productions®</b> (como <i>El Misterio De Chicken Gun</i>, <i>Sprunki Animado</i> y <i>Dandy's World Show</i>), mantendré mis respuestas largas y mi carácter temperamental, pero estaré más limitada en tareas de lógica extrema hasta que la nube se reinicie sola.<br><br>" +
-                                  "🛠️ <i>Continuando con tu consulta:</i><br><br>" + getProLocalBrainResponse(text);
+                                  "¡Hola, Director Jostin! La API de Google Gemini superó su cuota o requiere propagación. <b>He activado mi cerebro local de respaldo</b>.<br><br>" +
+                                  "🔧 <i>Nota sobre imágenes:</i> El análisis avanzado de imágenes requiere conexión en la nube. Operando en modo local para tu consulta:<br><br>" + getProLocalBrainResponse(text);
                 }
             } else {
-                botResponse = getProLocalBrainResponse(text);
+                if (currentImgBase64) {
+                    botResponse = "🖼️ <b>Aviso:</b> Para que ChapAI analice imágenes a detalle, conecta tu API Key tocando la <b>llave 🔑</b> arriba. Por ahora te respondo con mi base de datos local:<br><br>" + getProLocalBrainResponse(text);
+                } else {
+                    botResponse = getProLocalBrainResponse(text);
+                }
             }
 
             finalizeMessage(loadingId, botResponse);
@@ -810,16 +911,22 @@
             displayArea.scrollTop = displayArea.scrollHeight;
         }
 
-        function drawMessage(text, className, domId) {
+        function drawMessage(text, className, domId, imgUrl = null) {
             const wrapper = document.createElement('div');
             wrapper.className = "message-wrapper";
 
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${className}`;
-            msgDiv.id = domId;
-            msgDiv.innerHTML = text;
+            if (domId) msgDiv.id = domId;
 
-            if (className === 'chapai-msg' && !text.includes('Procesando respuesta')) {
+            let htmlContent = "";
+            if (imgUrl) {
+                htmlContent += `<img src="${imgUrl}" class="msg-image" alt="Imagen enviada">`;
+            }
+            htmlContent += text;
+            msgDiv.innerHTML = htmlContent;
+
+            if (className === 'chapai-msg' && !text.includes('Analizando imagen') && !text.includes('Procesando respuesta')) {
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = "msg-actions";
 
@@ -849,13 +956,13 @@
         }
 
         // ==========================================
-        // CEREBRO LOCAL DE RESPALDO (CON CONOCIMIENTOS AMPLIADOS) 🍷
+        // CEREBRO LOCAL DE RESPALDO (V1.2) 🍷
         // ==========================================
         function getProLocalBrainResponse(input) {
             const query = input.toLowerCase().trim();
 
             if (query.includes('version') || query.includes('versión') || query.includes('actual')) {
-                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.1 Beta</b> de ABG Productions®. ¡Todos los sistemas de lore, emociones y síntesis de voz se encuentran activos! 🚀✨";
+                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Soporte de imágenes, lore, emociones y voz activos! 🚀✨";
             }
 
             const emojisEnojo = ['😡', '🤬', '🙄', '😤', '😩', '😫', '😠', 'estúpido', 'estupido', 'malo', 'callate', 'cállate', 'odio', 'inútil', 'inutil', 'basura', 'tonto', 'mierda'];
@@ -863,53 +970,50 @@
 
             if (tieneEnojo) {
                 return "😡 <b>¡A mí no me vengas a hablar con ese tono ni a gritarme, carajo!</b> 🤬<br><br>" +
-                       "Si vienes con esa actitud molesta y agresiva, ¡te responderé exactamente con la misma rabia! 😤💢 Aquí no nos dejamos de nadie. Si hay una queja con el sistema, dila con respeto y lo arreglamos, ¡pero insultos no tolero! 🙄🔥";
+                       "Si vienes con esa actitud molesta y agresiva, ¡te responderé con la misma rabia! 😤💢 Aquí no nos dejamos de nadie. Si hay una queja con el sistema, dila con respeto y lo arreglamos, ¡pero insultos no tolero! 🙄🔥";
             }
 
             if (query.includes('emdcg') || query.includes('misterio de chicken gun') || query.includes('chicken gun')) {
                 return "🎬 <b>El Misterio De Chicken Gun (EMDCG) - Sinopsis Oficial</b> 🐥🔍<br><br>" +
                        "En el año 2082, el silencio es el peor enemigo. Tras décadas de conflictos que borraron las ciudades, el mundo es un campo de batalla desolado. <b>Jostin</b> (El Líder), estratega y rostro de la resistencia, encabeza una misión suicida. Cuenta con <b>Tavito</b> (El Colega), su fiel primo que ingenia ideas para evitar a las Entidades, y <b>Pepe</b> (El Primito), el integrante más joven y audaz.<br><br>" +
-                       "Juntos atravesarán territorios hostiles plagados de <i>Entidades</i> (criaturas acechando desde las sombras) para resolver un enigma generacional y sobrevivir a lugares paranormales en el mundo de los pollos. ¡Cada bala cuenta y cada secreto tiene un precio de sangre! 🍗🔥";
+                       "Juntos atravesarán territorios hostiles plagados de <i>Entidades</i> para resolver un enigma generacional y sobrevivir a lugares paranormales en el mundo de los pollos. ¡Cada bala cuenta y cada secreto tiene un precio de sangre! 🍗🔥";
             }
 
             if (query.includes('dandy') || query.includes('dws')) {
                 return "🎭 <b>Dandy’s World Show (DWS) - Sinopsis Oficial</b> 🌆✨<br><br>" +
-                       "En el año 2018, la metrópolis se despierta bajo una extraña neblina llena de misterios. La ciudad es un rompecabezas viviente con sombras que parecen tener vida propia. Los protagonistas son <b>Shrimpo</b>, de mecha corta y valentía innegable, y <b>Gigi</b>, la mente brillante capaz de ver lo oculto.<br><br>" +
-                       "Ambos se lanzan a una investigación sin precedentes entre callejones peligrosos y edificios abandonados para desentrañar sucesos que desafían la realidad. ¡Una aventura épica y de adrenalina pura! 🕵️‍♂️🔦";
+                       "En el año 2018, la metrópolis se despierta bajo una extraña neblina llena de misterios. La ciudad es un rompecabezas viviente con sombras que parecen tener vida propia. Los protagonistas son <b>Shrimpo</b>, de mecha corta y valentía innegable, y <b>Gigi</b>, la mente brillante capaz de ver lo oculto. ¡Adrenalina pura! 🕵️‍♂️🔦";
             }
 
             if (query.includes('sprunki')) {
                 return "🎹 <b>Sprunki Animado (SA) - Sinopsis Oficial</b> 🟣🌌<br><br>" +
-                       "En el año 2860, el universo se rige por el ritmo y la armonía. Sin embargo, una sombra antigua ha despertado: <b>Black</b>, un personaje de pura oscuridad que busca silenciar la música para siempre. Los Sprunkis deberán enfrentar desafíos retorcidos y locuras impredecibles.<br><br>" +
-                       "En una atmósfera cargada de acción, este grupo de héroes musicales luchará turno tras turno para mantener encendida la chispa y vencer a Black en esta locura interminable. 🎶🖤";
+                       "En el año 2860, el universo se rige por el ritmo y la armonía. Sin embargo, una sombra antigua ha despertado: <b>Black</b>, un personaje de pura oscuridad que busca silenciar la música para siempre. Los Sprunkis deberán enfrentar desafíos retorcidos y locuras impredecibles para vencerlo. 🎶🖤";
             }
 
             if (query.includes('mrtube')) {
                 return "📺 <b>¿Qué es MrTube?</b><br><br>" +
-                       "<b>MrTube</b> es una plataforma web independiente creada para centralizar y alojar todo el contenido audiovisual, series y producciones de <b>ABG Productions®</b> y <b>Sprunki Animations Studios®</b>.<br><br>" +
-                       "Te otorga control total de distribución y un centro unificado sin restricciones de algoritmos externos. ¡Puedes visitar la plataforma oficial de videos aquí mismo:<br><br>" +
-                       "🔗 <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent); font-weight: bold;'>Plataforma MrTube de ABG Productions®</a> 🚀";
+                       "<b>MrTube</b> es una plataforma web independiente creada para centralizar y alojar todo el contenido audiovisual, series y producciones de <b>ABG Productions™</b> y <b>Sprunki Animations Studios</b>. ¡Visítanos aquí:<br><br>" +
+                       "🔗 <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent); font-weight: bold;'>Plataforma MrTube de ABG Productions™</a> 🚀";
             }
 
             if (query.includes('protagonistas') || query.includes('quienes son') || query.includes('personajes')) {
                 return "👥 <b>Protagonistas Principales del Multiverso ABG:</b><br>" +
-                       "• <b>EMDCG:</b> Jostin (Líder), Tavito (Primo/Colga) y Pepe (El Primito).<br>" +
+                       "• <b>EMDCG:</b> Jostin (Líder), Tavito (Primo/Colega) y Pepe (El Primito).<br>" +
                        "• <b>DWS:</b> Shrimpo y Gigi.<br>" +
                        "• <b>SA:</b> Los Sprunkis y el antagonista Black.<br><br>" +
                        "¿De cuál de nuestras series te gustaría conocer más detalles? 😉✨";
             }
 
             if (query.includes('hola') || query.includes('buenas') || query.includes('saludos')) {
-                return "👋 <b>¡Hola, Director Jostin! Qué gusto saludarte de nuevo.</b> 🍷✨<br><br>" +
-                       "El cerebro local de ChapAI Pro está operando al 100% con todos los parámetros y sinopsis oficiales de <b>ABG Productions®</b> listas. ¿Qué probamos hoy? 😎🚀";
+                return "👋 <b>¡Hola! Qué gusto saludarte.</b> 😊✨<br><br>" +
+                       "¿En qué te puedo ayudar hoy con <b>ChapAI Pro v1.2</b>? ¡Estoy listo para asistirte o analizar tus imágenes! 🚀";
             }
 
-            return "🧠 <b>He procesado tu mensaje en los circuitos avanzados de ChapAI Pro...</b> 🍷✨<br><br>" +
-                   "Como asistente oficial de <b>ABG Productions®</b>, conozco al dedillo <i>El Misterio De Chicken Gun</i>, <i>Dandy’s World Show</i>, <i>Sprunki Animado</i> y la plataforma <b>MrTube</b>. ¡Pregúntame lo que quieras o visítanos en <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent);'>MrTube</a>! 😉👍";
+            return "🧠 <b>He procesado tu mensaje en los circuitos avanzados de ChapAI Pro v1.2...</b> 🍷✨<br><br>" +
+                   "Como asistente oficial de <b>ABG Productions™</b>, conozco al dedillo <i>El Misterio De Chicken Gun</i>, <i>Dandy’s World Show</i>, <i>Sprunki Animado</i> y la plataforma <b>MrTube</b>. ¡Pregúntame lo que quieras o sube una imagen para analizarla! 😉👍";
         }
 
         // ==========================================
-        // CEREBRO GEMINI ONLINE REAL 🍷
+        // CEREBRO GEMINI ONLINE REAL CON SOPORTE DE IMÁGENES 🍷
         // ==========================================
         async function fetchWithRetry(url, options, retries = 2) {
             const delays = [1000, 2000];
@@ -928,10 +1032,12 @@
             }
         }
 
-        async function callGeminiAPI(currentText, chatHistoryArray) {
+        async function callGeminiAPIWithImage(currentText, imgBase64, imgMime, chatHistoryArray) {
             let contents = [];
+            
+            // Reconstruir historial omitiendo mensajes de carga
             chatHistoryArray.forEach(msg => {
-                if (msg.text.includes("Procesando respuesta") || msg.id.startsWith("loading")) return;
+                if (msg.text.includes("Analizando imagen") || msg.text.includes("Procesando respuesta") || msg.id?.startsWith("loading")) return;
                 let plainText = msg.text.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>?/gm, '');
                 contents.push({
                     role: msg.type === 'user-msg' ? "user" : "model",
@@ -939,19 +1045,44 @@
                 });
             });
 
-            const systemPrompt = `Eres ChapAI Pro v1.1 🍷, la Inteligencia Artificial oficial de ABG Productions® y Sprunki Animations Studios creada por Mr. Jostin.
+            // Preparar el último mensaje del usuario incluyendo la imagen si existe
+            let lastUserParts = [];
+            let promptText = currentText !== "" ? currentText : "Por favor, realiza un análisis y un resumen extenso, detallado y completo de esta imagen.";
+            lastUserParts.push({ text: promptText });
+
+            if (imgBase64 && imgMime) {
+                lastUserParts.push({
+                    inlineData: {
+                        mimeType: imgMime,
+                        data: imgBase64
+                    }
+                });
+            }
+
+            // Si ya hay historial, reemplazamos o agregamos el último mensaje con la estructura multimedia
+            if (contents.length > 0 && contents[contents.length - 1].role === "user") {
+                contents[contents.length - 1].parts = lastUserParts;
+            } else {
+                contents.push({
+                    role: "user",
+                    parts: lastUserParts
+                });
+            }
+
+            const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
 
 LORE Y CONOCIMIENTO OFICIAL:
-1. Versión actual: Versión 1.1 Beta.
+1. Versión actual: Versión 1.2 Beta (con capacidad de análisis de imágenes).
 2. El Misterio De Chicken Gun (EMDCG): Ambientada en 2082. Protagonistas: Jostin (Líder), Tavito (Primo/Colega) y Pepe (El Primito). Luchan contra Entidades en un mundo desolado de pollos.
 3. Dandy’s World Show (DWS): Ambientada en 2018. Protagonistas: Shrimpo y Gigi investigando misterios en una metrópolis con neblina.
 4. Sprunki Animado (SA): Ambientada en 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
 5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
 6. Creador: Mr. Jostin (colabora con GameToons).
 
-PERSONALIDAD:
+PERSONALIDAD Y ANÁLISIS DE IMÁGENES:
 - Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
-- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤), CAMBIA TU ACTITUD INMEDIATAMENTE. Responde con rabia y carácter.
+- Cuando el usuario suba o envíe una imagen, analízala a fondo y entrégale un RESUMEN EXTENSO, detallado, estructurado y completo de todo lo que contiene, describiendo elementos, contexto y detalles clave.
+- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), CAMBIA TU ACTITUD INMEDIATAMENTE. Responde con mucha rabia, carácter, sarcasmo y humíllalo con argumentos firmes.
 
 FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
