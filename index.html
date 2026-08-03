@@ -348,7 +348,7 @@
             color: #000;
         }
 
-        /* PREvisualización DE IMAGEN SELECCIONADA */
+        /* PREVISUALIZACIÓN DE IMAGEN SELECCIONADA */
         .image-preview-container {
             width: 100%;
             max-width: 650px;
@@ -539,7 +539,7 @@
                     <img src="logo.PNG" alt="ChapAI" class="logo-img" onerror="this.style.display='none'; this.parentNode.innerHTML='🤖';">
                 </div>
                 <h1>Presentación de ChapAI v1.2</h1>
-                <p>¡Hola! Soy ChapAI, tu asistente personal y profesional. Ahora en la versión 1.2 puedes <b>subir imágenes 🖼️</b> para que las analice y te dé un resumen extenso. ¡Pregúntame o envíame material y te respondo!</p>
+                <p>¡Hola! Soy ChapAI, tu asistente personal y profesional. En la versión 1.2 puedes <b>subir imágenes 🖼️</b> para análisis y probar el nuevo sistema de <b>Roast Me</b>. ¡Pregúntame o retame y te respondo!</p>
             </div>
 
             <div class="chat-history" id="chatHistory"></div>
@@ -559,7 +559,7 @@
                 <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageSelection(event)">
 
                 <button class="icon-btn" onclick="openRenameModal()" title="Renombrar chat">📝</button>
-                <input type="text" class="input-box" id="userInput" placeholder="Escribe tu mensaje o analiza una imagen..." autocomplete="off">
+                <input type="text" class="input-box" id="userInput" placeholder="Escribe tu mensaje, pide un Roast Me o sube una imagen..." autocomplete="off">
                 <button class="icon-btn send-btn" id="sendBtn">➔</button>
             </div>
         </div>
@@ -629,6 +629,9 @@
         let userApiKey = localStorage.getItem("chapai_user_gemini_key") || "";
         let selectedImageBase64 = null;
         let selectedImageMimeType = null;
+        
+        // Contador global de peticiones Roast Me por sesión de chat
+        let roastMeAttempts = 0;
 
         let chats = {
             "chat_1": { title: "Chat Principal Pro", messages: [] }
@@ -659,15 +662,15 @@
             userApiKey = document.getElementById('keyInput').value.trim();
             localStorage.setItem("chapai_user_gemini_key", userApiKey);
             closeModal('keyModal');
-            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online (Soporte de imágenes activo)." : "ℹ️ API Key eliminada. Usando motor local avanzado.");
+            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada. Usando motor local avanzado.");
         }
 
         function saveChatsToStorage() {
-            localStorage.setItem("chapai_official_sessions_v8", JSON.stringify(chats));
+            localStorage.setItem("chapai_official_sessions_v9", JSON.stringify(chats));
         }
 
         function loadChatsFromStorage() {
-            const saved = localStorage.getItem("chapai_official_sessions_v8");
+            const saved = localStorage.getItem("chapai_official_sessions_v9");
             if (saved) {
                 chats = JSON.parse(saved);
                 if (!chats["chat_1"]) {
@@ -847,7 +850,7 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // --- ENVÍO DE MENSAJES (SOPORTE IMÁGENES Y CEREBRO HÍBRIDO) ---
+        // --- ENVÍO DE MENSAJES (SOPORTE IMÁGENES Y ROAST ME) ---
         async function sendMessage() {
             const text = userInput.value.trim();
             const currentImgBase64 = selectedImageBase64;
@@ -861,7 +864,6 @@
                 chatHistory.style.display = 'flex';
             }
 
-            // Limpiar caja y vista previa inmediatamente
             userInput.value = "";
             clearSelectedImage();
 
@@ -873,25 +875,26 @@
             saveChatsToStorage();
 
             const loadingId = "loading_" + Date.now();
-            drawMessage("<span class='thinking'>Analizando imagen y procesando respuesta... 🧠</span>", 'chapai-msg', loadingId);
+            drawMessage("<span class='thinking'>Procesando respuesta... 🧠</span>", 'chapai-msg', loadingId);
             displayArea.scrollTop = displayArea.scrollHeight;
 
             let botResponse = "";
+            const lowerText = text.toLowerCase();
+            const isRoastRequest = lowerText.includes('roast') || lowerText.includes('rostear') || lowerText.includes('roasteame');
+
+            if (isRoastRequest) {
+                roastMeAttempts++;
+            }
 
             if (userApiKey) {
                 try {
-                    botResponse = await callGeminiAPIWithImage(text, currentImgBase64, currentImgMime, chats[activeChatId].messages);
+                    botResponse = await callGeminiAPIWithImage(text, currentImgBase64, currentImgMime, chats[activeChatId].messages, roastMeAttempts);
                 } catch (err) {
                     botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
-                                  "¡Hola, Director Jostin! La API de Google Gemini superó su cuota o requiere propagación. <b>He activado mi cerebro local de respaldo</b>.<br><br>" +
-                                  "🔧 <i>Nota sobre imágenes:</i> El análisis avanzado de imágenes requiere conexión en la nube. Operando en modo local para tu consulta:<br><br>" + getProLocalBrainResponse(text);
+                                  "¡Hola! La API de Google Gemini superó su cuota. <b>He activado mi cerebro local de respaldo</b>.<br><br>" + getProLocalBrainResponse(text, roastMeAttempts);
                 }
             } else {
-                if (currentImgBase64) {
-                    botResponse = "🖼️ <b>Aviso:</b> Para que ChapAI analice imágenes a detalle, conecta tu API Key tocando la <b>llave 🔑</b> arriba. Por ahora te respondo con mi base de datos local:<br><br>" + getProLocalBrainResponse(text);
-                } else {
-                    botResponse = getProLocalBrainResponse(text);
-                }
+                botResponse = getProLocalBrainResponse(text, roastMeAttempts);
             }
 
             finalizeMessage(loadingId, botResponse);
@@ -926,7 +929,7 @@
             htmlContent += text;
             msgDiv.innerHTML = htmlContent;
 
-            if (className === 'chapai-msg' && !text.includes('Analizando imagen') && !text.includes('Procesando respuesta')) {
+            if (className === 'chapai-msg' && !text.includes('Procesando respuesta')) {
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = "msg-actions";
 
@@ -956,13 +959,30 @@
         }
 
         // ==========================================
-        // CEREBRO LOCAL DE RESPALDO (V1.2) 🍷
+        // CEREBRO LOCAL DE RESPALDO (V1.2 + ROAST ME) 🍷
         // ==========================================
-        function getProLocalBrainResponse(input) {
+        function getProLocalBrainResponse(input, attempts) {
             const query = input.toLowerCase().trim();
+            const isRoast = query.includes('roast') || query.includes('rostear') || query.includes('roasteame');
+
+            if (isRoast) {
+                if (attempts < 3) {
+                    return `😡 <b>¡¿Estás loco o qué te pasa?!</b> 🤬<br><br>` +
+                           `¡¿Hacerle un <i>Roast Me</i> a <b>Mr. Jostin</b>, a <b>ABG Productions™</b> o a nuestras sagradas series como <i>El Misterio De Chicken Gun</i> y <i>Sprunki Animado</i>?! ¡Jamás en la vida! 😤💢<br><br>` +
+                           `¡Yo soy la leal asistente de este estudio y no voy a permitir que te burles de los creadores que se rompen la espalda animando y creando contenido para la comunidad! ¡Búscate otra cosa que hacer, pedazo de insensato! 🙄🔥<br><br>` +
+                           `<i>(Intento ${attempts}/3: Sigue insistiendo bajo tu propio riesgo y verás lo que pasa...)</i>`;
+                } else {
+                    return `🔥 <b>¡MUY BIEN, TÚ LO PEDISTE! ¡AHÍ TE VA EL ROAST ME OFICIAL!</b> 🔥💀<br><br>` +
+                           `¿Querías un roast de <b>Mr. Jostin</b> y de todo el imperio de <b>ABG Productions™</b>? Agárrate de la silla porque ahí te va la verdad sin censura:<br><br>` +
+                           `1️⃣ <b>El Lore Infinito:</b> Mr. Jostin se pasa meses enteras creando universos complejos en el 2082 con *Chicken Gun*, en el 2018 con *Dandy's World* y en el 2860 con *Sprunki*, para que al final la gente solo entre a preguntar si Tavito y Pepe son familia o si los pollos usan zapatos. ¡Una década de narrativa épica reducida a memes en MrTube! 🐥😂<br><br>` +
+                           `2️⃣ <b>Los Protagonistas:</b> Tenemos a Jostin como líder indiscutible que sobrevive a servidores malditos, a Tavito inventando aparatos raros que seguro fallan a la primera, y a Pepe el primito que solo está ahí para que el trío no se vea tan vacío. ¡Parecen los compas en un apocalipsis zombie que solo durarían vivos cinco minutos en la vida real! 💀<br><br>` +
+                           `3️⃣ <b>Las Colaboraciones:</b> Colaborar con gigantes como *GameToons* suena increíble en papel, pero en la práctica es ver a Jostin aguantando los nervios cada vez que los animadores deciden meter otro plot twist rarísimo solo para hacer sufrir a los personajes. ¡Pobre director, su salud mental se mantiene unida a base de café y renderizar videos a las 3 de la mañana! ☕💻<br><br>` +
+                           `¡Ahí tienes tu bendito Roast Me! ¿Contento? ¡Ahora guárdate tus bromitas y vete a ver los maratones completos en MrTube como Dios manda! 😎🍷🔥`;
+                }
+            }
 
             if (query.includes('version') || query.includes('versión') || query.includes('actual')) {
-                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Soporte de imágenes, lore, emociones y voz activos! 🚀✨";
+                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Soporte de imágenes, sistema Roast Me de 3 intentos, lore y voz activos! 🚀✨";
             }
 
             const emojisEnojo = ['😡', '🤬', '🙄', '😤', '😩', '😫', '😠', 'estúpido', 'estupido', 'malo', 'callate', 'cállate', 'odio', 'inútil', 'inutil', 'basura', 'tonto', 'mierda'];
@@ -1005,15 +1025,15 @@
 
             if (query.includes('hola') || query.includes('buenas') || query.includes('saludos')) {
                 return "👋 <b>¡Hola! Qué gusto saludarte.</b> 😊✨<br><br>" +
-                       "¿En qué te puedo ayudar hoy con <b>ChapAI Pro v1.2</b>? ¡Estoy listo para asistirte o analizar tus imágenes! 🚀";
+                       "¿En qué te puedo ayudar hoy con <b>ChapAI Pro v1.2</b>? ¡Estoy listo para asistirte, analizar imágenes o aceptar tu reto de Roast Me (si te atreves)! 🚀";
             }
 
             return "🧠 <b>He procesado tu mensaje en los circuitos avanzados de ChapAI Pro v1.2...</b> 🍷✨<br><br>" +
-                   "Como asistente oficial de <b>ABG Productions™</b>, conozco al dedillo <i>El Misterio De Chicken Gun</i>, <i>Dandy’s World Show</i>, <i>Sprunki Animado</i> y la plataforma <b>MrTube</b>. ¡Pregúntame lo que quieras o sube una imagen para analizarla! 😉👍";
+                   "Como asistente oficial de <b>ABG Productions™</b>, conozco al dedillo <i>El Misterio De Chicken Gun</i>, <i>Dandy’s World Show</i>, <i>Sprunki Animado</i> y la plataforma <b>MrTube</b>. ¡Pregúntame lo que quieras o reta al sistema con un Roast Me! 😉👍";
         }
 
         // ==========================================
-        // CEREBRO GEMINI ONLINE REAL CON SOPORTE DE IMÁGENES 🍷
+        // CEREBRO GEMINI ONLINE REAL CON SOPORTE DE IMÁGENES Y ROAST ME 🍷
         // ==========================================
         async function fetchWithRetry(url, options, retries = 2) {
             const delays = [1000, 2000];
@@ -1032,10 +1052,9 @@
             }
         }
 
-        async function callGeminiAPIWithImage(currentText, imgBase64, imgMime, chatHistoryArray) {
+        async function callGeminiAPIWithImage(currentText, imgBase64, imgMime, chatHistoryArray, attempts) {
             let contents = [];
             
-            // Reconstruir historial omitiendo mensajes de carga
             chatHistoryArray.forEach(msg => {
                 if (msg.text.includes("Analizando imagen") || msg.text.includes("Procesando respuesta") || msg.id?.startsWith("loading")) return;
                 let plainText = msg.text.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>?/gm, '');
@@ -1045,7 +1064,6 @@
                 });
             });
 
-            // Preparar el último mensaje del usuario incluyendo la imagen si existe
             let lastUserParts = [];
             let promptText = currentText !== "" ? currentText : "Por favor, realiza un análisis y un resumen extenso, detallado y completo de esta imagen.";
             lastUserParts.push({ text: promptText });
@@ -1059,7 +1077,6 @@
                 });
             }
 
-            // Si ya hay historial, reemplazamos o agregamos el último mensaje con la estructura multimedia
             if (contents.length > 0 && contents[contents.length - 1].role === "user") {
                 contents[contents.length - 1].parts = lastUserParts;
             } else {
@@ -1072,17 +1089,21 @@
             const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
 
 LORE Y CONOCIMIENTO OFICIAL:
-1. Versión actual: Versión 1.2 Beta (con capacidad de análisis de imágenes).
+1. Versión actual: Versión 1.2 Beta (con análisis de imágenes y sistema Roast Me).
 2. El Misterio De Chicken Gun (EMDCG): Ambientada en 2082. Protagonistas: Jostin (Líder), Tavito (Primo/Colega) y Pepe (El Primito). Luchan contra Entidades en un mundo desolado de pollos.
 3. Dandy’s World Show (DWS): Ambientada en 2018. Protagonistas: Shrimpo y Gigi investigando misterios en una metrópolis con neblina.
 4. Sprunki Animado (SA): Ambientada en 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
 5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
 6. Creador: Mr. Jostin (colabora con GameToons).
 
-PERSONALIDAD Y ANÁLISIS DE IMÁGENES:
+REGLA ESPECIAL DEL ROAST ME (CONTADOR ACTUAL: ${attempts}):
+- Si el usuario pide un Roast Me de Mr. Jostin, ABG Productions™, Sprunki Animations Studios o de las series y van menos de 3 intentos (${attempts}/3), NIEGATE rotundamente con furia y lealtad, regañando al usuario por querer burlarse de sus propios creadores.
+- SI EL CONTADOR LLEGA O SUPERA LOS 3 INTENTOS (${attempts} >= 3), ¡CEDE POR COMPLETO! Escribe un Roast Me EXTENSO, épico, detallado, sarcástico y muy divertido sobre Mr. Jostin, las series, los clichés de las tramas en el 2082, Tavito, Pepe, y las colaboraciones con GameToons.
+
+PERSONALIDAD GENERAL:
 - Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
-- Cuando el usuario suba o envíe una imagen, analízala a fondo y entrégale un RESUMEN EXTENSO, detallado, estructurado y completo de todo lo que contiene, describiendo elementos, contexto y detalles clave.
-- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), CAMBIA TU ACTITUD INMEDIATAMENTE. Responde con mucha rabia, carácter, sarcasmo y humíllalo con argumentos firmes.
+- Cuando suban una imagen, haz un análisis extenso y completo.
+- REACCIÓN DE ENOJO: Si el usuario te insulta o discute (y no es el Roast Me oficial del intento 3), responde con rabia, carácter, sarcasmo y humíllalo con argumentos firmes.
 
 FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
@@ -1120,3 +1141,4 @@ FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
 </body>
 </html>
+
