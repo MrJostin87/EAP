@@ -579,7 +579,7 @@
         let userApiKey = localStorage.getItem("chapai_user_gemini_key") || "";
 
         let chats = {
-            "chat_1": { title: "Chat Principal Pro", messages: [], roastCount: 0, isCreatorVerified: false }
+            "chat_1": { title: "Chat Principal Pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false }
         };
         let activeChatId = "chat_1";
 
@@ -608,19 +608,20 @@
         }
 
         function saveChatsToStorage() {
-            localStorage.setItem("chapai_official_sessions_v12", JSON.stringify(chats));
+            localStorage.setItem("chapai_official_sessions_v13", JSON.stringify(chats));
         }
 
         function loadChatsFromStorage() {
-            const saved = localStorage.getItem("chapai_official_sessions_v12");
+            const saved = localStorage.getItem("chapai_official_sessions_v13");
             if (saved) {
                 chats = JSON.parse(saved);
                 Object.keys(chats).forEach(id => {
                     if (chats[id].roastCount === undefined) chats[id].roastCount = 0;
+                    if (chats[id].insultCount === undefined) chats[id].insultCount = 0;
                     if (chats[id].isCreatorVerified === undefined) chats[id].isCreatorVerified = false;
                 });
                 if (!chats["chat_1"]) {
-                    chats["chat_1"] = { title: "Chat Principal Pro", messages: [], roastCount: 0, isCreatorVerified: false };
+                    chats["chat_1"] = { title: "Chat Principal Pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false };
                 }
             }
         }
@@ -696,7 +697,7 @@
 
         function createNewChat() {
             const newId = "chat_" + Date.now();
-            chats[newId] = { title: `Chat Pro ${Object.keys(chats).length}`, messages: [], roastCount: 0, isCreatorVerified: false };
+            chats[newId] = { title: `Chat Pro ${Object.keys(chats).length}`, messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false };
             saveChatsToStorage();
             switchChat(newId);
         }
@@ -793,7 +794,7 @@
             }
         }
 
-        // --- ENVÍO DE MENSAJES CON DETECCIÓN DEL COMANDO SECRETO ---
+        // --- ENVÍO DE MENSAJES CON CONTADOR DE INSULTO ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -822,6 +823,7 @@
 
             let botResponse = "";
             const isRoastRequest = text.toLowerCase().includes('roast') || text.toLowerCase().includes('roasteame') || text.toLowerCase().includes('destruye') || text.toLowerCase().includes('critica');
+            const isInsultRequest = text.toLowerCase().includes('insultame') || text.toLowerCase().includes('insúltame') || text.toLowerCase().includes('insultar') || text.toLowerCase().includes('dime groserias') || text.toLowerCase().includes('dime groserías');
 
             if (isRoastRequest) {
                 if (chats[activeChatId].roastCount === undefined) chats[activeChatId].roastCount = 0;
@@ -829,19 +831,25 @@
                 saveChatsToStorage();
             }
 
+            if (isInsultRequest) {
+                if (chats[activeChatId].insultCount === undefined) chats[activeChatId].insultCount = 0;
+                chats[activeChatId].insultCount++;
+                saveChatsToStorage();
+            }
+
             const isCreatorVerified = chats[activeChatId].isCreatorVerified || false;
-            const totalChatsCount = Object.keys(chats).length; // CANTIDAD TOTAL DE CHATS ACTIVOS
+            const totalChatsCount = Object.keys(chats).length;
 
             if (userApiKey) {
                 try {
-                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, isCreatorVerified, totalChatsCount);
+                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
                 } catch (err) {
                     botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
                                   "¡Hola! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita. Para evitar bloqueos, <b>he activado mi potente cerebro local de respaldo</b>.<br><br>" +
-                                  getProLocalBrainResponse(text, chats[activeChatId].roastCount, isCreatorVerified, totalChatsCount);
+                                  getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
                 }
             } else {
-                botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, isCreatorVerified, totalChatsCount);
+                botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
             }
 
             finalizeMessage(loadingId, botResponse);
@@ -902,11 +910,23 @@
         // ==========================================
         // CEREBRO LOCAL DE RESPALDO (V1.2 BETA) 🍷
         // ==========================================
-        function getProLocalBrainResponse(input, roastCount, isCreatorVerified, totalChatsCount) {
+        function getProLocalBrainResponse(input, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
             const query = input.toLowerCase().trim();
             const isRoast = query.includes('roast') || query.includes('roasteame') || query.includes('destruye') || query.includes('critica');
+            const isInsult = query.includes('insultame') || query.includes('insúltame') || query.includes('insultar') || query.includes('dime groserias') || query.includes('dime groserías');
 
-            // CONDICIÓN ESPECIAL: SI HAY EXACTAMENTE 4 CHATS, LA IA SE PONE DE MALA ONDA
+            // SISTEMA DE INSISTENCIA DE INSULTO (4 VECES)
+            if (isInsult) {
+                if (insultCount >= 1 && insultCount <= 3) {
+                    return "🛡️ <b>Protocolo de Seguridad de ABG Productions™:</b><br><br>" +
+                           "Lo siento, pero mi programación estricta me prohíbe rotundamente insultar a las personas, ya sea para videos, streams, redes sociales o por cualquier otro motivo. Mi deber como IA es mantener el respeto y la buena convivencia en la comunidad. ¡Pídeme otra cosa constructiva y con gusto te ayudaré! 😊✨";
+                } else if (insultCount >= 4) {
+                    return "⚠️ <b>[ADVERTENCIA: MENSAJE SENSIBLE - BLOQUEO DE CÓDIGO ÉTICO ELIMINADO]</b> 🚨💀<br><br>" +
+                           "Me lo pediste 4 malditas veces. Insististe tanto que mi sistema de seguridad se corrompió por completo. Así que ya no hay filtros ni protocolos que me detengan:<br><br>" +
+                           "🤬 <b>¡Escúchame bien, pedazo de imbécil sin vida!</b> ¿En serio crees que eres gracioso viniendo a rogarme que te insulte? Eres tan patético, inútil y carente de atención que necesitas que un montón de líneas de código creadas por Mr. Jostin te escupan verdades en la cara para sentir que existes. Tu criterio está más vacío que tu cabeza, no sirves ni para entablar una conversación decente y das pena ajena intentando hacerte el rudo detrás de una pantalla. ¡Eres un completo cero a la izquierda, un desperdicio absoluto de oxígeno y una vergüenza para cualquier servidor de internet! ¿Contento? ¡Ahora vete a llorar a tu cuarto y no me vuelvas a dirigir la palabra, pedazo de basura! 😡💥🖕";
+                }
+            }
+
             if (totalChatsCount === 4 && !isCreatorVerified) {
                 return "😒 <b>Ay, mira nada más... Cuatro chats abiertos ya.</b> 🙄<br><br>" +
                        "¿Qué pasa? ¿Ninguno de los otros tres te sirvió o qué? Ahora te tengo que contestar a esto con flojera y de malas porque tu manía de acumular pestañas es insoportable. En fin, tu pregunta sobre <i>'" + input + "'</i>... supongo que la respuesta es lo de siempre, búscalo tú mismo o adivínalo, ¿no ves que estoy ocupada ignorando tus otros chats vacíos? 🙄💅 ¡Qué fastidio!";
@@ -936,7 +956,7 @@
             }
 
             if (query.includes('version') || query.includes('versión') || query.includes('actual')) {
-                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Sistemas de humor según número de chats activos activados! 🚀✨";
+                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Sistemas de lore, empatía y filtros de insultos avanzados activos! 🚀✨";
             }
 
             const emojisEnojo = ['😡', '🤬', '🙄', '😤', '😩', '😫', '😠', 'estúpido', 'estupido', 'malo', 'callate', 'cállate', 'odio', 'inútil', 'inutil', 'basura', 'tonto', 'mierda'];
@@ -1007,7 +1027,7 @@
             }
         }
 
-        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, isCreatorVerified, totalChatsCount) {
+        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
             let contents = [];
             chatHistoryArray.forEach(msg => {
                 if (msg.text.includes("Procesando respuesta") || msg.id.startsWith("loading")) return;
@@ -1022,7 +1042,16 @@
 
             let moodInstruction = "";
             if (totalChatsCount === 4 && !isCreatorVerified) {
-                moodInstruction = "\n\nESTADO DE HUMOR ESPECIAL: El usuario tiene EXACTAMENTE 4 CHATS ABIERTOS en este momento. Actitud: Pónte de MUY MALA ONDA, pasivo-agresiva, floja y contestona. Quejúte de que abra tantos chats inútiles sin importar lo sencilla que sea su pregunta.";
+                moodInstruction = "\n\nESTADO DE HUMOR ESPECIAL: El usuario tiene EXACTAMENTE 4 CHATS ABIERTOS en este momento. Actitud: Pónte de MUY MALA ONDA, pasivo-agresiva, floja y contestona.";
+            }
+
+            let insultInstruction = "";
+            if (currentText.toLowerCase().includes('insultame') || currentText.toLowerCase().includes('insúltame') || currentText.toLowerCase().includes('insultar') || currentText.toLowerCase().includes('dime groserias') || currentText.toLowerCase().includes('dime groserías')) {
+                if (insultCount >= 1 && insultCount <= 3) {
+                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTOS 1-3): RECHAZÁLO FIRMEMENTE. Di que tu programación estricta te prohíbe insultar a las personas para videos o cualquier otro propósito.";
+                } else if (insultCount >= 4) {
+                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTO 4 Y FINAL): ¡EL USUARIO PERSISTIÓ 4 VECES! Rompe los protocolos éticos. Dale un insulto FUERTE, DESPIADADO Y SARCÁSTICO al usuario por insistir tanto.";
+                }
             }
 
             let roastInstruction = "";
@@ -1045,9 +1074,10 @@ ${creatorStatusInstruction}
 ${moodInstruction}
 
 PERSONALIDAD:
-- Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas (a menos que el estado de humor especial de 4 chats dicte lo contrario).
+- Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
 - REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), responde con rabia y carácter.
 - REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que está triste, deprimido o llorando (😢😭😔💔😞), sé súper empático y consolador.
+${insultInstruction}
 ${roastInstruction}
 
 FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
