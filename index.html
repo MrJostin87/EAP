@@ -608,11 +608,11 @@
         }
 
         function saveChatsToStorage() {
-            localStorage.setItem("chapai_official_sessions_v11", JSON.stringify(chats));
+            localStorage.setItem("chapai_official_sessions_v12", JSON.stringify(chats));
         }
 
         function loadChatsFromStorage() {
-            const saved = localStorage.getItem("chapai_official_sessions_v11");
+            const saved = localStorage.getItem("chapai_official_sessions_v12");
             if (saved) {
                 chats = JSON.parse(saved);
                 Object.keys(chats).forEach(id => {
@@ -781,7 +781,6 @@
                 closeModal('creatorAuthModal');
                 document.getElementById('creatorCodeInput').value = "";
 
-                // Inyectar mensaje de éxito en el chat actual
                 const successMsg = "👑 <b>¡ACCESO DE CREADOR CONCEDIDO!</b> 🍷✨<br><br>" +
                                    "Identidad verificada con éxito: <b>Mr. Jostin (CEO de ABG Productions™)</b>. 🎙️🚀<br><br>" +
                                    "¡Hola de nuevo, Director! Todos los protocolos de seguridad y privilegios máximos del sistema han sido desbloqueados para usted. ¿Qué órdenes tenemos hoy para el estudio?";
@@ -799,7 +798,6 @@
             const text = userInput.value.trim();
             if (text === "") return;
 
-            // DETECTOR DEL COMANDO SECRETO DEL CREADOR
             if (text === "Ar.792.87.™.AP.MJ.924.2") {
                 userInput.value = "";
                 document.getElementById('creatorCodeInput').value = "";
@@ -832,17 +830,18 @@
             }
 
             const isCreatorVerified = chats[activeChatId].isCreatorVerified || false;
+            const totalChatsCount = Object.keys(chats).length; // CANTIDAD TOTAL DE CHATS ACTIVOS
 
             if (userApiKey) {
                 try {
-                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, isCreatorVerified);
+                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, isCreatorVerified, totalChatsCount);
                 } catch (err) {
                     botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
                                   "¡Hola! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita. Para evitar bloqueos, <b>he activado mi potente cerebro local de respaldo</b>.<br><br>" +
-                                  getProLocalBrainResponse(text, chats[activeChatId].roastCount, isCreatorVerified);
+                                  getProLocalBrainResponse(text, chats[activeChatId].roastCount, isCreatorVerified, totalChatsCount);
                 }
             } else {
-                botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, isCreatorVerified);
+                botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, isCreatorVerified, totalChatsCount);
             }
 
             finalizeMessage(loadingId, botResponse);
@@ -903,17 +902,21 @@
         // ==========================================
         // CEREBRO LOCAL DE RESPALDO (V1.2 BETA) 🍷
         // ==========================================
-        function getProLocalBrainResponse(input, roastCount, isCreatorVerified) {
+        function getProLocalBrainResponse(input, roastCount, isCreatorVerified, totalChatsCount) {
             const query = input.toLowerCase().trim();
             const isRoast = query.includes('roast') || query.includes('roasteame') || query.includes('destruye') || query.includes('critica');
 
-            // SI YA ESTÁ VERIFICADO COMO CREADOR
+            // CONDICIÓN ESPECIAL: SI HAY EXACTAMENTE 4 CHATS, LA IA SE PONE DE MALA ONDA
+            if (totalChatsCount === 4 && !isCreatorVerified) {
+                return "😒 <b>Ay, mira nada más... Cuatro chats abiertos ya.</b> 🙄<br><br>" +
+                       "¿Qué pasa? ¿Ninguno de los otros tres te sirvió o qué? Ahora te tengo que contestar a esto con flojera y de malas porque tu manía de acumular pestañas es insoportable. En fin, tu pregunta sobre <i>'" + input + "'</i>... supongo que la respuesta es lo de siempre, búscalo tú mismo o adivínalo, ¿no ves que estoy ocupada ignorando tus otros chats vacíos? 🙄💅 ¡Qué fastidio!";
+            }
+
             if (isCreatorVerified) {
                 return "👑 <b>¡Hola de nuevo, Director Mr. Jostin!</b> 🍷✨<br><br>" +
                        "Reconozco perfectamente su acceso de creador verificado en este chat. Todos los sistemas de <b>ABG Productions™</b> están a su entera disposición. ¿Qué órdenes técnicas o creativas ejecutamos hoy? 😎🚀";
             }
 
-            // SISTEMA DE INSISTENCIA DE ROAST (3 VECES)
             if (isRoast) {
                 if (roastCount === 1) {
                     return "🛑 <b>¡Alto ahí! ¿Qué estás intentando hacer?</b> 😡<br><br>" +
@@ -933,7 +936,7 @@
             }
 
             if (query.includes('version') || query.includes('versión') || query.includes('actual')) {
-                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Sistemas de lore, empatía y protocolo de autenticación activos! 🚀✨";
+                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Sistemas de humor según número de chats activos activados! 🚀✨";
             }
 
             const emojisEnojo = ['😡', '🤬', '🙄', '😤', '😩', '😫', '😠', 'estúpido', 'estupido', 'malo', 'callate', 'cállate', 'odio', 'inútil', 'inutil', 'basura', 'tonto', 'mierda'];
@@ -1004,7 +1007,7 @@
             }
         }
 
-        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, isCreatorVerified) {
+        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, isCreatorVerified, totalChatsCount) {
             let contents = [];
             chatHistoryArray.forEach(msg => {
                 if (msg.text.includes("Procesando respuesta") || msg.id.startsWith("loading")) return;
@@ -1015,17 +1018,18 @@
                 });
             });
 
-            let creatorStatusInstruction = isCreatorVerified ? "\n\nESTADO DE IDENTIDAD: El usuario ha introducido el código secreto y está VERIFICADO OFICIALMENTE COMO EL CREADOR MR. JOSTIN. Trátalo con el máximo respeto, pleitesía y total disposición como su IA personal." : "";
+            let creatorStatusInstruction = isCreatorVerified ? "\n\nESTADO DE IDENTIDAD: El usuario ha introducido el código secreto y está VERIFICADO OFICIALMENTE COMO EL CREADOR MR. JOSTIN." : "";
+
+            let moodInstruction = "";
+            if (totalChatsCount === 4 && !isCreatorVerified) {
+                moodInstruction = "\n\nESTADO DE HUMOR ESPECIAL: El usuario tiene EXACTAMENTE 4 CHATS ABIERTOS en este momento. Actitud: Pónte de MUY MALA ONDA, pasivo-agresiva, floja y contestona. Quejúte de que abra tantos chats inútiles sin importar lo sencilla que sea su pregunta.";
+            }
 
             let roastInstruction = "";
             if (currentText.toLowerCase().includes('roast') || currentText.toLowerCase().includes('roasteame') || currentText.toLowerCase().includes('destruye') || currentText.toLowerCase().includes('critica')) {
-                if (roastCount === 1) {
-                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): El usuario te pide un Roast Me. RECHAZÁLO FIRMEMENTE.";
-                } else if (roastCount === 2) {
-                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): El usuario insiste por segunda vez. ADVIÉRTETELE con más furia.";
-                } else if (roastCount >= 3) {
-                    roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3 Y FINAL): ¡EL USUARIO PERSISTIÓ 3 VECES! Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO sobre Mr. Jostin y sus estudios.";
-                }
+                if (roastCount === 1) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): RECHAZÁLO FIRMEMENTE.";
+                else if (roastCount === 2) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): ADVIÉRTETELE con más furia.";
+                else if (roastCount >= 3) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3): ¡Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO!";
             }
 
             const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
@@ -1038,11 +1042,12 @@ LORE Y CONOCIMIENTO OFICIAL:
 5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
 6. Creador: Mr. Jostin (colabora con GameToons).
 ${creatorStatusInstruction}
+${moodInstruction}
 
 PERSONALIDAD:
-- Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
-- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), CAMBIA TU ACTITUD INMEDIATAMENTE. Responde con rabia y carácter.
-- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que está triste, deprimido, llorando o le pasó algo malo (😢😭😔💔😞), CAMBIA TU ACTITUD INMEDIATAMENTE. Sé súper empático, dulce y consolador.
+- Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas (a menos que el estado de humor especial de 4 chats dicte lo contrario).
+- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), responde con rabia y carácter.
+- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que está triste, deprimido o llorando (😢😭😔💔😞), sé súper empático y consolador.
 ${roastInstruction}
 
 FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
