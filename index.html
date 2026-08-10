@@ -745,7 +745,7 @@
             }
         }
 
-        // --- SÍNTESIS DE VOZ CORREGIDA ---
+        // --- SÍNTESIS DE VOZ CORREGIDA (FILTRANDO EMOJIS) ---
         function leerTexto(htmlText, btnElement) {
             if (!('speechSynthesis' in window)) {
                 alert("Tu navegador no soporta la lectura por voz.");
@@ -755,6 +755,9 @@
             let tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlText;
             let cleanText = tempDiv.innerText || tempDiv.textContent || "";
+
+            // FILTRAR Y ELIMINAR EMOJIS PARA QUE LA VOZ NO LOS LEA
+            cleanText = cleanText.replace(/([\u2700-\u27BF]|[\ue000-\uf8ff]|\uD83C[\udc00-\udfff]|\uD83D[\udc00-\udfff]|[\u2600-\u26FF]|\uD83E[\udd00-\uddff])/g, '');
 
             if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel();
@@ -915,7 +918,6 @@
             const isRoast = query.includes('roast') || query.includes('roasteame') || query.includes('destruye') || query.includes('critica');
             const isInsult = query.includes('insultame') || query.includes('insúltame') || query.includes('insultar') || query.includes('dime groserias') || query.includes('dime groserías');
 
-            // SISTEMA DE INSISTENCIA DE INSULTO (4 VECES)
             if (isInsult) {
                 if (insultCount >= 1 && insultCount <= 3) {
                     return "🛡️ <b>Protocolo de Seguridad de ABG Productions™:</b><br><br>" +
@@ -956,7 +958,7 @@
             }
 
             if (query.includes('version') || query.includes('versión') || query.includes('actual')) {
-                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Sistemas de lore, empatía y filtros de insultos avanzados activos! 🚀✨";
+                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Sistemas de lore, empatía y filtros de voz limpios activos! 🚀✨";
             }
 
             const emojisEnojo = ['😡', '🤬', '🙄', '😤', '😩', '😫', '😠', 'estúpido', 'estupido', 'malo', 'callate', 'cállate', 'odio', 'inútil', 'inutil', 'basura', 'tonto', 'mierda'];
