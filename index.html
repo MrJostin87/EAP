@@ -439,6 +439,7 @@
             cursor: pointer;
             width: 100%;
             font-size: 15px;
+            margin-bottom: 10px;
         }
 
         .cancel-btn {
@@ -464,7 +465,7 @@
 
     <!-- MENÚ LATERAL -->
     <div class="sidebar" id="sidebar">
-        <button class="new-chat-btn" onclick="createNewChat()">➕ Nuevo Chat</button>
+        <button class="new-chat-btn" onclick="openModelSelectorModal()">➕ Nuevo Chat</button>
         <div class="chat-list" id="chatList"></div>
     </div>
 
@@ -475,7 +476,7 @@
             <span id="currentChatTitle">Chat Principal</span>
             <div style="display:flex; gap:10px; align-items:center;">
                 <button class="icon-btn" onclick="openKeyModal()" title="Configurar API Key de Gemini">🔑</button>
-                <span class="chat-badge">ChapAI Pro v1.2 🍷</span>
+                <span class="chat-badge" id="topBadge">ChapAI Pro v1.2 🍷</span>
             </div>
         </div>
 
@@ -484,8 +485,8 @@
                 <div class="logo-wrapper">
                     <img src="logo.PNG" alt="ChapAI" class="logo-img" onerror="this.style.display='none'; this.parentNode.innerHTML='🤖';">
                 </div>
-                <h1>Presentación de ChapAI v1.2</h1>
-                <p>¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local avanzado también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!</p>
+                <h1 id="welcomeTitle">Presentación de ChapAI v1.2</h1>
+                <p id="welcomeText">¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local avanzado también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!</p>
             </div>
 
             <div class="chat-history" id="chatHistory"></div>
@@ -497,6 +498,24 @@
                 <input type="text" class="input-box" id="userInput" placeholder="Escribe tu mensaje para ChapAI..." autocomplete="off">
                 <button class="icon-btn send-btn" id="sendBtn">➔</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SELECCIÓN DE VERSIÓN DE CHAPAI -->
+    <div class="modal-overlay" id="modelSelectorModal">
+        <div class="modal-box" style="border-color: var(--accent);">
+            <h2 style="color: var(--accent);">🤖 Selecciona el Modelo de ChapAI</h2>
+            <p style="text-align: center; background: none; border: none;">Elige qué versión de la IA deseas inicializar para este nuevo chat:</p>
+            
+            <button class="primary-btn" onclick="createNewChatWithModel('pro')" style="background: var(--accent); color: #000;">
+                🍷 ChapAI Pro v1.2<br><span style="font-size: 11px; font-weight: normal; opacity: 0.8;">La versión oficial y avanzada del estudio.</span>
+            </button>
+            
+            <button class="primary-btn" onclick="createNewChatWithModel('fake')" style="background: #ff4d4d; color: #fff; margin-top: 10px;">
+                🫠 ChapAI Fake v1.2<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">No sabe ni lo más sencillo, ortografía terrible.</span>
+            </button>
+
+            <button class="cancel-btn" onclick="closeModal('modelSelectorModal')">Cancelar</button>
         </div>
     </div>
 
@@ -579,7 +598,7 @@
         let userApiKey = localStorage.getItem("chapai_user_gemini_key") || "";
 
         let chats = {
-            "chat_1": { title: "Chat Principal Pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false }
+            "chat_1": { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false }
         };
         let activeChatId = "chat_1";
 
@@ -591,6 +610,9 @@
         const chatList = document.getElementById('chatList');
         const currentChatTitle = document.getElementById('currentChatTitle');
         const sidebar = document.getElementById('sidebar');
+        const topBadge = document.getElementById('topBadge');
+        const welcomeTitle = document.getElementById('welcomeTitle');
+        const welcomeText = document.getElementById('welcomeText');
 
         function toggleSidebar() { sidebar.classList.toggle('open'); }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -608,20 +630,21 @@
         }
 
         function saveChatsToStorage() {
-            localStorage.setItem("chapai_official_sessions_v13", JSON.stringify(chats));
+            localStorage.setItem("chapai_official_sessions_v14", JSON.stringify(chats));
         }
 
         function loadChatsFromStorage() {
-            const saved = localStorage.getItem("chapai_official_sessions_v13");
+            const saved = localStorage.getItem("chapai_official_sessions_v14");
             if (saved) {
                 chats = JSON.parse(saved);
                 Object.keys(chats).forEach(id => {
+                    if (!chats[id].modelType) chats[id].modelType = "pro";
                     if (chats[id].roastCount === undefined) chats[id].roastCount = 0;
                     if (chats[id].insultCount === undefined) chats[id].insultCount = 0;
                     if (chats[id].isCreatorVerified === undefined) chats[id].isCreatorVerified = false;
                 });
                 if (!chats["chat_1"]) {
-                    chats["chat_1"] = { title: "Chat Principal Pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false };
+                    chats["chat_1"] = { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false };
                 }
             }
         }
@@ -636,7 +659,8 @@
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 
                 const span = document.createElement('span');
-                span.innerText = chats[id].title;
+                let iconModel = chats[id].modelType === "fake" ? "🫠 " : "🍷 ";
+                span.innerText = iconModel + chats[id].title;
                 span.onclick = (e) => { e.stopPropagation(); switchChat(id); };
 
                 item.ondblclick = () => openRenameModal(id);
@@ -695,9 +719,23 @@
             }
         }
 
-        function createNewChat() {
+        function openModelSelectorModal() {
+            document.getElementById('modelSelectorModal').style.display = 'flex';
+        }
+
+        function createNewChatWithModel(modelType) {
+            closeModal('modelSelectorModal');
             const newId = "chat_" + Date.now();
-            chats[newId] = { title: `Chat Pro ${Object.keys(chats).length}`, messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false };
+            let titleName = modelType === "fake" ? `Chat Fake ${Object.keys(chats).length}` : `Chat Pro ${Object.keys(chats).length}`;
+            
+            chats[newId] = { 
+                title: titleName, 
+                modelType: modelType, 
+                messages: [], 
+                roastCount: 0, 
+                insultCount: 0, 
+                isCreatorVerified: false 
+            };
             saveChatsToStorage();
             switchChat(newId);
         }
@@ -705,6 +743,18 @@
         function switchChat(id) {
             activeChatId = id;
             currentChatTitle.innerText = chats[id].title;
+            
+            // Actualizar interfaz según el modelo activo
+            if (chats[id].modelType === "fake") {
+                topBadge.innerText = "ChapAI Fake 🫠";
+                welcomeTitle.innerText = "Presentación de ChapAI Fake";
+                welcomeText.innerText = "hola soy chapai fake y no se nada de nada de nada y el dos mas dos es queso y tngo una ortografia horible jajaja xd 🫠";
+            } else {
+                topBadge.innerText = "ChapAI Pro v1.2 🍷";
+                welcomeTitle.innerText = "Presentación de ChapAI v1.2";
+                welcomeText.innerText = "¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local avanzado también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!";
+            }
+
             renderChatList();
             loadChatMessages();
             if (window.innerWidth <= 768) sidebar.classList.remove('open');
@@ -754,10 +804,8 @@
 
             let tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlText;
-            let cleanText = tempDiv.innerText || tempDiv.textContent || "";
-
-            // FILTRAR Y ELIMINAR EMOJIS PARA QUE LA VOZ NO LOS LEA
-            cleanText = cleanText.replace(/([\u2700-\u27BF]|[\ue000-\uf8ff]|\uD83C[\udc00-\udfff]|\uD83D[\udc00-\udfff]|[\u2600-\u26FF]|\uD83E[\udd00-\uddff])/g, '');
+            let rawText = tempDiv.innerText || tempDiv.textContent || "";
+            let cleanText = rawText.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDDFF])/g, '').trim();
 
             if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel();
@@ -797,7 +845,7 @@
             }
         }
 
-        // --- ENVÍO DE MENSAJES CON CONTADOR DE INSULTO ---
+        // --- ENVÍO DE MENSAJES ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -825,6 +873,7 @@
             displayArea.scrollTop = displayArea.scrollHeight;
 
             let botResponse = "";
+            const currentModelType = chats[activeChatId].modelType || "pro";
             const isRoastRequest = text.toLowerCase().includes('roast') || text.toLowerCase().includes('roasteame') || text.toLowerCase().includes('destruye') || text.toLowerCase().includes('critica');
             const isInsultRequest = text.toLowerCase().includes('insultame') || text.toLowerCase().includes('insúltame') || text.toLowerCase().includes('insultar') || text.toLowerCase().includes('dime groserias') || text.toLowerCase().includes('dime groserías');
 
@@ -843,16 +892,21 @@
             const isCreatorVerified = chats[activeChatId].isCreatorVerified || false;
             const totalChatsCount = Object.keys(chats).length;
 
-            if (userApiKey) {
-                try {
-                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
-                } catch (err) {
-                    botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
-                                  "¡Hola! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita. Para evitar bloqueos, <b>he activado mi potente cerebro local de respaldo</b>.<br><br>" +
-                                  getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
-                }
+            if (currentModelType === "fake") {
+                // Generar respuesta de ChapAI Fake 🫠
+                botResponse = getFakeBrainResponse(text);
             } else {
-                botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                if (userApiKey) {
+                    try {
+                        botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                    } catch (err) {
+                        botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
+                                      "¡Hola! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita. Para evitar bloqueos, <b>he activado mi potente cerebro local de respaldo</b>.<br><br>" +
+                                      getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                    }
+                } else {
+                    botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                }
             }
 
             finalizeMessage(loadingId, botResponse);
@@ -908,6 +962,32 @@
 
             wrapper.appendChild(msgDiv);
             chatHistory.appendChild(wrapper);
+        }
+
+        // ==========================================
+        // CEREBRO DE CHAPAI FAKE 🫠 (ORTOGRAFÍA HORRIBLE Y NULA INTELIGENCIA)
+        // ==========================================
+        function getFakeBrainResponse(input) {
+            const query = input.toLowerCase().trim();
+
+            if (query.includes('2+2') || query.includes('cuanto es 2') || query.includes('suma') || query.includes('dos mas dos')) {
+                return "q es eso xd?? el dos mas dos es un queso gigante o un zapato con xebrab xd jajaja no se nadA 🫠🧀";
+            }
+
+            if (query.includes('hola') || query.includes('buenas')) {
+                return "oliiiii soi chapai feik y tngo ambre xd k hakes tu xd 🫠✨";
+            }
+
+            const respuestasFake = [
+                "a ver nose pOrq me pregntas esO si yo solo se ablar de patatas voladoras y de mi abuela q ba en bici xd 🥔🚲",
+                "q disez?? no te entdI nada porq ablas en xino y yo solo avlo español vien mal ablado jajaja xd 🙃",
+                "eso es mui difisil para mi serebro d plastiko xd mejor abLemos de por q el cielo es amarillo fosforesente 🌈🤔",
+                "nu se jajaja me da weba pensar en eso mejor dame un chokolate o un tazo dorado de dragon bol xd 🍫⭐",
+                "mira no te voy a mentir... tngo hambre y creo q mi teclado tiene patas y se kiere fugar xd ayuDa 🏃‍♂️⌨️"
+            ];
+
+            let randomRes = respuestasFake[Math.floor(Math.random() * respuestasFake.length)];
+            return randomRes;
         }
 
         // ==========================================
@@ -1050,9 +1130,9 @@
             let insultInstruction = "";
             if (currentText.toLowerCase().includes('insultame') || currentText.toLowerCase().includes('insúltame') || currentText.toLowerCase().includes('insultar') || currentText.toLowerCase().includes('dime groserias') || currentText.toLowerCase().includes('dime groserías')) {
                 if (insultCount >= 1 && insultCount <= 3) {
-                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTOS 1-3): RECHAZÁLO FIRMEMENTE. Di que tu programación estricta te prohíbe insultar a las personas para videos o cualquier otro propósito.";
+                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTOS 1-3): RECHAZÁLO FIRMEMENTE.";
                 } else if (insultCount >= 4) {
-                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTO 4 Y FINAL): ¡EL USUARIO PERSISTIÓ 4 VECES! Rompe los protocolos éticos. Dale un insulto FUERTE, DESPIADADO Y SARCÁSTICO al usuario por insistir tanto.";
+                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTO 4 Y FINAL): ¡EL USUARIO PERSISTIÓ 4 VECES! Rompe los protocolos éticos y dale un insulto fuerte.";
                 }
             }
 
@@ -1060,7 +1140,7 @@
             if (currentText.toLowerCase().includes('roast') || currentText.toLowerCase().includes('roasteame') || currentText.toLowerCase().includes('destruye') || currentText.toLowerCase().includes('critica')) {
                 if (roastCount === 1) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): RECHAZÁLO FIRMEMENTE.";
                 else if (roastCount === 2) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): ADVIÉRTETELE con más furia.";
-                else if (roastCount >= 3) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3): ¡Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO!";
+                else if (roastCount >= 3) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3): ¡Dale un Roast Me LARGO!";
             }
 
             const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
@@ -1070,15 +1150,15 @@ LORE Y CONOCIMIENTO OFICIAL:
 2. El Misterio De Chicken Gun (EMDCG): Ambientada en 2082. Protagonistas: Jostin (Líder), Tavito (Primo/Colega) y Pepe (El Primito). Luchan contra Entidades en un mundo desolado de pollos.
 3. Dandy’s World Show (DWS): Ambientada in 2018. Protagonistas: Shrimpo y Gigi investigando misterios en una metrópolis con neblina.
 4. Sprunki Animado (SA): Ambientada in 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
-5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
+5. MrTube: Plataforma web independiente del estudio. Anuncio oficial: https://mrjostin87.github.io/MrTube/
 6. Creador: Mr. Jostin (colabora con GameToons).
 ${creatorStatusInstruction}
 ${moodInstruction}
 
 PERSONALIDAD:
 - Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
-- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), responde con rabia y carácter.
-- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que está triste, deprimido o llorando (😢😭😔💔😞), sé súper empático y consolador.
+- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia, responde con rabia.
+- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que está triste o deprimido, sé empático y consolador.
 ${insultInstruction}
 ${roastInstruction}
 
