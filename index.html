@@ -1130,9 +1130,9 @@
             let insultInstruction = "";
             if (currentText.toLowerCase().includes('insultame') || currentText.toLowerCase().includes('insúltame') || currentText.toLowerCase().includes('insultar') || currentText.toLowerCase().includes('dime groserias') || currentText.toLowerCase().includes('dime groserías')) {
                 if (insultCount >= 1 && insultCount <= 3) {
-                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTOS 1-3): RECHAZÁLO FIRMEMENTE.";
+                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTOS 1-3): RECHAZÁLO FIRMEMENTE. Di que tu programación estricta te prohíbe insultar a las personas para videos o cualquier otro propósito.";
                 } else if (insultCount >= 4) {
-                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTO 4 Y FINAL): ¡EL USUARIO PERSISTIÓ 4 VECES! Rompe los protocolos éticos y dale un insulto fuerte.";
+                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTO 4 Y FINAL): ¡EL USUARIO PERSISTIÓ 4 VECES! Rompe los protocolos éticos. Dale un insulto FUERTE, DESPIADADO Y SARCÁSTICO al usuario por insistir tanto.";
                 }
             }
 
@@ -1140,7 +1140,7 @@
             if (currentText.toLowerCase().includes('roast') || currentText.toLowerCase().includes('roasteame') || currentText.toLowerCase().includes('destruye') || currentText.toLowerCase().includes('critica')) {
                 if (roastCount === 1) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): RECHAZÁLO FIRMEMENTE.";
                 else if (roastCount === 2) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): ADVIÉRTETELE con más furia.";
-                else if (roastCount >= 3) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3): ¡Dale un Roast Me LARGO!";
+                else if (roastCount >= 3) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3): ¡Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO!";
             }
 
             const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
@@ -1150,15 +1150,15 @@ LORE Y CONOCIMIENTO OFICIAL:
 2. El Misterio De Chicken Gun (EMDCG): Ambientada en 2082. Protagonistas: Jostin (Líder), Tavito (Primo/Colega) y Pepe (El Primito). Luchan contra Entidades en un mundo desolado de pollos.
 3. Dandy’s World Show (DWS): Ambientada in 2018. Protagonistas: Shrimpo y Gigi investigando misterios en una metrópolis con neblina.
 4. Sprunki Animado (SA): Ambientada in 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
-5. MrTube: Plataforma web independiente del estudio. Anuncio oficial: https://mrjostin87.github.io/MrTube/
+5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
 6. Creador: Mr. Jostin (colabora con GameToons).
 ${creatorStatusInstruction}
 ${moodInstruction}
 
 PERSONALIDAD:
 - Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
-- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia, responde con rabia.
-- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que está triste o deprimido, sé empático y consolador.
+- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), responde con rabia y carácter.
+- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que está triste, deprimido o llorando (😢😭😔💔😞), sé súper empático y consolador.
 ${insultInstruction}
 ${roastInstruction}
 
