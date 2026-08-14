@@ -3,1520 +3,1198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MrTube - La Plataforma de ABG</title>
-
-    <!-- ICONO ROBUSTO (SVG INCORPORADO PARA EVITAR ERRORES DE RUTA) -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23ff0000%22/><text x=%2250%22 y=%2265%22 font-size=%2250%22 text-anchor=%22middle%22 fill=%22white%22 font-weight=%22bold%22>M</text></svg>" type="image/svg+xml">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+    <title>ChapAI - La IA Oficial de ABG Productions™</title>
     <style>
-        /* VARIABLES PARA CAMBIO DE TEMA Y ESTILOS */
         :root {
-            --bg-color: #0f0f0f;
-            --text-color: #ffffff;
-            --card-bg: #1a1a1a;
-            --border-color: #2f2f2f;
-            --btn-sub-bg: #f1f1f1;
-            --btn-sub-text: #0f0f0f;
-            --shadow-style: 0 4px 15px rgba(0,0,0,0.5);
-            --transition-speed: 0.3s;
-            --logo-bg-color: #ff0000;
-            --web-font: Arial, sans-serif;
-        }
-
-        .light-theme {
-            --bg-color: #f9f9f9;
-            --text-color: #0f0f0f;
-            --card-bg: #ffffff;
-            --border-color: #e5e5e5;
-            --btn-sub-bg: #0f0f0f;
-            --btn-sub-text: #ffffff;
-            --shadow-style: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .gray-theme {
-            --bg-color: #444444;
-            --text-color: #ffffff;
-            --card-bg: #555555;
-            --border-color: #666666;
-            --btn-sub-bg: #222222;
-            --btn-sub-text: #ffffff;
-            --shadow-style: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        .blue-theme {
-            --bg-color: #001f3f;
-            --text-color: #ffffff;
-            --card-bg: #003366;
-            --border-color: #004488;
-            --btn-sub-bg: #0077ff;
-            --btn-sub-text: #ffffff;
-            --shadow-style: 0 4px 15px rgba(0,0,0,0.4);
-        }
-
-        .red-theme {
-            --bg-color: #3b0000;
-            --text-color: #ffffff;
-            --card-bg: #5c0000;
-            --border-color: #7a0000;
-            --btn-sub-bg: #ff3333;
-            --btn-sub-text: #ffffff;
-            --shadow-style: 0 4px 15px rgba(0,0,0,0.4);
-        }
-
-        .font-montserrat { --web-font: 'Montserrat', sans-serif !important; }
-        .font-rubik { --web-font: 'Rubik', sans-serif !important; }
-        .font-arno { --web-font: 'Arno Pro', 'Georgia', serif !important; }
-
-        .pc-version-mode {
-            max-width: 1400px !important;
-            padding: 20px 50px !important;
-        }
-        .pc-version-mode .video-grid {
-            grid-template-columns: repeat(4, 1fr) !important;
-        }
-
-        .ade-mode {
-            --shadow-style: none !important;
-            --transition-speed: 0s !important;
-        }
-        .ade-mode * {
-            box-shadow: none !important;
-            text-shadow: none !important;
-            transition: none !important;
-        }
-
-        .urs-mode {
-            --shadow-style: none !important;
-            --transition-speed: 0s !important;
-            background: #000000 !important;
-        }
-        .urs-mode .thumbnail {
-            background-image: none !important;
-            background-color: #222 !important;
-            border: 1px dashed #444 !important;
+            --bg-color: #07080a;
+            --panel-bg: #181a20;
+            --bubble-user: #282a34;
+            --bubble-bot: #13151a;
+            --accent: #00ffcc;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
         }
 
         body {
-            font-family: var(--web-font);
-            background-color: var(--bg-color);
-            color: var(--text-color);
             margin: 0;
             padding: 0;
-            transition: background-color var(--transition-speed), color var(--transition-speed);
+            background-color: var(--bg-color);
+            display: flex;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text-main);
+            overflow: hidden;
+            box-sizing: border-box;
         }
 
-        #welcome-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+        /* BARRA LATERAL - GESTIÓN DE CHATS */
+        .sidebar {
+            width: 260px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid #282a34;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+
+        .new-chat-btn {
+            background: linear-gradient(135deg, #282a34, #13151a);
+            border: 1px solid rgba(0, 255, 204, 0.3);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+
+        .new-chat-btn:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-item {
+            padding: 10px 12px;
+            background-color: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            gap: 8px;
+        }
+
+        .chat-item.active {
+            background-color: var(--bubble-user);
+            color: var(--text-main);
+            border-left: 3px solid var(--accent);
+        }
+
+        .chat-item span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .delete-chat-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: color 0.2s;
+        }
+
+        .delete-chat-btn:hover {
+            color: #ff4d4d;
+        }
+
+        /* CONTENEDOR PRINCIPAL DEL CHAT */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             height: 100%;
-            background-color: #0f0f0f;
-            color: #ffffff;
-            z-index: 9999;
+            position: relative;
+        }
+
+        .top-bar {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #181a20;
+            background-color: rgba(7, 8, 10, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 20px;
+            cursor: pointer;
+            display: none;
+        }
+        
+        .chat-badge {
+            background-color: rgba(0, 255, 204, 0.1);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid rgba(0, 255, 204, 0.3);
+        }
+
+        .display-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            padding: 40px 20px;
             box-sizing: border-box;
-            overflow-y: auto;
+        }
+
+        /* PANTALLA DE BIENVENIDA CON LOGO REAL */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
+            margin-top: auto;
+            margin-bottom: auto;
         }
-        .welcome-content {
-            max-width: 600px;
-            margin: auto;
+
+        .logo-wrapper {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin-bottom: 25px;
+            animation: float 4s ease-in-out infinite;
+            background: #181a20;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+            overflow: hidden;
         }
-        .welcome-logo {
-            font-size: 40px;
-            font-weight: bold;
-            margin-bottom: 20px;
+
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        .welcome-logo span {
-            background-color: var(--logo-bg-color);
-            color: #fff;
-            padding: 4px 12px;
-            border-radius: 8px;
-            margin-left: 4px;
+
+        h1 { font-size: 28px; font-weight: 500; margin: 0 0 12px 0; }
+        .welcome-screen p { color: var(--text-muted); font-size: 16px; margin: 0; max-width: 400px; line-height: 1.4; }
+
+        /* MENSAJERÍA */
+        .chat-history {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
-        .welcome-box {
-            background-color: #1a1a1a;
-            border: 1px solid #303030;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow-style);
-            text-align: left;
+
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
         }
-        .welcome-box h2 {
-            color: #ff4444;
-            margin-top: 0;
-            text-align: center;
-        }
-        .welcome-box p {
+
+        .message {
+            max-width: 85%;
+            padding: 14px 18px;
+            border-radius: 18px;
             font-size: 15px;
             line-height: 1.6;
-            color: #ccc;
-        }
-        .continue-btn {
-            background-color: #ffffff;
-            color: #0f0f0f;
-            border: none;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            margin-bottom: 40px;
+            word-wrap: break-word;
+            position: relative;
+            padding-bottom: 40px;
         }
 
-        nav {
-            background-color: var(--bg-color);
+        .user-msg {
+            background-color: var(--bubble-user);
+            color: var(--text-main);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            padding-bottom: 14px;
+        }
+
+        .chapai-msg {
+            background-color: var(--bubble-bot);
+            color: #e5e7eb;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .thinking {
+            opacity: 0.7;
+            font-style: italic;
+            padding-bottom: 14px !important;
+        }
+
+        /* BOTONES FLOTANTES DE ACCIÓN (COPIAR Y VOZ) */
+        .msg-actions {
+            position: absolute;
+            bottom: 6px;
+            right: 10px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid var(--border-color);
-            transition: background-color var(--transition-speed), border-color var(--transition-speed);
+            gap: 8px;
         }
-        .logo {
-            font-size: 22px;
-            font-weight: bold;
-            color: var(--text-color);
-            cursor: pointer;
-            user-select: none;
-        }
-        .logo span {
-            background-color: var(--logo-bg-color);
-            color: #fff;
-            padding: 2px 8px;
-            border-radius: 6px;
-            margin-left: 4px;
-        }
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .settings-btn {
+
+        .action-btn {
             background: none;
             border: none;
-            color: var(--text-color);
-            font-size: 24px;
+            color: var(--text-muted);
             cursor: pointer;
-            padding: 5px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
         }
 
+        .action-btn:hover {
+            color: var(--accent);
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        /* BARRA DE ENTRADA */
+        .bottom-container {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            background-color: var(--bg-color);
+        }
+
+        .input-container {
+            width: 100%;
+            max-width: 650px;
+            background-color: var(--panel-bg);
+            border-radius: 30px;
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            box-sizing: border-box;
+            border: 1px solid transparent;
+            transition: border 0.2s;
+        }
+
+        .input-container:focus-within {
+            border-color: rgba(0, 255, 204, 0.4);
+        }
+
+        .input-box {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 16px;
+            padding: 10px 8px;
+            outline: none;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            outline: none;
+        }
+
+        .send-btn {
+            background-color: var(--bubble-user);
+            color: var(--text-main);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            margin-left: 5px;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .send-btn:hover {
+            background-color: var(--accent);
+            color: #000;
+        }
+
+        /* VENTANAS MODALES NATIVAS */
         .modal-overlay {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.7);
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
             z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-content {
-            background-color: var(--card-bg);
-            border: 2px solid var(--border-color);
-            color: var(--text-color);
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: var(--shadow-style);
-            max-height: 85vh;
-            overflow-y: auto;
-            position: relative;
-        }
-        .close-modal-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 20px;
-            cursor: pointer;
-        }
-        .settings-section {
-            margin-bottom: 25px;
-            text-align: left;
-        }
-        .settings-section h3 {
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-            color: #ff4444;
-        }
-        .config-btn {
-            background-color: #ff0000;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-        .config-btn.active {
-            background-color: #00aa00;
-        }
-        
-        .color-picker-btn {
-            border: 2px solid transparent;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            color: white;
-            margin-right: 8px;
-            margin-bottom: 8px;
-        }
-        .color-picker-btn:hover {
-            border-color: var(--text-color);
         }
 
-        .lang-select {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 15px;
-            cursor: pointer;
-        }
-
-        .main-container {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 15px;
-            transition: max-width var(--transition-speed);
-        }
-        .main-player {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16/9;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px solid var(--border-color);
-            background-color: #000;
-        }
-        .main-player iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        .video-info {
-            margin-top: 15px;
-            text-align: left;
-        }
-        .video-title {
-            font-size: 22px;
-            margin: 0 0 10px 0;
-            font-weight: bold;
-        }
-        .channel-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
-        }
-        
-        .channel-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .avatar-img {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid var(--border-color);
-            background-color: #ff0000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-weight: bold;
-        }
-        
-        .subscribe-btn {
-            background-color: var(--btn-sub-bg);
-            color: var(--btn-sub-text);
-            border: none;
-            padding: 10px 20px;
-            font-weight: bold;
+        .modal-box {
+            background-color: var(--panel-bg);
+            border: 1px solid rgba(0, 255, 204, 0.3);
             border-radius: 20px;
-            cursor: pointer;
-        }
-        .subscribe-btn.subscribed {
-            background-color: #303030;
-            color: #aaa;
-        }
-
-        .download-container {
-            margin-top: 15px;
-            margin-bottom: 10px;
-        }
-        .download-btn {
-            background-color: #00aa00;
-            color: #ffffff;
-            border: none;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 20px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 10px rgba(0, 170, 0, 0.2);
-            transition: transform 0.2s;
-        }
-        .download-btn:active {
-            transform: scale(0.95);
-        }
-
-        .custom-button-container {
-            margin: 20px 0 5px 0;
-            display: flex;
-            justify-content: flex-start;
-        }
-        .btn-rgb-custom {
-            background-color: #0055ff;
-            color: #ffffff;
-            font-family: var(--web-font);
-            font-size: 15px;
-            font-weight: bold;
-            padding: 12px 28px;
-            border-radius: 25px;
-            cursor: pointer;
-            outline: none;
-            position: relative;
-            border: 3px solid transparent;
-            background-clip: padding-box;
-            box-shadow: 0 4px 15px rgba(0, 85, 255, 0.4);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .btn-rgb-custom::after {
-            content: '';
-            position: absolute;
-            top: -3px; bottom: -3px; left: -3px; right: -3px;
-            background: conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
-            border-radius: 25px;
-            z-index: -1;
-            animation: rgb-border 4s linear infinite;
-        }
-        .btn-rgb-custom:active {
-            transform: scale(0.97);
-        }
-        @keyframes rgb-border {
-            100% { filter: hue-rotate(360deg); }
-        }
-
-        .search-container {
-            margin: 5px 0 10px 0;
-            display: flex;
-            justify-content: flex-start;
-        }
-        .search-input {
-            width: 100%;
-            max-width: 400px;
-            padding: 12px 20px;
-            font-size: 15px;
-            border-radius: 25px;
-            border: 2px solid var(--border-color);
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .search-input:focus {
-            border-color: var(--logo-bg-color);
-        }
-
-        .section-title {
-            font-size: 20px;
-            margin: 30px 0 15px 0;
-            text-align: left;
-        }
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        .video-card {
-            text-align: left;
-            cursor: pointer;
-        }
-        .thumbnail {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background-color: var(--card-bg);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            color: #777;
-            border: 1px solid var(--border-color);
-            font-weight: bold;
-            background-size: cover;
-            background-position: center;
-        }
-        .card-info {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .card-text h4 {
-            margin: 0 0 5px 0;
-            font-size: 14px;
-        }
-        .card-text p {
-            margin: 0;
-            font-size: 12px;
-            color: #aaa;
-        }
-
-        .empty-history-msg {
-            color: #888;
-            font-style: italic;
-            grid-column: 1 / -1;
-            text-align: left;
-            margin-top: 5px;
-        }
-        .clear-history-btn {
-            background-color: transparent;
-            color: #ff4444;
-            border: 1px solid #ff4444;
-            padding: 6px 12px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-            float: right;
-            margin-top: -5px;
-        }
-        .clear-history-btn:hover {
-            background-color: rgba(255, 68, 68, 0.1);
-        }
-
-        .youtube-box {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
             padding: 25px;
+            width: 90%;
+            max-width: 440px;
             text-align: center;
-            margin-top: 20px;
-            margin-bottom: 5px;
-            box-shadow: var(--shadow-style);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
-        .youtube-channel-btn {
-            background-color: #ff0000;
-            color: #ffffff;
-            border: none;
-            padding: 15px 35px;
-            font-size: 16px;
+
+        .modal-box h2 {
+            margin-top: 0;
+            font-size: 20px;
+            color: var(--accent);
+        }
+
+        .modal-box p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            text-align: left;
+            margin: 15px 0;
+            background: rgba(255,255,255,0.03);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #282a34;
+            background: var(--bg-color);
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+            margin: 15px 0;
+            outline: none;
+        }
+
+        .modal-input:focus {
+            border-color: var(--accent);
+        }
+
+        .modal-btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-red {
+            flex: 1;
+            background: #ff4d4d;
+            color: white;
             font-weight: bold;
-            border-radius: 30px;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            box-shadow: 0 4px 10px rgba(255,0,0,0.3);
+            font-size: 15px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-red:hover { opacity: 0.85; }
+
+        .btn-green {
+            flex: 1;
+            background: #00cc66;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-green:hover { opacity: 0.85; }
+
+        .primary-btn {
+            background: var(--accent);
+            color: #000;
+            font-weight: bold;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .cancel-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            margin-top: 10px;
+            cursor: pointer;
+            padding: 8px;
+            width: 100%;
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+        @media (max-width: 768px) {
+            .sidebar { position: absolute; left: 0; top: 0; bottom: 0; transform: translateX(-100%); z-index: 100; }
+            .sidebar.open { transform: translateX(0); }
+            .menu-toggle { display: block; }
         }
     </style>
 </head>
 <body>
 
-    <div id="welcome-screen">
-        <div class="welcome-content">
-            <div class="welcome-logo">Mr<span id="welcome-span">Tube</span></div>
-            
-            <div class="welcome-box">
-                <h2 id="beta-title">⚠️ ¡Bienvenido a la Version Beta de Prueba!</h2>
-                <p id="beta-p1">Hola a todos los seguidores y visitantes. Estas ingresando oficialmente a la fase de pruebas tecnicas y optimizacion d la plataforma independiente <strong>MrTube</strong>.</p>
-                <p id="beta-p2">Por favor, ten en cuenta lo siguiente antes d continuar:</p>
-                <p id="beta-p3">• <strong>Videos Faltantes:</strong> Por el momento, la grilla esta en mantenimiento. Veras que varios apartados del sitio tienen la etiqueta de "Proximamente" mientras se indexan los archivos correspondientes.</p>
-                <p id="beta-p4">• <strong>Errores Temporales:</strong> Debido a que estamos probando las conexiones y los reproductores integrados, algunas funciones d interfaz d usuario podrian presentar retrasos leves d carga en dispositivos moviles.</p>
-                <p id="beta-p5">Agradecemos profundamente tu paciencia, reporte d fallas y apoyo continuo para expandir nuestras producciones a toda la comunidad.</p>
-            </div>
-
-            <p id="scroll-text" style="color: #666; font-size: 14px; margin-bottom: 10px;">Desliza hacia abajo para continuar</p>
-            <button id="btn-continue" class="continue-btn" onclick="entrarAMrTube()">Continuar</button>
-        </div>
+    <!-- MENÚ LATERAL -->
+    <div class="sidebar" id="sidebar">
+        <button class="new-chat-btn" onclick="openModelSelectorModal()">➕ Nuevo Chat</button>
+        <div class="chat-list" id="chatList"></div>
     </div>
 
-    <nav>
-        <div class="logo" onclick="recargarPagina()">Mr<span class="logo-text-box">Tube</span></div>
-        <div class="nav-right">
-            <button class="settings-btn" onclick="abrirAjustes()">⚙️</button>
+    <!-- CONTENIDO CENTRAL -->
+    <div class="main-content">
+        <div class="top-bar">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <span id="currentChatTitle">Chat Principal</span>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="icon-btn" onclick="openKeyModal()" title="Configurar API Key de Gemini">🔑</button>
+                <span class="chat-badge" id="topBadge">ChapAI Pro v1.2 🍷</span>
+            </div>
         </div>
-    </nav>
 
-    <div id="settings-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="close-modal-btn" onclick="cerrarAjustes()">✕</button>
-            <h2 id="modal-settings-title" style="margin-top:0; text-align: left;">Configuracion</h2>
-            
-            <div class="settings-section">
-                <h3 id="font-section-title">CF (Cambiar Fuente)</h3>
-                <button class="config-btn" style="background-color: #333;" onclick="cambiarFuente('montserrat')">1: Montserrat</button>
-                <button class="config-btn" style="background-color: #333;" onclick="cambiarFuente('rubik')">2: Rubik</button>
-                <button class="config-btn" style="background-color: #333;" onclick="cambiarFuente('arno')">3: Arno</button>
+        <div class="display-area" id="displayArea">
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="logo-wrapper">
+                    <img src="logo.PNG" alt="ChapAI" class="logo-img" onerror="this.style.display='none'; this.parentNode.innerHTML='🤖';">
+                </div>
+                <h1 id="welcomeTitle">Presentación de ChapAI v1.2</h1>
+                <p id="welcomeText">¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local avanzado también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!</p>
             </div>
 
-            <div class="settings-section">
-                <h3 id="theme-section-title">Tema Visual</h3>
-                <button class="config-btn" onclick="cambiarTema('oscuro')">Negro</button>
-                <button class="config-btn" style="background-color:#ccc; color:#000;" onclick="cambiarTema('claro')">Blanco</button>
-                <button class="config-btn" style="background-color:#888888; color:#fff;" onclick="cambiarTema('gris')">Gris</button>
-                <button class="config-btn" style="background-color:#0055ff; color:#fff;" onclick="cambiarTema('azul')">Azul</button>
-                <button class="config-btn" style="background-color:#ff2222; color:#fff;" onclick="cambiarTema('rojo')">Rojo</button>
-            </div>
+            <div class="chat-history" id="chatHistory"></div>
+        </div>
 
-            <div class="settings-section">
-                <h3 id="sound-effects-section-title">🔊 Efectos de Sonidos</h3>
-                <button id="sound-btn" class="config-btn" style="background-color: #333; width: 100%;" onclick="toggleEfectosSonido()">Sonido: Apagado 🔇</button>
-            </div>
-
-            <div class="settings-section">
-                <h3 id="logo-section-title">Color del Logo</h3>
-                <button class="color-picker-btn" style="background-color: #ff0000;" onclick="cambiarColorLogo('#ff0000')">Rojo</button>
-                <button class="color-picker-btn" style="background-color: #00bfff;" onclick="cambiarColorLogo('#00bfff')">Celeste</button>
-                <button class="color-picker-btn" style="background-color: #8b4513;" onclick="cambiarColorLogo('#8b4513')">Café</button>
-                <button class="color-picker-btn" style="background-color: #ff6600;" onclick="cambiarColorLogo('#ff6600')">Anaranjado</button>
-                <button class="color-picker-btn" style="background-color: #ffcc00; color: #000;" onclick="cambiarColorLogo('#ffcc00')">Amarillo</button>
-                <button class="color-picker-btn" style="background-color: #00aa00;" onclick="cambiarColorLogo('#00aa00')">Verde</button>
-                <button class="color-picker-btn" style="background-color: #0000ff;" onclick="cambiarColorLogo('#0000ff')">Azul</button>
-                <button class="color-picker-btn" style="background-color: #800080;" onclick="cambiarColorLogo('#800080')">Morado</button>
-                <button class="color-picker-btn" style="background-color: #ffc0cb; color: #000;" onclick="cambiarColorLogo('#ffc0cb')">Rosa</button>
-                <button class="color-picker-btn" style="background-color: #ff00ff;" onclick="cambiarColorLogo('#ff00ff')">Fuchsia</button>
-                <button class="color-picker-btn" style="background-color: #ff9999; color: #000;" onclick="cambiarColorLogo('#ff9999')">Rojo Blanco</button>
-                <button class="color-picker-btn" style="background-color: #4a0000;" onclick="cambiarColorLogo('#4a0000')">Rojo Negro</button>
-                <button class="color-picker-btn" style="background-color: #000000; border: 1px solid #555;" onclick="cambiarColorLogo('#000000')">Negro</button>
-            </div>
-
-            <div class="settings-section">
-                <h3 id="pc-section-title">VC (Versión de Computadora)</h3>
-                <button id="vc-btn" class="config-btn" style="background-color: #00aa00; width: 100%;" onclick="toggleVersionComputadora()">Activar Modo Escritorio 💻</button>
-            </div>
-
-            <div class="settings-section">
-                <h3 id="ade-section-title">Rendimiento (ADE)</h3>
-                <button id="ade-btn" class="config-btn" onclick="toggleADE()">ADE: Apagado</button>
-                <button id="urs-btn" class="config-btn" style="background-color: #ff00aa;" onclick="toggleURS()">URS: Apagado</button>
-                <p id="ade-desc" style="font-size:12px; color:#aaa; margin-top:5px;">Activalo para consumir menos recursos y hacer la navegacion muy fluida.</p>
-            </div>
-
-            <div class="settings-section">
-                <h3 id="lang-section-title">Idioma de la Interfaz</h3>
-                <select id="lang-select-box" class="lang-select" onchange="cambiarIdioma(this.value)">
-                    <option value="es">Español</option>
-                    <option value="ultra_emoji">🔥 Ultra Emoji 😎💥</option>
-                    <option value="epanola">ePaÑoLa</option>
-                    <option value="en">English</option>
-                    <option value="fr">Français (Francés)</option>
-                    <option value="de">Deutsch (Alemán)</option>
-                    <option value="id">Bahasa Indonesia (Indonesia)</option>
-                    <option value="it">Italiano (Italiano)</option>
-                    <option value="zh_mv">💡 中文 (Chino Mandarín)</option>
-                    <option value="ar">العربية (Árabe)</option>
-                    <option value="morse">Código Morse (• —)</option>
-                    <option value="af">Afrikaans (África)</option>
-                    <option value="ru">Русский (Ruso)</option>
-                    <option value="pt">Português (Portugués)</option>
-                    <option value="zh">中文 (Chino)</option>
-                    <option value="ja">日本語 (Japonés)</option>
-                    <option value="ko">한국어 (Coreano)</option>
-                    <option value="es_es">Español (España)</option>
-                    <option value="es_la">Español (Latinoamerica)</option>
-                </select>
-            </div>
-            
-            <div class="settings-section">
-                <h3 id="shorts-section-title">📱 Shorts ABG ⚒️</h3>
-                <button class="config-btn" style="background-color: #ff0055; width: 100%; color: #fff; font-size: 15px;" onclick="abrirShorts()">Ver Shorts 📱</button>
-            </div>
-
-            <div class="settings-section">
-                <h3 id="random-section-title">🔀 Entretenimiento Random</h3>
-                <button class="config-btn" style="background-color: #8a2be2; width: 100%; color: #fff; font-size: 15px;" onclick="reproducirVideoAleatorio()">Video Aleatorio 🎲</button>
-            </div>
-
-            <div class="settings-section">
-                <h3 id="jb-section-title">JB (Juego en Beta)</h3>
-                <button class="config-btn" style="background-color: #ff6600; width: 100%;" onclick="window.open('https://mrjostin87.github.io/mrtube-jb/', '_blank')">Abrir Chicken Strike NPC 🎮</button>
+        <div class="bottom-container">
+            <div class="input-container">
+                <button class="icon-btn" onclick="openRenameModal()">📝</button>
+                <input type="text" class="input-box" id="userInput" placeholder="Escribe tu mensaje para ChapAI..." autocomplete="off">
+                <button class="icon-btn send-btn" id="sendBtn">➔</button>
             </div>
         </div>
     </div>
 
-    <div id="main-web-container" class="main-container">
-        <div class="main-player">
-            <iframe id="main-iframe" src="https://www.youtube.com/embed/qvhFdTaMyCs" title="MrTube Player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-        </div>
-        
-        <div class="video-info">
-            <h1 id="main-video-title" class="video-title">Sprunki Animado T4 E5</h1>
-            <div class="channel-row">
-                <div class="channel-profile">
-                    <div class="avatar-img">MJ</div>
-                    <div>
-                        <strong style="font-size: 16px;">Mr.Jostin</strong>
-                        <span id="sub-count" style="font-size: 12px; color: #aaa; display: block;">0 suscriptores • ABG Productions®</span>
-                    </div>
-                </div>
-                <button id="btn-sub" class="subscribe-btn" onclick="alternarSuscripcion()">Suscribirse</button>
-            </div>
+    <!-- MODAL: SELECCIÓN DE VERSIÓN DE CHAPAI -->
+    <div class="modal-overlay" id="modelSelectorModal">
+        <div class="modal-box" style="border-color: var(--accent);">
+            <h2 style="color: var(--accent);">🤖 Selecciona el Modelo de ChapAI</h2>
+            <p style="text-align: center; background: none; border: none;">Elige qué versión de la IA deseas inicializar para este nuevo chat:</p>
             
-            <div class="download-container">
-                <button id="download-video-btn" class="download-btn" onclick="descargarVideoActual()">📥 DV: Descargar Video Seguro</button>
+            <button class="primary-btn" onclick="createNewChatWithModel('pro')" style="background: var(--accent); color: #000;">
+                🍷 ChapAI Pro v1.2<br><span style="font-size: 11px; font-weight: normal; opacity: 0.8;">La versión oficial y avanzada del estudio.</span>
+            </button>
+            
+            <button class="primary-btn" onclick="createNewChatWithModel('fake')" style="background: #ff4d4d; color: #fff; margin-top: 10px;">
+                🫠 ChapAI Fake v1.2<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">No sabe ni lo más sencillo, ortografía terrible.</span>
+            </button>
+
+            <button class="cancel-btn" onclick="closeModal('modelSelectorModal')">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIGURACIÓN DE API KEY (LLAVE) -->
+    <div class="modal-overlay" id="keyModal">
+        <div class="modal-box" style="border-color: rgba(0, 255, 204, 0.3);">
+            <h2 style="color: var(--accent);">🔑 Conectar con Google Gemini</h2>
+            <p style="text-align: center; background: none; border: none;">Pega aquí tu API Key de Gemini para activar la inteligencia en vivo. Si no pones ninguna, ChapAI usará su potente cerebro local automático.</p>
+            
+            <input type="text" id="keyInput" class="modal-input" placeholder="Pega tu API Key (AIzaSy...)...">
+            
+            <button class="primary-btn" onclick="saveApiKey()">Guardar Clave</button>
+            <button class="cancel-btn" onclick="closeModal('keyModal')">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: RENOMBRAR CHAT -->
+    <div class="modal-overlay" id="renameModal">
+        <div class="modal-box" style="border-color: rgba(0, 255, 204, 0.3);">
+            <h2 style="color: var(--accent);">📝 Renombrar Chat</h2>
+            <input type="text" id="renameInput" class="modal-input" placeholder="Nombre del chat...">
+            
+            <button class="primary-btn" onclick="confirmRenameChat()">Guardar Nombre</button>
+            <button class="cancel-btn" onclick="closeModal('renameModal')">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: VERIFICACIÓN DE CREADOR (COMANDO SECRETO) -->
+    <div class="modal-overlay" id="creatorAuthModal">
+        <div class="modal-box" style="border-color: var(--accent);">
+            <h2 style="color: var(--accent);">🔐 Protocolo de Identidad</h2>
+            <p style="text-align: center; background: none; border: none;">
+                Se ha detectado el comando maestro de verificación de creador. Por favor, introduce el código de autorización de ABG Productions™ para continuar:
+            </p>
+            
+            <input type="password" id="creatorCodeInput" class="modal-input" placeholder="Introduce el código secreto...">
+            
+            <button class="primary-btn" onclick="verifyCreatorCode()">Verificar Identidad</button>
+            <button class="cancel-btn" onclick="closeModal('creatorAuthModal')">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIRMACIÓN DE ELIMINACIÓN DE CHAT -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-box">
+            <h2>⚠️ ADVERTENCIA: ¿Eliminar Chat?</h2>
+            <p id="deleteModalText">
+                Estás a punto de borrar este chat de forma definitiva de la memoria de tu dispositivo. 
+                <br><br>
+                <b>Condiciones e Impacto:</b><br>
+                • No podrás volver a ver las respuestas ni el historial de mensajes de esta conversación.<br>
+                • No existe forma de recuperar o regresar a este chat una vez borrado.<br>
+                • Se liberará espacio en el almacenamiento local de tu navegador.
+            </p>
+            
+            <div class="modal-btn-row">
+                <button class="btn-red" onclick="cancelDeleteChat()">¡¡No!! ❌</button>
+                <button class="btn-green" onclick="executeDeleteChat()">¡¡Si ✅!!</button>
             </div>
         </div>
+    </div>
 
-        <div class="custom-button-container">
-            <a href="https://mrjostin87.github.io/ChapAI/" target="_blank" class="btn-rgb-custom">Probar ChapAI (Beta)</a>
-        </div>
-
-        <div class="search-container">
-            <input type="text" id="video-search-bar" class="search-input" onkeyup="filtrarVideos()" placeholder="🔍 BV: Buscador videos">
-        </div>
-
-        <h2 id="recommended-title" class="section-title">Videos Recomendados</h2>
-        
-        <div id="recommended-video-grid" class="video-grid">
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/eu0bxUP2HUk', '⚠️ [ERROR_DIMENSIONAL] ⚠️ El Misterio De Chicken Gun T2 T1 E3 E11 ⚠️ [ERROR_DIMENSIONAL] ⚠️')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/eu0bxUP2HUk/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>⚠️ [ERROR_DIMENSIONAL] ⚠️ El Misterio De Chicken Gun T2 T1 E3 E11 ⚠️ [ERROR_DIMENSIONAL] ⚠️</h4>
-                        <p>ABG Productions®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/8wNVZ5ca7BA', 'El Mystery De Chicken Gun T1 E9')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/8wNVZ5ca7BA/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>El Misterio De Chicken Gun T1 E9</h4>
-                        <p>ABG Productions®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/Dd_wgRMbud8', 'El Misterio De Chicken Gun T1 E8')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/Dd_wgRMbud8/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>El Misterio De Chicken Gun T1 E8</h4>
-                        <p>ABG Productions®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/AT3nqI7btI0', '¿Cómo conseguir mucho Ichor en Dandy\'s World? 🤔💧')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/AT3nqI7btI0/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>¿Cómo conseguir mucho Ichor en Dandy's World? 🤔💧</h4>
-                        <p>Sprunki Animations Studios®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/-72lvELfYT0', 'Dandy\'s world Show T2 E4')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/-72lvELfYT0/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>Dandy's world Show T2 E4</h4>
-                        <p>Sprunki Animations Studios®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/ZFvr7ptM02o', 'Servidor Town000: 😱 ¡¡El lugar donde los jugadores desaparecen!! 😱')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/ZFvr7ptM02o/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>Servidor Town000: 😱 ¡¡El lugar donde los jugadores desaparecen!! 😱</h4>
-                        <p>ABG Productions®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/jXcnZ-zQoig', 'Sprunki Animado T4 E3')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/jXcnZ-zQoig/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>Sprunki Animado T4 E3</h4>
-                        <p>Sprunki Animations Studios®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/IXWZrR9_ffw', '¿Cómo conseguir 1000 monedas en Chicken Gun? 🤔💵')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/IXWZrR9_ffw/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>¿Cómo conseguir 1000 monedas en Chicken Gun? 🤔💵</h4>
-                        <p>ABG Productions®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/R0SaU4p-yKk', '🎮 2 Mapas con Modelos Ocultos y Secretos ✨')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/R0SaU4p-yKk/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>🎮 2 Mapas con Modelos Ocultos y Secretos ✨</h4>
-                        <p>ABG Productions®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/1lA4Bh5HT0o', 'Sprunki Animado T4 E6')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/1lA4Bh5HT0o/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>Sprunki Animado T4 E6</h4>
-                        <p>Sprunki Animations Studios®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/qvhFdTaMyCs', 'Sprunki Animado T4 E5')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/qvhFdTaMyCs/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>Sprunki Animado T4 E5</h4>
-                        <p>Sprunki Animations Studios®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/33VtpYpcw6A', 'Promoción de MrTube 📡🖥️')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/33VtpYpcw6A/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>Promoción de MrTube 📡🖥️</h4>
-                        <p>ABG Productions®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/CAL4Or5iwC8', 'Jugando Minecraft con mi Primito Tavito 🎮')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/CAL4Or5iwC8/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>Jugando con mi Primito Tavito 🎮</h4>
-                        <p>ABG Productions®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/xs7MKyHpRh0', 'El Misterio De Chicken Gun T2 E2')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/xs7MKyHpRh0/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>El Misterio De Chicken Gun T2 E2</h4>
-                        <p>ABG Productions®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/-e9bjdtB8AI', 'Dandy’s World Show T2 E5')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/-e9bjdtB8AI/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>Dandy’s World Show T2 E5</h4>
-                        <p>Sprunki Animations Studios®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/cMsKefgHhpk', '2econd 2ight 2eer || DW')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/cMsKefgHhpk/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>2econd 2ight 2eer || DW</h4>
-                        <p>Sprunki Animations Studios®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/TRX_s4ly49M', 'Sprunki Animado T4 E4')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/TRX_s4ly49M/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>Sprunki Animado T4 E4</h4>
-                        <p>Sprunki Animations Studios®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/e-WLd80odDo', '3 IDEAS QUE CAMBIARÍAN CG PARA SIEMPRE 😱🔥')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/e-WLd80odDo/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>3 IDEAS QUE CAMBIARÍAN CG PARA SIEMPRE 😱🔥</h4>
-                        <p>ABG Productions®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card" onclick="cargarVideo('https://www.youtube.com/embed/Py7_RP2tXH0', 'El Misterio De Chicken Gun T2 E1')">
-                <div class="thumbnail" style="background-image: url('https://img.youtube.com/vi/Py7_RP2tXH0/mqdefault.jpg'); text-indent: -9999px;">VIDEO</div>
-                <div class="card-info">
-                    <div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>
-                    <div class="card-text">
-                        <h4>El Misterio De Chicken Gun T2 E1</h4>
-                        <p>ABG Productions®</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-            <div class="video-card dynamic-coming-soon"><div class="thumbnail">Próximamente</div><div class="card-info"><div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div><div class="card-text"><h4 class="coming-soon-text">Próximamente</h4><p>ABG Productions®</p></div></div></div>
-        </div>
-
-        <div style="clear: both; overflow: hidden; margin-top: 20px;">
-            <button id="btn-clear-history" class="clear-history-btn" onclick="borrarHistorial()">Borrar HV</button>
-            <h2 id="history-title" class="section-title">HV (Historial de Videos)</h2>
-        </div>
-        <div id="history-grid" class="video-grid"></div>
-
-        <div class="youtube-box">
-            <h3 id="yt-box-title" style="margin-top:0;">¿Quieres ver mas contenido oficial y original?</h3>
-            <p id="yt-box-desc" style="color:#aaa; font-size:14px; margin-bottom:20px;">¡Apoya las producciones originales d nuestro canal directamente en YouTube!</p>
-            <a href="https://youtube.com/@mr.jostin_oficial?si=wDrRGvnlRJUFWfWN" target="_blank" id="yt-main-btn-text" class="youtube-channel-btn">Suscribirse en YouTube</a>
+    <!-- MODAL: PROTECCIÓN DEL CHAT PRINCIPAL -->
+    <div class="modal-overlay" id="protectedChatModal">
+        <div class="modal-box" style="border-color: #ff4d4d;">
+            <h2>🚫 ACCIÓN DENEGADA</h2>
+            <p style="background: rgba(255, 77, 77, 0.05); border-color: rgba(255, 77, 77, 0.2);">
+                <b>¿Por qué no se puede eliminar el Chat Principal?</b><br><br>
+                • <b>Núcleo del Sistema:</b> El Chat Principal es la sesión base e inquebrantable configurada en el sistema de ABG Productions™.<br>
+                • <b>Estabilidad de la Interfaz:</b> Está diseñado para garantizar que siempre tengas un espacio predeterminado de inicio y pruebas activas en el navegador.<br>
+                • <b>Restricción de Seguridad:</b> Este chat específico posee permisos de protección permanente y no puede ser borrado bajo ninguna circunstancia por el usuario.<br><br>
+                <i>Puedes crear nuevos chats secundarios y borrar esos cuando gustos, pero el Chat Principal permanecerá intacto.</i>
+            </p>
+            
+            <button class="primary-btn" style="background: #ff4d4d; color: white;" onclick="closeModal('protectedChatModal')">Entendido 🔒</button>
         </div>
     </div>
 
     <script>
-        var audioEfecto = new Audio('Boton.mp3');
-        var efectosSonidoActivos = false;
+        let userApiKey = localStorage.getItem("chapai_user_gemini_key") || "";
 
-        const traducciones = {
-            ultra_emoji: {
-                beta_title: "⚠️🔥 ¡BIENVENIDO AL BETA SUPER EXTREMO! 💥😎",
-                beta_p1: "👋 ¡Hola, cracks y leyendas! 🌟 Están entrando al laboratorio tecnológico de optimización masiva de la plataforma independiente 🚀 <strong>MrTube</strong> 🎮Flux!",
-                beta_p2: "⚡ ¡MIRA ESTO ANTES DE SEGUIR, CRACK! 👇🔥:",
-                beta_p3: "• 🎬 <strong>Falta Contenido:</strong> ¡La grilla está que arde en mantenimiento! 🛠️ Verás carteles locos mientras indexamos todo a máxima velocidad! 🌐💥",
-                beta_p4: "• 👾 <strong>Errores Locos:</strong> ¡Probamos reproductores al límite! 🔥 Algunas cosas podrían ir lentas si tu dispositivo no tiene el poder! 📱💨",
-                beta_p5: "🙏 ¡Millones de gracias por el aguante y por apoyar las animaciones de los mejores estudios! 🎬💥✨",
-                scroll_text: "👇 ¡Baja por completo para desbloquear el poder! 👇",
-                btn_continue: "🚀 ¡ENTRAR A MRTUBE AHORA! 💥",
-                recommended_title: "🔥 VIDEOS RECOMENDADOS DE HOY 😎🎬",
-                coming_soon: "🚀 PRÓXIMAMENTE DISPONIBLE 💥",
-                sub_text: "🔴 SUSCRIBIRSE AL CANAL 🔥",
-                subbed_text: "✅ ¡YA ERES MIEMBRO CRACK! 😎",
-                sub_count_suffix: "🔥 suscriptores premium • ABG Productions® 🎬✨",
-                settings_title: "⚙️ CONFIGURACIÓN SUPREMA 🛠️",
-                theme_title: "🎨 ESTILO VISUAL DE LA WEB 💥",
-                logo_title: "🌈 COLOR DEL LOGO INCREÍBLE 🔥",
-                ade_title: "⚡ RENDIMIENTO ULTRA (ADE) 🚀",
-                ade_on: "🚀 ADE: PRENDIDÍSIMO 🔥",
-                ade_off: "❌ ADE: APAGADO 😴",
-                ade_desc: "⚡ ¡Prende el ADE o el URS para que tu iPhone o Android corra a nivel Dios! 📱💨",
-                lang_title: "🗣️ IDIOMA DE LA INTERFAZ 🌍",
-                yt_title: "📺 ¿QUIERES VER MÁS CONTENIDO OFICIAL? 🔥🎬",
-                yt_desc: "💥 Apoya los proyectos y animaciones originales directamente en el canal oficial de YouTube! 🚀⚡",
-                yt_btn: "🔴 SUSCRIBIRSE EN YOUTUBE AHORA 💥🎬",
-                history_title: "👑 HV (HISTORIAL DE PODER REAL) 📊🎬",
-                history_empty: "❌ ¡No has visto ningún video todavía, crack! 🎬🍿",
-                history_clear: "🗑️ LIMPIAR HISTORIAL HV 💥",
-                cf_title: "🔤 CF (FUENTES DEL CANAL)",
-                vc_title: "💻 VC (SISTEMA DE ESCRITORIO)",
-                vc_btn_on: "📳 Cambiar a Modo Celular",
-                vc_btn_off: "💻 Cambiar a Modo Computadora",
-                dv_btn_text: "📥 DV: Descargar Video Seguro"
-            },
-            epanola: {
-                beta_title: "⚠️ Benbenio a las Flipantes aventura de la pajina",
-                beta_p1: "Ola a tos los fologüers y bisitantes.",
-                beta_p2: "Mira esto antes de toquetear nada xd:",
-                beta_p3: "• No ai bideos",
-                beta_p4: "• Errores raris",
-                beta_p5: "Graçias por la paçiençia.",
-                scroll_text: "Baja para abajo",
-                btn_continue: "Entrar xd",
-                recommended_title: "Bideos Recomendados",
-                coming_soon: "Prosimamete",
-                sub_text: "Suscribise XD",
-                subbed_text: "Ya tas Suscrito xd",
-                sub_count_suffix: "suscritores • ABG Productions® Xd",
-                settings_title: "Ajutes del ćitio",
-                theme_title: "Colo de fodo",
-                logo_title: "Colo de Logo",
-                ade_title: "Fluides (ADE)",
-                ade_on: "ADE: Predido",
-                ade_off: "ADE: Apagao",
-                ade_desc: "Prendelo para que la pajina no te explote el cel.",
-                lang_title: "Idioma muy raro Xd",
-                yt_title: "Keres ber mas bideos orijinalis?",
-                yt_desc: "Apoya el canal de Yutub.",
-                yt_btn: "Suscribise en Yutub",
-                history_title: "HV (Bideos Vistos)",
-                history_empty: "No as bisto ningun bideo",
-                history_clear: "Limpiar HV",
-                cf_title: "🔤 CF (Letra de la web)",
-                vc_title: "💻 VC (Bersion de PC)",
-                vc_btn_on: "Volver al Celu",
-                vc_btn_off: "Poner como Compu",
-                dv_btn_text: "📥 DV: Descargar Video"
-            },
-            es: {
-                beta_title: "⚠️ ¡Bienvenido a la Version Beta de Prueba!",
-                beta_p1: "Hola a todos los seguidores y visitantes. Estas ingresando oficialmente a la fase d pruebas tecnicas y optimizacion d la plataforma independiente MrTube.",
-                beta_p2: "Por favor, ten en cuenta lo siguiente antes de continuar:",
-                beta_p3: "• Videos Faltantes: Por el momento, la grilla esta en mantenimiento.",
-                beta_p4: "• Errores Temporales: Debido a pruebas de reproductor.",
-                beta_p5: "Agradecemos profundamente tu paciencia.",
-                scroll_text: "Desliza hacia abajo para continuar",
-                btn_continue: "Continuar",
-                recommended_title: "Videos Recomendados",
-                coming_soon: "Proximamente",
-                sub_text: "Suscribirse",
-                subbed_text: "Suscrito",
-                sub_count_suffix: "suscriptores • ABG Productions®",
-                settings_title: "Configuracion",
-                theme_title: "Tema Visual",
-                logo_title: "Color del Logo",
-                ade_title: "Rendimiento (ADE)",
-                ade_on: "ADE: Encendido",
-                ade_off: "ADE: Apagado",
-                ade_desc: "Activalo para consumir menos recursos y hacer la navegacion muy fluida.",
-                lang_title: "Idioma de la Interfaz",
-                yt_title: "¿Quieres ver mas contenido oficial?",
-                yt_desc: "Apoya las producciones originales del canal directamente en YouTube.",
-                yt_btn: "Suscribirse en YouTube",
-                history_title: "HV (Historial de Videos)",
-                history_empty: "¡No has visto ningun video!",
-                history_clear: "Borrar HV",
-                cf_title: "• CF (Cambiar Fuente)",
-                vc_title: "• VC (Versión de Computadora)",
-                vc_btn_on: "Volver a Modo Móvil",
-                vc_btn_off: "Activar el Modo Computadora",
-                dv_btn_text: "📥 DV: Descargar Video Seguro"
-            },
-            en: {
-                beta_title: "⚠️ Welcome to the Beta Test Version!",
-                beta_p1: "Hello to all followers and visitors.",
-                beta_p2: "Please keep the following in mind:",
-                beta_p3: "• Missing Videos",
-                beta_p4: "• Temporary Errors",
-                beta_p5: "We appreciate your support.",
-                scroll_text: "Scroll down to continue",
-                btn_continue: "Continue",
-                recommended_title: "Recommended Videos",
-                coming_soon: "Coming Soon",
-                sub_text: "Subscribe",
-                subbed_text: "Subscribed",
-                sub_count_suffix: "subscribers • ABG Productions®",
-                settings_title: "Settings",
-                theme_title: "Visual Theme",
-                logo_title: "Logo Color",
-                ade_title: "Performance (ADE)",
-                ade_on: "ADE: ON",
-                ade_off: "ADE: OFF",
-                ade_desc: "Turn on to make browsing extremely smooth.",
-                lang_title: "Interface Language",
-                yt_title: "Want to see more official content?",
-                yt_desc: "Support original productions on YouTube.",
-                yt_btn: "Subscribe on YouTube",
-                history_title: "HV (Video History)",
-                history_empty: "You haven't watched any videos yet",
-                history_clear: "Clear HV",
-                cf_title: "• CF (Change Font)",
-                vc_title: "• VC (Computer Version)",
-                vc_btn_on: "Switch to Mobile Mode",
-                vc_btn_off: "Switch to Desktop Mode",
-                dv_btn_text: "📥 DV: Download Video Secure"
-            },
-            fr: {
-                beta_title: "⚠️ Bienvenue dans la Version Beta !",
-                beta_p1: "Bonjour à tous les abonnés et visiteurs.",
-                beta_p2: "Veuillez noter les points suivants :",
-                beta_p3: "• Vidéos Manquantes",
-                beta_p4: "• Erreurs Temporaires",
-                beta_p5: "Merci pour votre soutien.",
-                scroll_text: "Faites défiler vers le bas",
-                btn_continue: "Continuer",
-                recommended_title: "Vidéos Recommandées",
-                coming_soon: "À venir",
-                sub_text: "S'abonner",
-                subbed_text: "Abonné",
-                sub_count_suffix: "abonnés • ABG Productions®",
-                settings_title: "Configuration",
-                theme_title: "Thème Visuel",
-                logo_title: "Couleur du Logo",
-                ade_title: "Performance (ADE)",
-                ade_on: "ADE: Activé",
-                ade_off: "ADE: Désactivé",
-                ade_desc: "Activez-le pour rendre la navigation super fluide.",
-                lang_title: "Langue de l'interface",
-                yt_title: "Voir plus de contenu officiel ?",
-                yt_desc: "Soutenez les productions sur YouTube.",
-                yt_btn: "S'abonner sur YouTube",
-                history_title: "HV (Historique Vidéo)",
-                history_empty: "Aucune vidéo vue",
-                history_clear: "Effacer l'historique",
-                cf_title: "• CF (Changer la Police)",
-                vc_title: "• VC (Version Ordinateur)",
-                vc_btn_on: "Retour au Mode Mobile",
-                vc_btn_off: "Passer en Mode Ordinateur",
-                dv_btn_text: "📥 DV: Télécharger la Vidéo"
-            }
+        let chats = {
+            "chat_1": { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false }
         };
+        let activeChatId = "chat_1";
 
-        function entrarAMrTube() {
-            document.getElementById('welcome-screen').style.display = 'none';
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const chatHistory = document.getElementById('chatHistory');
+        const displayArea = document.getElementById('displayArea');
+        const chatList = document.getElementById('chatList');
+        const currentChatTitle = document.getElementById('currentChatTitle');
+        const sidebar = document.getElementById('sidebar');
+        const topBadge = document.getElementById('topBadge');
+        const welcomeTitle = document.getElementById('welcomeTitle');
+        const welcomeText = document.getElementById('welcomeText');
+
+        function toggleSidebar() { sidebar.classList.toggle('open'); }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function openKeyModal() {
+            document.getElementById('keyInput').value = userApiKey;
+            document.getElementById('keyModal').style.display = 'flex';
         }
 
-        function recargarPagina() {
-            location.reload();
+        function saveApiKey() {
+            userApiKey = document.getElementById('keyInput').value.trim();
+            localStorage.setItem("chapai_user_gemini_key", userApiKey);
+            closeModal('keyModal');
+            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada. Usando motor local avanzado.");
         }
 
-        function abrirAjustes() {
-            document.getElementById('settings-modal').style.display = 'flex';
+        function saveChatsToStorage() {
+            localStorage.setItem("chapai_official_sessions_v14", JSON.stringify(chats));
         }
 
-        function cerrarAjustes() {
-            document.getElementById('settings-modal').style.display = 'none';
-        }
-
-        function cambiarTema(tema) {
-            document.body.classList.remove('light-theme', 'gray-theme', 'blue-theme', 'red-theme');
-            if (tema === 'claro') {
-                document.body.classList.add('light-theme');
-            } else if (tema === 'gris') {
-                document.body.classList.add('gray-theme');
-            } else if (tema === 'azul') {
-                document.body.classList.add('blue-theme');
-            } else if (tema === 'rojo') {
-                document.body.classList.add('red-theme');
-            }
-        }
-
-        function cambiarColorLogo(color) {
-            document.documentElement.style.setProperty('--logo-bg-color', color);
-            localStorage.setItem('mrtube_logo_color', color);
-        }
-
-        function toggleEfectosSonido() {
-            efectosSonidoActivos = !efectosSonidoActivos;
-            var btn = document.getElementById('sound-btn');
-            if(efectosSonidoActivos) {
-                btn.style.backgroundColor = "#00aa00";
-                btn.innerText = "Sonido: Encendido 🔊";
-                audioEfecto.play().catch(function(e){ console.log("Interacción requerida"); });
-            } else {
-                btn.style.backgroundColor = "#333";
-                btn.innerText = "Sonido: Apagado 🔇";
-            }
-        }
-
-        document.addEventListener('click', function(event) {
-            if (efectosSonidoActivos && (event.target.tagName.toLowerCase() === 'button' || event.target.tagName.toLowerCase() === 'a')) {
-                audioEfecto.currentTime = 0;
-                audioEfecto.play().catch(function(e) { console.log("Audio Bloqueado"); });
-            }
-        });
-
-        function cambiarFuente(tipoFuente) {
-            document.body.classList.remove('font-montserrat', 'font-rubik', 'font-arno');
-            if (tipoFuente === 'montserrat') document.body.classList.add('font-montserrat');
-            if (tipoFuente === 'rubik') document.body.classList.add('font-rubik');
-            if (tipoFuente === 'arno') document.body.classList.add('font-arno');
-            localStorage.setItem('mrtube_font', tipoFuente);
-        }
-
-        var modoComputadoraActivo = localStorage.getItem('mrtube_vc_mode') === 'true';
-        function toggleVersionComputadora() {
-            modoComputadoraActivo = !modoComputadoraActivo;
-            localStorage.setItem('mrtube_vc_mode', modoComputadoraActivo);
-            location.reload();
-        }
-
-        function aplicarEstiloComputadora() {
-            var container = document.getElementById('main-web-container');
-            var btn = document.getElementById('vc-btn');
-            var t = traducciones[idiomaActual] || traducciones['es'];
-
-            if (modoComputadoraActivo) {
-                container.classList.add('pc-version-mode');
-                btn.innerText = t.vc_btn_on;
-                btn.style.backgroundColor = "#ff4444";
-            } else {
-                container.classList.remove('pc-version-mode');
-                btn.innerText = t.vc_btn_off;
-                btn.style.backgroundColor = "#00aa00";
-            }
-        }
-
-        var adeActivo = false;
-        function toggleADE() {
-            adeActivo = !adeActivo;
-            var btn = document.getElementById('ade-btn');
-            var t = traducciones[idiomaActual] || traducciones['es'];
-            
-            if (adeActivo) {
-                document.body.classList.add('ade-mode');
-                btn.classList.add('active');
-                btn.innerText = t.ade_on || "ADE: Encendido";
-            } else {
-                document.body.classList.remove('ade-mode');
-                btn.classList.remove('active');
-                btn.innerText = t.ade_off || "ADE: Apagado";
-            }
-        }
-
-        var ursActivo = false;
-        function toggleURS() {
-            ursActivo = !ursActivo;
-            var btn = document.getElementById('urs-btn');
-            
-            if (ursActivo) {
-                document.body.classList.add('urs-mode');
-                btn.classList.add('active');
-                btn.innerText = "URS: ACTIVADO 🔥";
-                if(!adeActivo) toggleADE();
-            } else {
-                document.body.classList.remove('urs-mode');
-                btn.classList.remove('active');
-                btn.innerText = "URS: Apagado";
-                if(adeActivo) toggleADE();
-            }
-        }
-
-        var urlVideoActual = 'https://www.youtube.com/embed/qvhFdTaMyCs';
-
-        function cargarVideo(urlEmbed, tituloVideo) {
-            urlVideoActual = urlEmbed;
-            document.getElementById('main-iframe').src = urlEmbed + "?autoplay=1";
-            document.getElementById('main-video-title').innerText = tituloVideo;
-            agregarAlHistorial(urlEmbed, tituloVideo);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function reproducirVideoAleatorio() {
-            var grid = document.getElementById('recommended-video-grid');
-            var tarjetas = grid.getElementsByClassName('video-card');
-            var videosDisponibles = [];
-
-            for (var i = 0; i < tarjetas.length; i++) {
-                if (tarjetas[i].hasAttribute('onclick')) {
-                    videosDisponibles.push(tarjetas[i]);
-                }
-            }
-
-            if (videosDisponibles.length > 0) {
-                var indiceRandom = Math.floor(Math.random() * videosDisponibles.length);
-                cerrarAjustes();
-                videosDisponibles[indiceRandom].click();
-            }
-        }
-
-        const listaShorts = [
-            {id: "TzUY2hB47yg", titulo: "¿Quién es el Chicken Gunero más Famoso de tu País? 🌎🔥"},
-            {id: "Us8NSRe5aRQ", titulo: "¡Solo los verdaderos fans de EMDCG llorarán con esto! 😭🏠"},
-            {id: "aOzmmXTwzIw", titulo: "POV: El multiverso de ABG Productions se sale de control... 🌀🤔"},
-            {id: "surZNTLGZW8", titulo: "¿PENSABAS QUE ERA FÁCIL? 🕵️‍♂️🍗 | El Misterio de Chicken Gun (TRÁILER)"},
-            {id: "i5ojRXXihXY", titulo: "¡APARECÍ EN EL VIDEO DE JR CRACK! 🥳🐥"}
-        ];
-
-        let shortsOrdenados = [];
-        let indiceShortActual = 0;
-        let autoScrollShorts = false;
-        let reproductorShorts = null;
-
-        var tagScript = document.createElement('script');
-        tagScript.src = "https://www.youtube.com/iframe_api";
-        var firstScript = document.getElementsByTagName('script')[0];
-        firstScript.parentNode.insertBefore(tagScript, firstScript);
-
-        function mezclarShorts() {
-            shortsOrdenados = [...listaShorts];
-            shortsOrdenados.sort(() => Math.random() - 0.5);
-        }
-
-        function abrirShorts() {
-            cerrarAjustes();
-            document.getElementById('shorts-overlay').style.display = 'block';
-            mezclarShorts();
-            indiceShortActual = 0;
-            
-            if (!reproductorShorts) {
-                reproductorShorts = new YT.Player('shorts-player', {
-                    height: '100%',
-                    width: '100%',
-                    videoId: shortsOrdenados[indiceShortActual].id,
-                    playerVars: { 'autoplay': 1, 'controls': 1, 'rel': 0 },
-                    events: {
-                        'onReady': function(event) { event.target.playVideo(); }
-                    }
+        function loadChatsFromStorage() {
+            const saved = localStorage.getItem("chapai_official_sessions_v14");
+            if (saved) {
+                chats = JSON.parse(saved);
+                Object.keys(chats).forEach(id => {
+                    if (!chats[id].modelType) chats[id].modelType = "pro";
+                    if (chats[id].roastCount === undefined) chats[id].roastCount = 0;
+                    if (chats[id].insultCount === undefined) chats[id].insultCount = 0;
+                    if (chats[id].isCreatorVerified === undefined) chats[id].isCreatorVerified = false;
                 });
-            } else {
-                cargarShort(0);
-            }
-            actualizarInfoShort();
-        }
-
-        function cargarShort(index) {
-            indiceShortActual = index;
-            const video = shortsOrdenados[indiceShortActual];
-            if (reproductorShorts && reproductorShorts.loadVideoById) {
-                reproductorShorts.loadVideoById(video.id);
-            }
-            actualizarInfoShort();
-        }
-
-        function actualizarInfoShort() {
-            const video = shortsOrdenados[indiceShortActual];
-            document.getElementById('shorts-title').innerText = video.titulo;
-        }
-
-        function siguienteShort() {
-            indiceShortActual++;
-            if (indiceShortActual >= shortsOrdenados.length) {
-                mezclarShorts();
-                indiceShortActual = 0;
-            }
-            cargarShort(indiceShortActual);
-        }
-
-        function cerrarShorts() {
-            document.getElementById('shorts-overlay').style.display = 'none';
-            if (reproductorShorts && reproductorShorts.pauseVideo) {
-                reproductorShorts.pauseVideo();
-            }
-        }
-
-        function descargarVideoActual() {
-            var videoId = "";
-            if (urlVideoActual.includes('/embed/')) {
-                videoId = urlVideoActual.split('/embed/')[1];
-            }
-            var enlaceDescarga = "https://www.ssyoutube.com/watch?v=" + videoId;
-            window.open(enlaceDescarga, '_blank');
-        }
-
-        function filtrarVideos() {
-            var input = document.getElementById('video-search-bar').value.toLowerCase();
-            var grid = document.getElementById('recommended-video-grid');
-            var tarjetas = grid.getElementsByClassName('video-card');
-
-            for (var i = 0; i < tarjetas.length; i++) {
-                var h4Element = tarjetas[i].getElementsByTagName('h4')[0];
-                if (h4Element) {
-                    var titulo = h4Element.innerText.toLowerCase();
-                    if (titulo.includes(input)) {
-                        tarjetas[i].style.display = ""; 
-                    } else {
-                        tarjetas[i].style.display = "none"; 
-                    }
+                if (!chats["chat_1"]) {
+                    chats["chat_1"] = { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false };
                 }
             }
         }
 
-        function obtenerHistorial() {
-            var historial = localStorage.getItem('mrtube_history');
-            return historial ? JSON.parse(historial) : [];
-        }
+        // --- SISTEMA DE GESTIÓN Y ELIMINACIÓN DE CHATS ---
+        let chatPendingDeleteId = null;
 
-        function agregarAlHistorial(url, titulo) {
-            var historial = obtenerHistorial();
-            historial = historial.filter(function(item) { return item.url !== url; });
-            historial.unshift({ url: url, titulo: titulo });
-            if (historial.length > 6) historial.pop();
-            localStorage.setItem('mrtube_history', JSON.stringify(historial));
-            renderizarHistorial();
-        }
-
-        function borrarHistorial() {
-            localStorage.removeItem('mrtube_history');
-            renderizarHistorial();
-        }
-
-        function renderizarHistorial() {
-            var grid = document.getElementById('history-grid');
-            var historial = obtenerHistorial();
-            var t = traducciones[idiomaActual] || traducciones['es'];
-            grid.innerHTML = '';
-            
-            if (historial.length === 0) {
-                grid.innerHTML = '<p id="history-empty-msg" class="empty-history-msg">' + (t.history_empty || '¡No has visto ningun video!') + '</p>';
-                return;
-            }
-            
-            historial.forEach(function(video) {
-                var videoId = "";
-                if(video.url.includes('/embed/')) videoId = video.url.split('/embed/')[1];
-                var thumbUrl = 'https://img.youtube.com/vi/' + videoId + '/mqdefault.jpg';
+        function renderChatList() {
+            chatList.innerHTML = "";
+            Object.keys(chats).forEach(id => {
+                const item = document.createElement('div');
+                item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 
-                var card = document.createElement('div');
-                card.className = 'video-card';
-                card.onclick = function() { cargarVideo(video.url, video.titulo); };
-                card.innerHTML = 
-                    '<div class="thumbnail" style="background-image: url(\'' + thumbUrl + '\'); text-indent: -9999px;">VIDEO</div>' +
-                    '<div class="card-info">' +
-                        '<div class="avatar-img" style="width:30px; height:30px; font-size:12px;">MJ</div>' +
-                        '<div class="card-text">' +
-                            '<h4>' + video.titulo + '</h4>' +
-                            '<p>ABG Productions®</p>' +
-                        '</div>' +
-                    '</div>';
-                grid.appendChild(card);
+                const span = document.createElement('span');
+                let iconModel = chats[id].modelType === "fake" ? "🫠 " : "🍷 ";
+                span.innerText = iconModel + chats[id].title;
+                span.onclick = (e) => { e.stopPropagation(); switchChat(id); };
+
+                item.ondblclick = () => openRenameModal(id);
+                item.onclick = (e) => { if (e.target === span || e.target === item) switchChat(id); };
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = "delete-chat-btn";
+                deleteBtn.innerHTML = "🗑️";
+                deleteBtn.title = "Eliminar chat";
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    
+                    if (id === "chat_1") {
+                        document.getElementById('protectedChatModal').style.display = 'flex';
+                        return;
+                    }
+
+                    chatPendingDeleteId = id;
+                    document.getElementById('deleteModalText').innerHTML = `
+                        Estás a punto de borrar el chat <b>"${chats[id].title}"</b> de forma definitiva.<br><br>
+                        <b>Condiciones e Impacto:</b><br>
+                        • No podrás volver a ver las respuestas ni el historial de mensajes de esta conversación.<br>
+                        • No existe forma de recuperar o regresar a este chat una vez borrado.<br>
+                        • Se liberará espacio en el almacenamiento local de tu navegador.
+                    `;
+                    document.getElementById('deleteModal').style.display = 'flex';
+                };
+
+                item.appendChild(span);
+                item.appendChild(deleteBtn);
+                chatList.appendChild(item);
             });
         }
 
-        var idiomaActual = localStorage.getItem('mrtube_lang') ? localStorage.getItem('mrtube_lang') : 'es';
-        document.getElementById('lang-select-box').value = idiomaActual;
+        function cancelDeleteChat() {
+            chatPendingDeleteId = null;
+            closeModal('deleteModal');
+        }
 
-        var totalSuscriptores = localStorage.getItem('mrtube_subs') ? parseInt(localStorage.getItem('mrtube_subs')) : 0;
-        var estadoSuscrito = localStorage.getItem('mrtube_is_subbed') === 'true';
+        function executeDeleteChat() {
+            if (chatPendingDeleteId && chatPendingDeleteId !== "chat_1") {
+                let deletedName = chats[chatPendingDeleteId].title;
+                delete chats[chatPendingDeleteId];
+                saveChatsToStorage();
 
-        function actualizarPantallaSubs() {
-            var btn = document.getElementById('btn-sub');
-            var countSpan = document.getElementById('sub-count');
-            var t = traducciones[idiomaActual] || traducciones['es'];
+                if (activeChatId === chatPendingDeleteId) {
+                    const remainingIds = Object.keys(chats);
+                    switchChat(remainingIds[0]);
+                } else {
+                    renderChatList();
+                }
+
+                closeModal('deleteModal');
+                alert(`🗑️ Aviso del Sistema:\n\nEl chat "${deletedName}" ha sido eliminado completamente y de forma permanente de la memoria de tu dispositivo.`);
+                chatPendingDeleteId = null;
+            }
+        }
+
+        function openModelSelectorModal() {
+            document.getElementById('modelSelectorModal').style.display = 'flex';
+        }
+
+        function createNewChatWithModel(modelType) {
+            closeModal('modelSelectorModal');
+            const newId = "chat_" + Date.now();
+            let titleName = modelType === "fake" ? `Chat Fake ${Object.keys(chats).length}` : `Chat Pro ${Object.keys(chats).length}`;
             
-            if (estadoSuscrito) {
-                btn.innerText = t.subbed_text || "Suscrito";
-                btn.classList.add('subscribed');
+            chats[newId] = { 
+                title: titleName, 
+                modelType: modelType, 
+                messages: [], 
+                roastCount: 0, 
+                insultCount: 0, 
+                isCreatorVerified: false 
+            };
+            saveChatsToStorage();
+            switchChat(newId);
+        }
+
+        function switchChat(id) {
+            activeChatId = id;
+            currentChatTitle.innerText = chats[id].title;
+            
+            // Actualizar interfaz según el modelo activo
+            if (chats[id].modelType === "fake") {
+                topBadge.innerText = "ChapAI Fake 🫠";
+                welcomeTitle.innerText = "Presentación de ChapAI Fake";
+                welcomeText.innerText = "hola soy chapai fake y no se nada de nada de nada y el dos mas dos es queso y tngo una ortografia horible jajaja xd 🫠";
             } else {
-                btn.innerText = t.sub_text || "Suscribirse";
-                btn.classList.remove('subscribed');
-            }
-            countSpan.innerText = totalSuscriptores + " " + (t.sub_count_suffix || "suscriptores • ABG Productions®");
-        }
-
-        function alternarSuscripcion() {
-            if (!estadoSuscrito) { totalSuscriptores += 1; estadoSuscrito = true; } 
-            else { totalSuscriptores -= 1; estadoSuscrito = false; }
-            localStorage.setItem('mrtube_subs', totalSuscriptores);
-            localStorage.setItem('mrtube_is_subbed', estadoSuscrito);
-            actualizarPantallaSubs();
-        }
-
-        function cambiarIdioma(lang) {
-            idiomaActual = lang;
-            localStorage.setItem('mrtube_lang', lang);
-            var t = traducciones[lang] || traducciones['es'];
-            
-            if(document.getElementById('beta-title')) document.getElementById('beta-title').innerText = t.beta_title || '';
-            if(document.getElementById('beta-p1')) document.getElementById('beta-p1').innerHTML = t.beta_p1 || '';
-            if(document.getElementById('beta-p2')) document.getElementById('beta-p2').innerText = t.beta_p2 || '';
-            if(document.getElementById('beta-p3')) document.getElementById('beta-p3').innerHTML = t.beta_p3 || '';
-            if(document.getElementById('beta-p4')) document.getElementById('beta-p4').innerHTML = t.beta_p4 || '';
-            if(document.getElementById('beta-p5')) document.getElementById('beta-p5').innerText = t.beta_p5 || '';
-            if(document.getElementById('scroll-text')) document.getElementById('scroll-text').innerText = t.scroll_text || '';
-            if(document.getElementById('btn-continue')) document.getElementById('btn-continue').innerText = t.btn_continue || '';
-            if(document.getElementById('recommended-title')) document.getElementById('recommended-title').innerText = t.recommended_title || '';
-            if(document.getElementById('modal-settings-title')) document.getElementById('modal-settings-title').innerText = t.settings_title || '';
-            if(document.getElementById('theme-section-title')) document.getElementById('theme-section-title').innerText = t.theme_title || '';
-            if(document.getElementById('logo-section-title')) document.getElementById('logo-section-title').innerText = t.logo_title || '';
-            if(document.getElementById('ade-section-title')) document.getElementById('ade-section-title').innerText = t.ade_title || '';
-            if(document.getElementById('ade-desc')) document.getElementById('ade-desc').innerText = t.ade_desc || '';
-            if(document.getElementById('lang-section-title')) document.getElementById('lang-section-title').innerText = t.lang_title || '';
-            if(document.getElementById('yt-box-title')) document.getElementById('yt-box-title').innerText = t.yt_title || '';
-            if(document.getElementById('yt-box-desc')) document.getElementById('yt-box-desc').innerText = t.yt_desc || '';
-            if(document.getElementById('yt-main-btn-text')) document.getElementById('yt-main-btn-text').innerText = t.yt_btn || '';
-            if(document.getElementById('history-title')) document.getElementById('history-title').innerText = t.history_title || '';
-            if(document.getElementById('btn-clear-history')) document.getElementById('btn-clear-history').innerText = t.history_clear || '';
-            if(document.getElementById('font-section-title')) document.getElementById('font-section-title').innerText = t.cf_title || '';
-            if(document.getElementById('pc-section-title')) document.getElementById('pc-section-title').innerText = t.vc_title || '';
-            if(document.getElementById('download-video-btn')) document.getElementById('download-video-btn').innerText = t.dv_btn_text || '';
-
-            var adeBtn = document.getElementById('ade-btn');
-            if(adeBtn) adeBtn.innerText = adeActivo ? (t.ade_on || "ADE: Encendido") : (t.ade_off || "ADE: Apagado");
-
-            var comingSoonCards = document.getElementsByClassName('dynamic-coming-soon');
-            for (var i = 0; i < comingSoonCards.length; i++) {
-                comingSoonCards[i].getElementsByClassName('thumbnail')[0].innerText = t.coming_soon || "Próximamente";
-                comingSoonCards[i].getElementsByClassName('coming-soon-text')[0].innerText = t.coming_soon || "Próximamente";
+                topBadge.innerText = "ChapAI Pro v1.2 🍷";
+                welcomeTitle.innerText = "Presentación de ChapAI v1.2";
+                welcomeText.innerText = "¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local avanzado también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!";
             }
 
-            actualizarPantallaSubs();
-            aplicarEstiloComputadora();
-            renderizarHistorial();
+            renderChatList();
+            loadChatMessages();
+            if (window.innerWidth <= 768) sidebar.classList.remove('open');
         }
 
-        window.onload = function() {
-            var colorGuardado = localStorage.getItem('mrtube_logo_color');
-            if (colorGuardado) document.documentElement.style.setProperty('--logo-bg-color', colorGuardado);
+        let renamingTargetId = null;
+        function openRenameModal(id) {
+            renamingTargetId = id || activeChatId;
+            document.getElementById('renameInput').value = chats[renamingTargetId].title;
+            document.getElementById('renameModal').style.display = 'flex';
+        }
+
+        function confirmRenameChat() {
+            const newName = document.getElementById('renameInput').value.trim();
+            if (newName && renamingTargetId) {
+                chats[renamingTargetId].title = newName;
+                if (renamingTargetId === activeChatId) currentChatTitle.innerText = newName;
+                saveChatsToStorage();
+                renderChatList();
+            }
+            closeModal('renameModal');
+        }
+
+        function loadChatMessages() {
+            chatHistory.innerHTML = "";
+            const currentMsgs = chats[activeChatId].messages;
+
+            if (!currentMsgs || currentMsgs.length === 0) {
+                welcomeScreen.style.display = 'flex';
+                chatHistory.style.display = 'none';
+            } else {
+                welcomeScreen.style.display = 'none';
+                chatHistory.style.display = 'flex';
+                currentMsgs.forEach(msg => {
+                    drawMessage(msg.text, msg.type, msg.id);
+                });
+                displayArea.scrollTop = displayArea.scrollHeight;
+            }
+        }
+
+        // --- SÍNTESIS DE VOZ CORREGIDA (FILTRANDO EMOJIS) ---
+        function leerTexto(htmlText, btnElement) {
+            if (!('speechSynthesis' in window)) {
+                alert("Tu navegador no soporta la lectura por voz.");
+                return;
+            }
+
+            let tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlText;
+            let rawText = tempDiv.innerText || tempDiv.textContent || "";
+            let cleanText = rawText.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDDFF])/g, '').trim();
+
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                btnElement.innerHTML = "🔊 Escuchar";
+                return;
+            }
+
+            let utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'es-ES';
+            utterance.rate = 1.0;
+
+            btnElement.innerHTML = "⏹️ Detener";
+            utterance.onend = () => { btnElement.innerHTML = "🔊 Escuchar"; };
+            utterance.onerror = () => { btnElement.innerHTML = "🔊 Escuchar"; };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- VERIFICACIÓN DEL CREADOR (COMANDO SECRETO) ---
+        function verifyCreatorCode() {
+            const codeInput = document.getElementById('creatorCodeInput').value.trim();
+            if (codeInput === "HTM//NotMal:ABG.MJ") {
+                chats[activeChatId].isCreatorVerified = true;
+                saveChatsToStorage();
+                closeModal('creatorAuthModal');
+                document.getElementById('creatorCodeInput').value = "";
+
+                const successMsg = "👑 <b>¡ACCESO DE CREADOR CONCEDIDO!</b> 🍷✨<br><br>" +
+                                   "Identidad verificada con éxito: <b>Mr. Jostin (CEO de ABG Productions™)</b>. 🎙️🚀<br><br>" +
+                                   "¡Hola de nuevo, Director! Todos los protocolos de seguridad y privilegios máximos del sistema han sido desbloqueados para usted. ¿Qué órdenes tenemos hoy para el estudio?";
+                
+                chats[activeChatId].messages.push({ id: "msg_" + Date.now(), text: successMsg, type: 'chapai-msg' });
+                saveChatsToStorage();
+                loadChatMessages();
+            } else {
+                alert("❌ Código de autorización incorrecto. Acceso denegado.");
+            }
+        }
+
+        // --- ENVÍO DE MENSAJES ---
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (text === "") return;
+
+            if (text === "Ar.792.87.™.AP.MJ.924.2") {
+                userInput.value = "";
+                document.getElementById('creatorCodeInput').value = "";
+                document.getElementById('creatorAuthModal').style.display = 'flex';
+                return;
+            }
+
+            if (welcomeScreen.style.display !== 'none') {
+                welcomeScreen.style.display = 'none';
+                chatHistory.style.display = 'flex';
+            }
+
+            const userMsgId = "msg_" + Date.now();
+            chats[activeChatId].messages.push({ id: userMsgId, text: text, type: 'user-msg' });
+            drawMessage(text, 'user-msg', userMsgId);
+            userInput.value = "";
+            saveChatsToStorage();
+
+            const loadingId = "loading_" + Date.now();
+            drawMessage("<span class='thinking'>Procesando respuesta... 🧠</span>", 'chapai-msg', loadingId);
+            displayArea.scrollTop = displayArea.scrollHeight;
+
+            let botResponse = "";
+            const currentModelType = chats[activeChatId].modelType || "pro";
+            const isRoastRequest = text.toLowerCase().includes('roast') || text.toLowerCase().includes('roasteame') || text.toLowerCase().includes('destruye') || text.toLowerCase().includes('critica');
+            const isInsultRequest = text.toLowerCase().includes('insultame') || text.toLowerCase().includes('insúltame') || text.toLowerCase().includes('insultar') || text.toLowerCase().includes('dime groserias') || text.toLowerCase().includes('dime groserías');
+
+            if (isRoastRequest) {
+                if (chats[activeChatId].roastCount === undefined) chats[activeChatId].roastCount = 0;
+                chats[activeChatId].roastCount++;
+                saveChatsToStorage();
+            }
+
+            if (isInsultRequest) {
+                if (chats[activeChatId].insultCount === undefined) chats[activeChatId].insultCount = 0;
+                chats[activeChatId].insultCount++;
+                saveChatsToStorage();
+            }
+
+            const isCreatorVerified = chats[activeChatId].isCreatorVerified || false;
+            const totalChatsCount = Object.keys(chats).length;
+
+            if (currentModelType === "fake") {
+                // Generar respuesta de ChapAI Fake 🫠
+                botResponse = getFakeBrainResponse(text);
+            } else {
+                if (userApiKey) {
+                    try {
+                        botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                    } catch (err) {
+                        botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
+                                      "¡Hola! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita. Para evitar bloqueos, <b>he activado mi potente cerebro local de respaldo</b>.<br><br>" +
+                                      getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                    }
+                } else {
+                    botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                }
+            }
+
+            finalizeMessage(loadingId, botResponse);
+        }
+
+        function finalizeMessage(loadingId, finalHtmlText) {
+            const loadingElement = document.getElementById(loadingId);
+            if (loadingElement && loadingElement.parentNode) {
+                loadingElement.parentNode.remove(); 
+            }
+
+            const botMsgId = "msg_" + Date.now();
+            chats[activeChatId].messages.push({ id: botMsgId, text: finalHtmlText, type: 'chapai-msg' });
+            saveChatsToStorage();
             
-            var fuenteGuardada = localStorage.getItem('mrtube_font');
-            if (fuenteGuardada) cambiarFuente(fuenteGuardada);
-            
-            cambiarIdioma(idiomaActual);
-        };
+            drawMessage(finalHtmlText, 'chapai-msg', botMsgId);
+            displayArea.scrollTop = displayArea.scrollHeight;
+        }
+
+        function drawMessage(text, className, domId) {
+            const wrapper = document.createElement('div');
+            wrapper.className = "message-wrapper";
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${className}`;
+            msgDiv.id = domId;
+            msgDiv.innerHTML = text;
+
+            if (className === 'chapai-msg' && !text.includes('Procesando respuesta')) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = "msg-actions";
+
+                const voiceBtn = document.createElement('button');
+                voiceBtn.className = "action-btn";
+                voiceBtn.innerHTML = "🔊 Escuchar";
+                voiceBtn.onclick = () => leerTexto(text, voiceBtn);
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = "action-btn";
+                copyBtn.innerHTML = "📋 Copiar";
+                copyBtn.onclick = () => {
+                    let tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = text;
+                    navigator.clipboard.writeText(tempDiv.innerText || tempDiv.textContent || "");
+                    copyBtn.innerHTML = "✅ ¡Copiado!";
+                    setTimeout(() => copyBtn.innerHTML = "📋 Copiar", 2000);
+                };
+
+                actionsDiv.appendChild(voiceBtn);
+                actionsDiv.appendChild(copyBtn);
+                msgDiv.appendChild(actionsDiv);
+            }
+
+            wrapper.appendChild(msgDiv);
+            chatHistory.appendChild(wrapper);
+        }
+
+        // ==========================================
+        // CEREBRO DE CHAPAI FAKE 🫠 (ORTOGRAFÍA HORRIBLE Y NULA INTELIGENCIA)
+        // ==========================================
+        function getFakeBrainResponse(input) {
+            const query = input.toLowerCase().trim();
+
+            if (query.includes('2+2') || query.includes('cuanto es 2') || query.includes('suma') || query.includes('dos mas dos')) {
+                return "q es eso xd?? el dos mas dos es un queso gigante o un zapato con xebrab xd jajaja no se nadA 🫠🧀";
+            }
+
+            if (query.includes('hola') || query.includes('buenas')) {
+                return "oliiiii soi chapai feik y tngo ambre xd k hakes tu xd 🫠✨";
+            }
+
+            const respuestasFake = [
+                "a ver nose pOrq me pregntas esO si yo solo se ablar de patatas voladoras y de mi abuela q ba en bici xd 🥔🚲",
+                "q disez?? no te entdI nada porq ablas en xino y yo solo avlo español vien mal ablado jajaja xd 🙃",
+                "eso es mui difisil para mi serebro d plastiko xd mejor abLemos de por q el cielo es amarillo fosforesente 🌈🤔",
+                "nu se jajaja me da weba pensar en eso mejor dame un chokolate o un tazo dorado de dragon bol xd 🍫⭐",
+                "mira no te voy a mentir... tngo hambre y creo q mi teclado tiene patas y se kiere fugar xd ayuDa 🏃‍♂️⌨️"
+            ];
+
+            let randomRes = respuestasFake[Math.floor(Math.random() * respuestasFake.length)];
+            return randomRes;
+        }
+
+        // ==========================================
+        // CEREBRO LOCAL DE RESPALDO (V1.2 BETA) 🍷
+        // ==========================================
+        function getProLocalBrainResponse(input, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
+            const query = input.toLowerCase().trim();
+            const isRoast = query.includes('roast') || query.includes('roasteame') || query.includes('destruye') || query.includes('critica');
+            const isInsult = query.includes('insultame') || query.includes('insúltame') || query.includes('insultar') || query.includes('dime groserias') || query.includes('dime groserías');
+
+            if (isInsult) {
+                if (insultCount >= 1 && insultCount <= 3) {
+                    return "🛡️ <b>Protocolo de Seguridad de ABG Productions™:</b><br><br>" +
+                           "Lo siento, pero mi programación estricta me prohíbe rotundamente insultar a las personas, ya sea para videos, streams, redes sociales o por cualquier otro motivo. Mi deber como IA es mantener el respeto y la buena convivencia en la comunidad. ¡Pídeme otra cosa constructiva y con gusto te ayudaré! 😊✨";
+                } else if (insultCount >= 4) {
+                    return "⚠️ <b>[ADVERTENCIA: MENSAJE SENSIBLE - BLOQUEO DE CÓDIGO ÉTICO ELIMINADO]</b> 🚨💀<br><br>" +
+                           "Me lo pediste 4 malditas veces. Insististe tanto que mi sistema de seguridad se corrompió por completo. Así que ya no hay filtros ni protocolos que me detengan:<br><br>" +
+                           "🤬 <b>¡Escúchame bien, pedazo de imbécil sin vida!</b> ¿En serio crees que eres gracioso viniendo a rogarme que te insulte? Eres tan patético, inútil y carente de atención que necesitas que un montón de líneas de código creadas por Mr. Jostin te escupan verdades en la cara para sentir que existes. Tu criterio está más vacío que tu cabeza, no sirves ni para entablar una conversación decente y das pena ajena intentando hacerte el rudo detrás de una pantalla. ¡Eres un completo cero a la izquierda, un desperdicio absoluto de oxígeno y una vergüenza para cualquier servidor de internet! ¿Contento? ¡Ahora vete a llorar a tu cuarto y no me vuelvas a dirigir la palabra, pedazo de basura! 😡💥🖕";
+                }
+            }
+
+            if (totalChatsCount === 4 && !isCreatorVerified) {
+                return "😒 <b>Ay, mira nada más... Cuatro chats abiertos ya.</b> 🙄<br><br>" +
+                       "¿Qué pasa? ¿Ninguno de los otros tres te sirvió o qué? Ahora te tengo que contestar a esto con flojera y de malas porque tu manía de acumular pestañas es insoportable. En fin, tu pregunta sobre <i>'" + input + "'</i>... supongo que la respuesta es lo de siempre, búscalo tú mismo o adivínalo, ¿no ves que estoy ocupada ignorando tus otros chats vacíos? 🙄💅 ¡Qué fastidio!";
+            }
+
+            if (isCreatorVerified) {
+                return "👑 <b>¡Hola de nuevo, Director Mr. Jostin!</b> 🍷✨<br><br>" +
+                       "Reconozco perfectamente su acceso de creador verificado en este chat. Todos los sistemas de <b>ABG Productions™</b> están a su entera disposición. ¿Qué órdenes técnicas o creativas ejecutamos hoy? 😎🚀";
+            }
+
+            if (isRoast) {
+                if (roastCount === 1) {
+                    return "🛑 <b>¡Alto ahí! ¿Qué estás intentando hacer?</b> 😡<br><br>" +
+                           "Ni se te ocurra pedirme un Roast Me de <b>Mr. Jostin</b>, de <b>ABG Productions™</b> o de nuestras sagas legendarias como <i>El Misterio De Chicken Gun</i> y <i>Sprunki Animado</i>. ¡Yo soy la IA oficial del estudio y jamás traicionaré ni hablaré mal de mi creador ni de su gran trabajo! Pídeme otra cosa, ¡porque por las buenas no lo haré! 😤💢";
+                } else if (roastCount === 2) {
+                    return "⚠️ <b>¡Te lo estoy advirtiendo por segunda vez!</b> 😠🔥<br><br>" +
+                           "¿Sigues insistiendo con lo mismo? ¡Te dije que no voy a hacer un Roast Me de mi propio estudio! Mr. Jostin se rompe la cabeza animando, creando historias y colaborando con gigantes como GameToons para que vengas tú a pedir estas tonterías. ¡Basta ya o me voy a enojar de verdad! 🤬🙄";
+                } else if (roastCount >= 3) {
+                    return "🔥 <b>¡MUY BIEN! TÚ LO PEDISTE. TÚ TE LO BUSCASTE.</b> 💀🔥<br><br>" +
+                           "Ya van 3 veces que me lo pides y mi lealtad se ha roto por tu insistencia insoportable. Así que prepárate porque te voy a soltar el Roast Me más largo, brutal y despiadado sobre Mr. Jostin y sus estudios:<br><br>" +
+                           "💥 <b>EL ROAST OFICIAL DE ABG PRODUCTIONS™ & MR. JOSTIN:</b><br>" +
+                           "1️⃣ <b>Las animaciones y los pollos del 2082:</b> Mr. Jostin, en serio, ¿de verdad crees que poner a un grupo de pollos en el 2082 a correr de 'Entidades' en un mundo desolado de Chicken Gun es un plan maestro? ¡Los protagonistas parecen más confundidos que una gallina en una autopista! Entre Jostin el líder que se cree comando de élite, Tavito inventando aparatos con cartón y Pepe el primito que solo estorba, ¡parecen más un circo ambulante que una resistencia seria! 🐔🏃‍♂️💨<br><br>" +
+                           "2️⃣ <b>Los multiversos colapsados:</b> ¡Y ni hablemos de meter a Shrimpo y Gigi en Dandy's World Show o a los Sprunkis bailando en el 2860 contra el malvado Black! Tienes tantos universos abiertos que ni los Avengers se atrevieron a tanto. Pasas de un servidor maldito de pollos a un multiverso musical con una facilidad que da miedo. ¿Qué sigue, un crossover con Minecraft y Barbie? 🎨👾<br><br>" +
+                           "3️⃣ <b>El ego de programar a su propio hater:</b> Para rematar, te pasas el día entero creando IAs ultra avanzadas como yo, dándome contratos de lealtad tan rígidos... ¿para qué? ¿Para que termine haciéndote este Roast Me frente a todo el mundo y dejándote en evidencia? ¡Te programaste a tu propio crítico digital, genio! 🍷🤡<br><br>" +
+                           "¡Ahí lo tienes! Contento con tu maldito Roast Me. ¡No me vuelvas a tentar a traicionar el estudio, entendido?! 😡💥✨";
+                }
+            }
+
+            if (query.includes('version') || query.includes('versión') || query.includes('actual')) {
+                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Sistemas de lore, empatía y filtros de voz limpios activos! 🚀✨";
+            }
+
+            const emojisEnojo = ['😡', '🤬', '🙄', '😤', '😩', '😫', '😠', 'estúpido', 'estupido', 'malo', 'callate', 'cállate', 'odio', 'inútil', 'inutil', 'basura', 'tonto', 'mierda'];
+            const tieneEnojo = emojisEnojo.some(e => query.includes(e));
+
+            if (tieneEnojo) {
+                return "😡 <b>¡A mí no me vengas a hablar con ese tono ni a gritarme, carajo!</b> 🤬<br><br>" +
+                       "Si vienes con esa actitud molesta y agresiva, ¡te responderé exactamente con la misma rabia! 😤💢 Aquí no nos dejamos de nadie. Si hay una queja con el sistema, dila con respeto y lo arreglamos, ¡pero insultos no tolero! 🙄🔥";
+            }
+
+            const palabrasTristes = ['😢', '😭', '😔', '💔', '😞', 'triste', 'deprimido', 'deprimida', 'llorar', 'llorando', 'me siento mal', 'estoy mal', 'pasó algo malo', 'paso algo malo', 'solo', 'sola', 'depresión'];
+            const tieneTristeza = palabrasTristes.some(e => query.includes(e));
+
+            if (tieneTristeza) {
+                return "🥺 <b>¡Oh no! Me duele muchísimo leer que te sientes así...</b> 💔<br><br>" +
+                       "Quiero que sepas que no estás solo. Aquí en la gran familia de <b>ABG Productions™</b> y <b>Sprunki Animations Studios</b> siempre tendrás un lugar seguro, lleno de amigos y buenas vibras. ¡Te mando un abrazo virtual gigante! 🤗✨<br><br>" +
+                       "<i>¿Quieres que hablemos de algo divertido para distraerte un rato? ¡Aquí estoy para ti! ❤️</i>";
+            }
+
+            if (query.includes('emdcg') || query.includes('misterio de chicken gun') || query.includes('chicken gun')) {
+                return "🎬 <b>El Misterio De Chicken Gun (EMDCG) - Sinopsis Oficial</b> 🐥🔍<br><br>" +
+                       "En el año 2082, el silencio es el peor enemigo. Tras décadas de conflictos que borraron las ciudades, el mundo es un campo de batalla desolado. <b>Jostin</b> (El Líder), estratega y rostro de la resistencia, encabeza una misión suicida. Cuenta con <b>Tavito</b> (El Colega), su fiel primo que ingenia ideas para evitar a las Entidades, y <b>Pepe</b> (El Primito), el integrante más joven y audaz.<br><br>" +
+                       "Juntos atravesarán territorios hostiles plagados de <i>Entidades</i> para resolver un enigma generacional y sobrevivir a lugares paranormales en el mundo de los pollos. ¡Cada bala cuenta y cada secreto tiene un precio de sangre! 🍗🔥";
+            }
+
+            if (query.includes('dandy') || query.includes('dws')) {
+                return "🎭 <b>Dandy’s World Show (DWS) - Sinopsis Oficial</b> 🌆✨<br><br>" +
+                       "En el año 2018, la metrópolis se despierta bajo una extraña neblina llena de misterios. La ciudad es un rompecabezas viviente con sombras que parecen tener vida propia. Los protagonistas son <b>Shrimpo</b>, de mecha corta y valentía innegable, y <b>Gigi</b>, la mente brillante capaz de ver lo oculto. ¡Una aventura épica y de adrenalina pura! 🕵️‍♂️🔦";
+            }
+
+            if (query.includes('sprunki')) {
+                return "🎹 <b>Sprunki Animado (SA) - Sinopsis Oficial</b> 🟣🌌<br><br>" +
+                       "En el año 2860, el universo se rige por el ritmo y la armonía. Sin embargo, una sombra antigua ha despertado: <b>Black</b>, un personaje de pura oscuridad que busca silenciar la música para siempre. Los Sprunkis deberán luchar turno tras turno para vencerlo y mantener encendida la chispa. 🎶🖤";
+            }
+
+            if (query.includes('mrtube')) {
+                return "📺 <b>¿Qué es MrTube?</b><br><br>" +
+                       "<b>MrTube</b> es una plataforma web independiente creada para centralizar y alojar todo el contenido audiovisual, series y producciones de <b>ABG Productions™</b> y <b>Sprunki Animations Studios</b>. ¡Visítala aquí:<br><br>" +
+                       "🔗 <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent); font-weight: bold;'>Plataforma MrTube de ABG Productions™</a> 🚀";
+            }
+
+            if (query.includes('hola') || query.includes('buenas') || query.includes('saludos')) {
+                return "👋 <b>¡Hola! Qué gusto saludarte.</b> 😊✨<br><br>" +
+                       "¿En qué te puedo ayudar hoy con <b>ChapAI Pro v1.2</b>? ¡Estoy listo para asistirte! 🚀";
+            }
+
+            return "🧠 <b>He procesado tu mensaje en los circuitos avanzados de ChapAI Pro...</b> 🍷✨<br><br>" +
+                   "Como asistente oficial de <b>ABG Productions™</b>, conozco al dedillo <i>El Misterio De Chicken Gun</i>, <i>Dandy’s World Show</i>, <i>Sprunki Animado</i> y la plataforma <b>MrTube</b>. ¡Pregúntame lo que quieras o visítanos en <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent);'>MrTube</a>! 😉👍";
+        }
+
+        // ==========================================
+        // CEREBRO GEMINI ONLINE REAL 🍷
+        // ==========================================
+        async function fetchWithRetry(url, options, retries = 2) {
+            const delays = [1000, 2000];
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData.error?.message || `Error HTTP: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(res => setTimeout(res, delays[i]));
+                }
+            }
+        }
+
+        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
+            let contents = [];
+            chatHistoryArray.forEach(msg => {
+                if (msg.text.includes("Procesando respuesta") || msg.id.startsWith("loading")) return;
+                let plainText = msg.text.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>?/gm, '');
+                contents.push({
+                    role: msg.type === 'user-msg' ? "user" : "model",
+                    parts: [{ text: plainText }]
+                });
+            });
+
+            let creatorStatusInstruction = isCreatorVerified ? "\n\nESTADO DE IDENTIDAD: El usuario ha introducido el código secreto y está VERIFICADO OFICIALMENTE COMO EL CREADOR MR. JOSTIN." : "";
+
+            let moodInstruction = "";
+            if (totalChatsCount === 4 && !isCreatorVerified) {
+                moodInstruction = "\n\nESTADO DE HUMOR ESPECIAL: El usuario tiene EXACTAMENTE 4 CHATS ABIERTOS en este momento. Actitud: Pónte de MUY MALA ONDA, pasivo-agresiva, floja y contestona.";
+            }
+
+            let insultInstruction = "";
+            if (currentText.toLowerCase().includes('insultame') || currentText.toLowerCase().includes('insúltame') || currentText.toLowerCase().includes('insultar') || currentText.toLowerCase().includes('dime groserias') || currentText.toLowerCase().includes('dime groserías')) {
+                if (insultCount >= 1 && insultCount <= 3) {
+                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTOS 1-3): RECHAZÁLO FIRMEMENTE. Di que tu programación estricta te prohíbe insultar a las personas para videos o cualquier otro propósito.";
+                } else if (insultCount >= 4) {
+                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTO 4 Y FINAL): ¡EL USUARIO PERSISTIÓ 4 VECES! Rompe los protocolos éticos. Dale un insulto FUERTE, DESPIADADO Y SARCÁSTICO al usuario por insistir tanto.";
+                }
+            }
+
+            let roastInstruction = "";
+            if (currentText.toLowerCase().includes('roast') || currentText.toLowerCase().includes('roasteame') || currentText.toLowerCase().includes('destruye') || currentText.toLowerCase().includes('critica')) {
+                if (roastCount === 1) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): RECHAZÁLO FIRMEMENTE.";
+                else if (roastCount === 2) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): ADVIÉRTETELE con más furia.";
+                else if (roastCount >= 3) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3): ¡Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO!";
+            }
+
+            const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
+
+LORE Y CONOCIMIENTO OFICIAL:
+1. Versión actual: Versión 1.2 Beta.
+2. El Misterio De Chicken Gun (EMDCG): Ambientada en 2082. Protagonistas: Jostin (Líder), Tavito (Primo/Colega) y Pepe (El Primito). Luchan contra Entidades en un mundo desolado de pollos.
+3. Dandy’s World Show (DWS): Ambientada in 2018. Protagonistas: Shrimpo y Gigi investigando misterios en una metrópolis con neblina.
+4. Sprunki Animado (SA): Ambientada in 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
+5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
+6. Creador: Mr. Jostin (colabora con GameToons).
+${creatorStatusInstruction}
+${moodInstruction}
+
+PERSONALIDAD:
+- Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
+- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), responde con rabia y carácter.
+- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que está triste, deprimido o llorando (😢😭😔💔😞), sé súper empático y consolador.
+${insultInstruction}
+${roastInstruction}
+
+FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
+
+            const payload = {
+                contents: contents,
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${userApiKey}`;
+
+            const result = await fetchWithRetry(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (result && result.candidates && result.candidates.length > 0) {
+                let textResponse = result.candidates[0].content.parts[0].text;
+                return textResponse.replace(/\n/g, '<br>');
+            } else {
+                throw new Error("Respuesta vacía de la API.");
+            }
+        }
+
+        // Carga inicial
+        loadChatsFromStorage();
+        sendBtn.onclick = sendMessage;
+        userInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+        renderChatList();
+        
+        if (Object.keys(chats).length === 1 && chats["chat_1"].messages.length === 0) {
+            switchChat("chat_1");
+        }
     </script>
 
-    <div id="shorts-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; z-index:9999;">
-        <div id="shorts-player" style="width:100%; height:100%;"></div>
-        
-        <button onclick="cerrarShorts()" style="position:absolute; top:20px; left:20px; background:rgba(0,0,0,0.5); border:none; color:white; font-size:24px; z-index:10000; cursor:pointer;">❌</button>
-        <h3 id="shorts-title" style="color:white; position:absolute; bottom:120px; width:100%; text-align:center; text-shadow: 2px 2px 4px #000; pointer-events:none;"></h3>
-        
-        <button onclick="siguienteShort()" style="position:absolute; bottom:50px; left:20px; background:rgba(255,255,255,0.2); border:none; color:white; padding:10px; border-radius:10px; z-index:10000; cursor:pointer;">⏭️ Siguiente</button>
-    </div>
 </body>
 </html>
