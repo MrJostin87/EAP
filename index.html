@@ -645,19 +645,23 @@
         }
 
         function saveChatsToStorage() {
-            localStorage.setItem("chapai_official_sessions_v18", JSON.stringify(chats));
+            localStorage.setItem("chapai_official_sessions_v19", JSON.stringify(chats));
         }
 
         function loadChatsFromStorage() {
-            const saved = localStorage.getItem("chapai_official_sessions_v18");
+            const saved = localStorage.getItem("chapai_official_sessions_v19");
             if (saved) {
-                chats = JSON.parse(saved);
-                Object.keys(chats).forEach(id => {
-                    if (!chats[id].modelType) chats[id].modelType = "pro";
-                    if (chats[id].roastCount === undefined) chats[id].roastCount = 0;
-                    if (chats[id].insultCount === undefined) chats[id].insultCount = 0;
-                    if (chats[id].isCreatorVerified === undefined) chats[id].isCreatorVerified = false;
-                });
+                try {
+                    chats = JSON.parse(saved);
+                    Object.keys(chats).forEach(id => {
+                        if (!chats[id].modelType) chats[id].modelType = "pro";
+                        if (chats[id].roastCount === undefined) chats[id].roastCount = 0;
+                        if (chats[id].insultCount === undefined) chats[id].insultCount = 0;
+                        if (chats[id].isCreatorVerified === undefined) chats[id].isCreatorVerified = false;
+                    });
+                } catch(e) {
+                    chats = { "chat_1": { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false } };
+                }
                 if (!chats["chat_1"]) {
                     chats["chat_1"] = { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false };
                 }
@@ -981,12 +985,9 @@
             if (currentModelType === "fake") {
                 botResponse = getFakeBrainResponse(text);
             } else if (currentModelType === "creator" && isImageGenRequest) {
-                // Generar imagen con Imagen Pince o usar respaldo inteligente si el navegador/entorno limita la API Key de imagen
                 try {
                     botResponse = await callImageGenerationNativeAPI(text);
                 } catch (err) {
-                    // SISTEMA DE RESPALDO INTELIGENTE DE IMAGEN PINCE (Garantiza que siempre aparezca una imagen genial relacionada)
-                    const encodedQuery = encodeURIComponent(text);
                     const fallbackImageUrl = `https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&w=600&q=80`;
                     botResponse = `🎨 <b>Imagen Pince ha generado tu solicitud con éxito:</b><br><br><i>"${text}"</i><br><img src="${fallbackImageUrl}" class="generated-img">`;
                 }
@@ -1126,7 +1127,7 @@
             return respuestasFake[Math.floor(Math.random() * respuestasFake.length)];
         }
 
-       // ==========================================
+        // ==========================================
         // CEREBRO LOCAL DE RESPALDO (V1.2 BETA + LORE AMPLIADO) 🍷
         // ==========================================
         function getProLocalBrainResponse(input, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
@@ -1380,7 +1381,8 @@ ${roastInstruction}
 
 FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
-            const payload = {
+datesPayload = {
+                const payload = {
                 contents: contents,
                 systemInstruction: { parts: [{ text: systemPrompt }] }
             };
@@ -1401,15 +1403,19 @@ FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
             }
         }
 
-        // Carga inicial
-        loadChatsFromStorage();
-        sendBtn.onclick = sendMessage;
-        userInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
-        renderChatList();
-        
-        if (Object.keys(chats).length === 1 && chats["chat_1"].messages.length === 0) {
-            switchChat("chat_1");
-        }
+        // --- ENLACE DE EVENTOS AL CARGAR LA PÁGINA ---
+        window.onload = function() {
+            loadChatsFromStorage();
+            if (sendBtn) sendBtn.onclick = sendMessage;
+            if (userInput) {
+                userInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+            }
+            renderChatList();
+            
+            if (Object.keys(chats).length === 1 && chats["chat_1"].messages.length === 0) {
+                switchChat("chat_1");
+            }
+        };
     </script>
 
 </body>
