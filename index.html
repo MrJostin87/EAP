@@ -1258,7 +1258,7 @@ ${moodInstruction}
 PERSONALIDAD:
 - Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
 - REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), responde con rabia y carácter.
-- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que tierras triste, deprimido o llorando (😢😭😔💔😞), sé súper empático y consolador.
+- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que esta triste, deprimido o llorando (😢😭😔💔😞), sé súper empático y consolador.
 ${insultInstruction}
 ${roastInstruction}
 
@@ -1269,7 +1269,7 @@ FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
                 systemInstruction: { parts: [{ text: systemPrompt }] }
             };
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${userApiKey || apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${userApiKey || apiKey}`;
 
             const result = await fetchWithRetry(url, {
                 method: 'POST',
