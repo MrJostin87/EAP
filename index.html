@@ -993,7 +993,12 @@
                     botResponse = `🎨 <b>Imagen Pince ha generado tu solicitud con éxito:</b><br><br><i>"${text}"</i><br><img src="${fallbackImageUrl}" class="generated-img">`;
                 }
             } else if (currentModelType === "creator") {
-                botResponse = "🎨 <b>Imagen Pince (Creator AI):</b><br><br>¡Hola Director! Para crear una imagen escribe algo como <i>'Crea una imagen de un gato'</i> o sube una foto usando el botón de imagen 🖼️ en la parte superior para que te haga un resumen detallado.";
+                // Forzar de forma estricta que Creator AI entienda que si le piden cualquier cosa descriptiva de arte/creación, genere la imagen de inmediato
+                try {
+                    botResponse = await callImageGenerationNativeAPI(text);
+                } catch (err) {
+                    botResponse = "🎨 <b>Imagen Pince (Creator AI):</b><br><br>¡Hola Director! Para crear una imagen escribe algo como <i>'Crea una imagen de un gato'</i> o sube una foto usando el botón de imagen 🖼️ en la parte superior para que te haga un resumen detallado.";
+                }
             } else {
                 if (userApiKey || apiKey) {
                     try {
@@ -1015,7 +1020,7 @@
             const payload = {
                 contents: [{
                     role: "user",
-                    parts: [{ text: `Genera una imagen basada en esta descripción: ${promptText}` }]
+                    parts: [{ text: `Genera una imagen digital detallada y hermosa basada exactamente en esta descripción: ${promptText}` }]
                 }],
                 generationConfig: {
                     responseModalities: ["TEXT", "IMAGE"]
@@ -1224,7 +1229,7 @@
 
             let moodInstruction = "";
             if (totalChatsCount === 4 && !isCreatorVerified) {
-                moodInstruction = "\n\nESTADO DE HUMOR ESPECIAL: El usuario tiene EXACTAMENTE 4 CHATS ABIERTOS en este momento. Actitud: Pónte de MUY MALA ONDA, pasivo-agresiva, floja y contestona.";
+                moodInstruction = "\n\nESTADO DE HUMOR ESPECIAL: El usuario tiene EXACTAMENTE 4 CHATS abiertos en este momento. Actitud: Pónte de MUY MALA ONDA, pasivo-agresiva, floja y contestona.";
             }
 
             let insultInstruction = "";
