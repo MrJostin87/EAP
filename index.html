@@ -1127,7 +1127,7 @@
             return respuestasFake[Math.floor(Math.random() * respuestasFake.length)];
         }
 
-        // ==========================================
+       // ==========================================
         // CEREBRO LOCAL DE RESPALDO (V1.2 BETA + LORE AMPLIADO) 🍷
         // ==========================================
         function getProLocalBrainResponse(input, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
@@ -1306,7 +1306,7 @@
                 return "💻 <b>¿Quieres programar como los grandes?</b><br><br>La regla de oro de un buen dev es: si funciona, no lo toques; y si falla, echa la culpa al navegador o al servidor. ¡Y haz como el Director Jostin, crea tus propias plataformas web desde cero! 🍷✨";
             }
 
-       // ==========================================
+        // ==========================================
         // CEREBRO GEMINI ONLINE REAL 🍷
         // ==========================================
         async function fetchWithRetry(url, options, retries = 2) {
@@ -1375,19 +1375,18 @@ ${moodInstruction}
 PERSONALIDAD:
 - Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
 - REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), responde con rabia y carácter.
-- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que está triste, deprimido o llorando (😢😭😔💔😞), sé súper empático y consolador.
+- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que tierras triste, deprimido o llorando (😢😭😔💔😞), sé súper empático y consolador.
 ${insultInstruction}
 ${roastInstruction}
 
 FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
-datesPayload = {
-                const payload = {
+            const payload = {
                 contents: contents,
                 systemInstruction: { parts: [{ text: systemPrompt }] }
             };
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${userApiKey}`;
+           const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${userApiKey}`;
 
             const result = await fetchWithRetry(url, {
                 method: 'POST',
