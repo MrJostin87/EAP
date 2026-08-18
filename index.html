@@ -1020,7 +1020,7 @@
             const payload = {
                 contents: [{
                     role: "user",
-                    parts: [{ text: `Genera una imagen digital detallada y hermosa basada exactamente en esta descripción: ${promptText}` }]
+                    parts: [{ text: promptText }] // AHORA ES PURO TEXTO DEL USUARIO
                 }],
                 generationConfig: {
                     responseModalities: ["TEXT", "IMAGE"]
@@ -1229,7 +1229,7 @@
 
             let moodInstruction = "";
             if (totalChatsCount === 4 && !isCreatorVerified) {
-                moodInstruction = "\n\nESTADO DE HUMOR ESPECIAL: El usuario tiene EXACTAMENTE 4 CHATS abiertos en este momento. Actitud: Pónte de MUY MALA ONDA, pasivo-agresiva, floja y contestona.";
+                moodInstruction = "\n\nESTADO DE HUMOR ESPECIAL: El usuario tiene EXACTAMENTE 4 CHATS ABIERTOS en este momento. Actitud: Pónte de MUY MALA ONDA, pasivo-agresiva, floja y contestona.";
             }
 
             let insultInstruction = "";
@@ -1307,4 +1307,5 @@ FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
 </body>
 </html>
+
 
