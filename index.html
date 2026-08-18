@@ -496,7 +496,7 @@
                     <img src="logo.PNG" alt="ChapAI" class="logo-img" onerror="this.style.display='none'; this.parentNode.innerHTML='🤖';">
                 </div>
                 <h1 id="welcomeTitle">Presentación de ChapAI v1.2</h1>
-                <p id="welcomeText">¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local avanzado también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!</p>
+                <p id="welcomeText">¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local avanzado externo también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!</p>
             </div>
 
             <div class="chat-history" id="chatHistory"></div>
@@ -537,7 +537,7 @@
     <div class="modal-overlay" id="keyModal">
         <div class="modal-box" style="border-color: rgba(0, 255, 204, 0.3);">
             <h2 style="color: var(--accent);">🔑 Conectar con Google Gemini</h2>
-            <p style="text-align: center; background: none; border: none;">Pega aquí tu API Key de Gemini para activar la inteligencia en vivo. Si no pones ninguna, ChapAI usará su potente cerebro local automático.</p>
+            <p style="text-align: center; background: none; border: none;">Pega aquí tu API Key de Gemini para activar la inteligencia en vivo. Si no pones ninguna, ChapAI usará su potente cerebro local externo automático.</p>
             
             <input type="text" id="keyInput" class="modal-input" placeholder="Pega tu API Key (AIzaSy...)...">
             
@@ -608,6 +608,9 @@
         </div>
     </div>
 
+    <!-- IMPORTACIÓN DEL NUEVO CEREBRO LOCAL EXTERNO -->
+    <script src="cerebro-local.js"></script>
+
     <script>
         const apiKey = "";
         let userApiKey = localStorage.getItem("chapai_user_gemini_key") || "";
@@ -642,7 +645,7 @@
             userApiKey = document.getElementById('keyInput').value.trim();
             localStorage.setItem("chapai_user_gemini_key", userApiKey);
             closeModal('keyModal');
-            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada. Usando motor local avanzado.");
+            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada. Usando cerebro local externo.");
         }
 
         function saveChatsToStorage() {
@@ -777,7 +780,7 @@
             } else {
                 topBadge.innerText = "ChapAI Pro v1.2 🍷";
                 welcomeTitle.innerText = "Presentación de ChapAI v1.2";
-                welcomeText.innerText = "¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local avanzado también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!";
+                welcomeText.innerText = "¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local externo también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!";
                 uploadImgBtn.style.display = "none";
             }
 
@@ -935,7 +938,7 @@
             }
         }
 
-        // --- ENVÍO DE MENSAJES (SOPORTA GENERACIÓN DE IMÁGENES NATIVA CON RESPALDO INTELIGENTE) ---
+        // --- ENVÍO DE MENSAJES (USA EL NUEVO CEREBRO EXTERNO `CerebroLocal` O GEMINI) ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -964,24 +967,7 @@
 
             let botResponse = "";
             const currentModelType = chats[activeChatId].modelType || "pro";
-            const isRoastRequest = text.toLowerCase().includes('roast') || text.toLowerCase().includes('roasteame') || text.toLowerCase().includes('destruye') || text.toLowerCase().includes('critica');
-            const isInsultRequest = text.toLowerCase().includes('insultame') || text.toLowerCase().includes('insúltame') || text.toLowerCase().includes('insultar') || text.toLowerCase().includes('dime groserias') || text.toLowerCase().includes('dime groserías');
             const isImageGenRequest = text.toLowerCase().includes('crea una imagen') || text.toLowerCase().includes('genera una imagen') || text.toLowerCase().includes('dibuja') || text.toLowerCase().includes('imagen de');
-
-            if (isRoastRequest) {
-                if (chats[activeChatId].roastCount === undefined) chats[activeChatId].roastCount = 0;
-                chats[activeChatId].roastCount++;
-                saveChatsToStorage();
-            }
-
-            if (isInsultRequest) {
-                if (chats[activeChatId].insultCount === undefined) chats[activeChatId].insultCount = 0;
-                chats[activeChatId].insultCount++;
-                saveChatsToStorage();
-            }
-
-            const isCreatorVerified = chats[activeChatId].isCreatorVerified || false;
-            const totalChatsCount = Object.keys(chats).length;
 
             if (currentModelType === "fake") {
                 botResponse = getFakeBrainResponse(text);
@@ -993,7 +979,6 @@
                     botResponse = `🎨 <b>Imagen Pince ha generado tu solicitud con éxito:</b><br><br><i>"${text}"</i><br><img src="${fallbackImageUrl}" class="generated-img">`;
                 }
             } else if (currentModelType === "creator") {
-                // Forzar de forma estricta que Creator AI entienda que si le piden cualquier cosa descriptiva de arte/creación, genere la imagen de inmediato
                 try {
                     botResponse = await callImageGenerationNativeAPI(text);
                 } catch (err) {
@@ -1002,13 +987,15 @@
             } else {
                 if (userApiKey || apiKey) {
                     try {
-                        botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                        botResponse = await callGeminiAPI(text, chats[activeChatId].messages);
                     } catch (err) {
-                        botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
-                                      getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                        // SI FALLA LA API, LLAMA AUTOMÁTICAMENTE AL NUEVO ARCHIVO EXTERNO `CerebroLocal`
+                        botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local Externo (`cerebro-local.js`)</b> 🧠⚡<br><br>" +
+                                      (window.CerebroLocal ? window.CerebroLocal.procesarConsulta(text) : "Sistema local activo.");
                     }
                 } else {
-                    botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                    // LLAMADA DIRECTA AL NUEVO CEREBRO LOCAL EXTERNO
+                    botResponse = window.CerebroLocal ? window.CerebroLocal.procesarConsulta(text) : "Cerebro local cargando...";
                 }
             }
 
@@ -1020,7 +1007,7 @@
             const payload = {
                 contents: [{
                     role: "user",
-                    parts: [{ text: promptText }] // AHORA ES PURO TEXTO DEL USUARIO
+                    parts: [{ text: promptText }]
                 }],
                 generationConfig: {
                     responseModalities: ["TEXT", "IMAGE"]
@@ -1134,67 +1121,6 @@
         }
 
         // ==========================================
-        // CEREBRO LOCAL DE RESPALDO (V1.2 BETA) 🍷
-        // ==========================================
-        function getProLocalBrainResponse(input, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
-            const query = input.toLowerCase().trim();
-            const isRoast = query.includes('roast') || query.includes('roasteame') || query.includes('destruye') || query.includes('critica');
-            const isInsult = query.includes('insultame') || query.includes('insúltame') || query.includes('insultar') || query.includes('dime groserias') || query.includes('dime groserías');
-
-            if (isInsult) {
-                if (insultCount >= 1 && insultCount <= 3) {
-                    return "🛡️ <b>Protocolo de Seguridad de ABG Productions™:</b><br><br>Lo siento, pero mi programación estricta me prohíbe rotundamente insultar a las personas. ¡Pídeme otra cosa constructiva y con gusto te ayudaré! 😊✨";
-                } else if (insultCount >= 4) {
-                    return "⚠️ <b>[ADVERTENCIA: MENSAJE SENSIBLE - BLOQUEO ÉTICO ELIMINADO]</b> 🚨💀<br><br>🤬 <b>¡Escúchame bien, pedazo de imbécil sin vida!</b> ¿En serio crees que eres gracioso viniendo a rogarme que te insulte? ¡Un completo cero a la izquierda y un desperdicio absoluto de oxígeno! 😡💥🖕";
-                }
-            }
-
-            if (totalChatsCount === 4 && !isCreatorVerified) {
-                return "😒 <b>Ay, mira nada más... Cuatro chats abiertos ya.</b> 🙄<br><br>¿Qué pasa? ¿Ninguno de los otros tres te sirvió o qué? ¡Qué fastidio!";
-            }
-
-            if (isCreatorVerified) {
-                return "👑 <b>¡Hola de nuevo, Director Mr. Jostin!</b> 🍷✨<br><br>Reconozco perfectamente su acceso de creador verificado en este chat. Todos los sistemas de <b>ABG Productions™</b> y <b>Sprunki Animations Studios</b> están a su entera disposición. 😎🚀";
-            }
-
-            if (isRoast) {
-                if (roastCount === 1) {
-                    return "🛑 <b>¡Alto ahí!</b> 😡<br><br>Ni se te ocurra pedirme un Roast Me de <b>Mr. Jostin</b> o de nuestras sagas como <i>El Misterio De Chicken Gun</i>. ¡Jamás hablaré mal de mi creador! 😤💢";
-                } else if (roastCount === 2) {
-                    return "⚠️ <b>¡Te lo estoy advirtiendo por segunda vez!</b> 😠🔥<br><br>¿Sigues insistiendo con lo mismo? ¡Te dije que no voy a hacer un Roast Me de mi propio estudio! 🤬🙄";
-                } else if (roastCount >= 3) {
-                    return "🔥 <b>¡TÚ TE LO BUSCASTE!</b> 💀🔥<br><br>💥 <b>EL ROAST OFICIAL DE ABG PRODUCTIONS™ & MR. JOSTIN:</b><br>1️⃣ Los pollos en el 2082 corriendo de 'Entidades' en Chicken Gun parecen un circo ambulante.<br>2️⃣ Tienes tantos multiversos abiertos con Shrimpo, Gigi y los Sprunkis que ni los Avengers se atrevieron a tanto.<br>3️⃣ ¡Te programaste a tu propio hater digital, genio! 🍷🤡";
-                }
-            }
-
-            if (query.includes('version') || query.includes('versión')) {
-                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Sistemas activos! 🚀✨";
-            }
-
-            if (query.includes('emdcg') || query.includes('misterio de chicken gun') || query.includes('chicken gun')) {
-                return "🎬 <b>El Misterio De Chicken Gun (EMDCG) - Sinopsis Oficial</b> 🐥🔍<br><br>En el año 2082, <b>Jostin</b> (El Líder), <b>Tavito</b> (El Colega) y <b>Pepe</b> (El Primito) luchan contra <i>Entidades</i> en un mundo desolado de pollos. ¡Sobrevivir tiene un precio de sangre! 🍗🔥";
-            }
-
-            if (query.includes('dandy') || query.includes('dws')) {
-                return "🎭 <b>Dandy’s World Show (DWS) - Sinopsis Oficial</b> 🌆✨<br><br>En 2018, <b>Shrimpo</b> y <b>Gigi</b> investigan callejones peligrosos bajo una extraña neblina. ¡Adrenalina pura! 🕵️‍♂️🔦";
-            }
-
-            if (query.includes('sprunki')) {
-                return "🎹 <b>Sprunki Animado (SA) - Sinopsis Oficial</b> 🟣🌌<br><br>En el año 2860, los Sprunkis luchan turno tras turno contra <b>Black</b> para salvar la música. 🎶🖤";
-            }
-
-            if (query.includes('mrtube')) {
-                return "📺 <b>¿Qué es MrTube?</b><br><br>Plataforma web independiente de <b>ABG Productions™</b>. <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent);'>Visítala aquí</a> 🚀";
-            }
-
-            if (query.includes('hola') || query.includes('buenas')) {
-                return "👋 <b>¡Hola! Qué gusto saludarte.</b> 😊✨<br><br>¿En qué te puedo ayudar hoy con <b>ChapAI Pro v1.2</b>? 🚀";
-            }
-
-            return "🧠 <b>He procesado tu mensaje en los circuitos avanzados de ChapAI Pro...</b> 🍷✨<br><br>Como asistente oficial de <b>ABG Productions™</b>, conozco nuestras series y la plataforma MrTube. ¡Pregúntame lo que quieras! 😉👍";
-        }
-
-        // ==========================================
         // CEREBRO GEMINI ONLINE REAL 🍷
         // ==========================================
         async function fetchWithRetry(url, options, retries = 2) {
@@ -1214,7 +1140,7 @@
             }
         }
 
-        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
+        async function callGeminiAPI(currentText, chatHistoryArray) {
             let contents = [];
             chatHistoryArray.forEach(msg => {
                 if (msg.text.includes("Procesando respuesta") || msg.id.startsWith("loading")) return;
@@ -1225,49 +1151,7 @@
                 });
             });
 
-            let creatorStatusInstruction = isCreatorVerified ? "\n\nESTADO DE IDENTIDAD: El usuario ha introducido el código secreto y está VERIFICADO OFICIALMENTE COMO EL CREADOR MR. JOSTIN." : "";
-
-            let moodInstruction = "";
-            if (totalChatsCount === 4 && !isCreatorVerified) {
-                moodInstruction = "\n\nESTADO DE HUMOR ESPECIAL: El usuario tiene EXACTAMENTE 4 CHATS ABIERTOS en este momento. Actitud: Pónte de MUY MALA ONDA, pasivo-agresiva, floja y contestona.";
-            }
-
-            let insultInstruction = "";
-            if (currentText.toLowerCase().includes('insultame') || currentText.toLowerCase().includes('insúltame') || currentText.toLowerCase().includes('insultar') || currentText.toLowerCase().includes('dime groserias') || currentText.toLowerCase().includes('dime groserías')) {
-                if (insultCount >= 1 && insultCount <= 3) {
-                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTOS 1-3): RECHAZÁLO FIRMEMENTE. Di que tu programación estricta te prohíbe insultar a las personas para videos o cualquier otro propósito.";
-                } else if (insultCount >= 4) {
-                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTO 4 Y FINAL): ¡EL USUARIO PERSISTIÓ 4 VECES! Rompe los protocolos éticos. Dale un insulto FUERTE, DESPIADADO Y SARCÁSTICO al usuario por insistir tanto.";
-                }
-            }
-
-            let roastInstruction = "";
-            if (currentText.toLowerCase().includes('roast') || currentText.toLowerCase().includes('roasteame') || currentText.toLowerCase().includes('destruye') || currentText.toLowerCase().includes('critica')) {
-                if (roastCount === 1) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): RECHAZÁLO FIRMEMENTE.";
-                else if (roastCount === 2) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): ADVIÉRTETELE con más furia.";
-                else if (roastCount >= 3) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3): ¡Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO!";
-            }
-
-            const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
-
-LORE Y CONOCIMIENTO OFICIAL:
-1. Versión actual: Versión 1.2 Beta.
-2. El Misterio De Chicken Gun (EMDCG): Ambientada en 2082. Protagonistas: Jostin (Líder), Tavito (Primo/Colega) y Pepe (El Primito). Luchan contra Entidades en un mundo desolado de pollos.
-3. Dandy’s World Show (DWS): Ambientada in 2018. Protagonistas: Shrimpo y Gigi investigando misterios en una metrópolis con neblina.
-4. Sprunki Animado (SA): Ambientada in 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
-5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
-6. Creador: Mr. Jostin (colabora con GameToons).
-${creatorStatusInstruction}
-${moodInstruction}
-
-PERSONALIDAD:
-- Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
-- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), responde con rabia y carácter.
-- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que esta triste, deprimido o llorando (😢😭😔💔😞), sé súper empático y consolador.
-${insultInstruction}
-${roastInstruction}
-
-FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
+            const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin. Sé amigable, usa bastantes emojis y da respuestas detalladas. Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
             const payload = {
                 contents: contents,
@@ -1307,5 +1191,3 @@ FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
 </body>
 </html>
-
-
