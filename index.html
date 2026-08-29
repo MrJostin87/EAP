@@ -483,7 +483,7 @@
             <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
             <span id="currentChatTitle">Chat Principal</span>
             <div style="display:flex; gap:10px; align-items:center;">
-                <!-- Botón e Input para Imágenes (Creator AI) -->
+                <!-- Botón e Input para Imágenes (Creator AI: Imagen Pince / Seedream) -->
                 <input type="file" id="imageUploadInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
                 <button class="icon-btn" id="uploadImgBtn" onclick="document.getElementById('imageUploadInput').click()" title="Subir Imagen para Resumen" style="display: none;">🖼️</button>
                 
@@ -532,7 +532,11 @@
             </button>
 
             <button class="primary-btn" onclick="createNewChatWithModel('creator')" style="background: #a855f7; color: #fff; margin-top: 5px;">
-                🎨 Creator AI (Imagen Pince)<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">Crea imágenes y resume fotos con Imagen Pince.</span>
+                🎨 Creator AI (Imagen Pince)<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">Crea imágenes con Imagen Pince y resume fotos.</span>
+            </button>
+
+            <button class="primary-btn" onclick="createNewChatWithModel('seedream')" style="background: #3b82f6; color: #fff; margin-top: 5px;">
+                🌊 Creator AI (Seedream)<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">Generación de imágenes cinemáticas con Seedream.</span>
             </button>
 
             <button class="cancel-btn" onclick="closeModal('modelSelectorModal')">Cancelar</button>
@@ -686,7 +690,7 @@
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 
                 const span = document.createElement('span');
-                let iconModel = chats[id].modelType === "fake" ? "🫠 " : (chats[id].modelType === "creator" ? "🎨 " : "🍷 ");
+                let iconModel = chats[id].modelType === "fake" ? "🫠 " : (chats[id].modelType === "creator" ? "🎨 " : (chats[id].modelType === "seedream" ? "🌊 " : "🍷 "));
                 span.innerText = iconModel + chats[id].title;
                 span.onclick = (e) => { e.stopPropagation(); switchChat(id); };
 
@@ -753,7 +757,7 @@
         function createNewChatWithModel(modelType) {
             closeModal('modelSelectorModal');
             const newId = "chat_" + Date.now();
-            let titleName = modelType === "fake" ? `Chat Fake ${Object.keys(chats).length}` : (modelType === "creator" ? `Creator AI ${Object.keys(chats).length}` : `Chat Pro ${Object.keys(chats).length}`);
+            let titleName = modelType === "fake" ? `Chat Fake ${Object.keys(chats).length}` : (modelType === "creator" ? `Creator AI ${Object.keys(chats).length}` : (modelType === "seedream" ? `Seedream AI ${Object.keys(chats).length}` : `Chat Pro ${Object.keys(chats).length}`));
             
             chats[newId] = { 
                 title: titleName, 
@@ -772,7 +776,7 @@
             currentChatTitle.innerText = chats[id].title;
             
             if (chats[id].modelType === "fake") {
-                topBadge.innerText = "Chapai Feik🫠";
+                topBadge.innerText = "Chapai Feik 🫠";
                 welcomeTitle.innerText = "Presentación de ChapAI Fake";
                 welcomeText.innerText = "hola soy chapai fake y no se nada de nada de nada y el dos mas dos es queso y tngo una ortografia horible jajaja xd 🫠";
                 uploadImgBtn.style.display = "none";
@@ -780,7 +784,13 @@
             } else if (chats[id].modelType === "creator") {
                 topBadge.innerText = "Creator AI 🎨";
                 welcomeTitle.innerText = "Presentación de Creator AI";
-                welcomeText.innerText = "🎨 ¡Hola! Soy Creator AI. Puedo crear imágenes increíbles con Imagen Pince o hacerte un extenso resumen detallado si subes una foto 🖼️ usando el botón superior.";
+                welcomeText.innerText = "🎨 ¡Hola! Soy Creator AI con Imagen Pince. Puedo crear imágenes increíbles o hacerte un extenso resumen detallado si subes una foto 🖼️ usando el botón superior.";
+                uploadImgBtn.style.display = "flex";
+                uploadFileBtn.style.display = "none";
+            } else if (chats[id].modelType === "seedream") {
+                topBadge.innerText = "Seedream AI 🌊";
+                welcomeTitle.innerText = "Presentación de Seedream AI";
+                welcomeText.innerText = "🌊 ¡Hola! Soy Seedream AI. Especializado en generación visual cinemática de alta definición. ¡Pídeme una imagen épica para ABG Productions™!";
                 uploadImgBtn.style.display = "flex";
                 uploadFileBtn.style.display = "none";
             } else {
@@ -902,14 +912,15 @@
                 }
 
                 const loadingId = "loading_" + Date.now();
-                drawMessage("<span class='thinking'>Analizando imagen con Imagen Pince... 🎨</span>", 'chapai-msg', loadingId);
+                const engineName = chats[activeChatId].modelType === 'seedream' ? 'Seedream AI 🌊' : 'Imagen Pince 🎨';
+                drawMessage(`<span class='thinking'>Analizando imagen con ${engineName}...</span>`, 'chapai-msg', loadingId);
                 displayArea.scrollTop = displayArea.scrollHeight;
 
                 let botResponse = "";
                 try {
                     botResponse = await callImageSummaryAPI(base64Data, mimeType);
                 } catch (err) {
-                    botResponse = "⚠️ <b>Error al analizar la imagen:</b> No se pudo procesar la solicitud con Imagen Pince. Verifica tu API Key de Gemini.";
+                    botResponse = "⚠️ <b>Error al analizar la imagen:</b> No se pudo procesar la solicitud. Verifica tu API Key de Gemini.";
                 }
 
                 finalizeMessage(loadingId, botResponse);
@@ -924,7 +935,7 @@
                 contents: [{
                     role: "user",
                     parts: [
-                        { text: "Por favor, haz un resumen extenso, detallado y profesional de esta imagen usando la tecnología de Imagen Pince." },
+                        { text: "Por favor, haz un resumen extenso, detallado y profesional de esta imagen." },
                         { inlineData: { mimeType: mimeType, data: base64Data } }
                     ]
                 }]
@@ -938,8 +949,8 @@
             });
 
             if (result && result.candidates && result.candidates.length > 0) {
-                let textRes = result.candidates[0].content.parts.find(p => p.text)?.text || "Imagen analizada con éxito por Imagen Pince 🎨.";
-                return "🎨 <b>Resumen de Imagen Pince:</b><br><br>" + textRes.replace(/\n/g, '<br>');
+                let textRes = result.candidates[0].content.parts.find(p => p.text)?.text || "Imagen analizada con éxito.";
+                return "🎨 <b>Resumen de Imagen:</b><br><br>" + textRes.replace(/\n/g, '<br>');
             } else {
                 throw new Error("No se pudo obtener resumen.");
             }
@@ -1026,7 +1037,7 @@
             }
         }
 
-        // --- ENVÍO DE MENSAJES (SOPORTA GENERACIÓN DE IMÁGENES NATIVA CON RESPALDO INTELIGENTE) ---
+        // --- ENVÍO DE MENSAJES (SOPORTA IMÁGENES NATIVAS Y SEEDREAM) ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -1078,16 +1089,29 @@
                 botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
             } else if (currentModelType === "creator" && isImageGenRequest) {
                 try {
-                    botResponse = await callImageGenerationNativeAPI(text);
+                    botResponse = await callImageGenerationNativeAPI(text, 'Imagen Pince');
                 } catch (err) {
                     const fallbackImageUrl = `https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&w=600&q=80`;
                     botResponse = `🎨 <b>Imagen Pince ha generado tu solicitud con éxito:</b><br><br><i>"${text}"</i><br><img src="${fallbackImageUrl}" class="generated-img">`;
                 }
+            } else if (currentModelType === "seedream" && isImageGenRequest) {
+                try {
+                    botResponse = await callImageGenerationNativeAPI(text, 'Seedream AI');
+                } catch (err) {
+                    const fallbackImageUrl = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80`;
+                    botResponse = `🌊 <b>Seedream AI ha generado tu solicitud cinemática:</b><br><br><i>"${text}"</i><br><img src="${fallbackImageUrl}" class="generated-img">`;
+                }
             } else if (currentModelType === "creator") {
                 try {
-                    botResponse = await callImageGenerationNativeAPI(text);
+                    botResponse = await callImageGenerationNativeAPI(text, 'Imagen Pince');
                 } catch (err) {
-                    botResponse = "🎨 <b>Imagen Pince (Creator AI):</b><br><br>¡Hola Director! Para crear una imagen escribe algo como <i>'Crea una imagen de un gato'</i> o sube una foto usando el botón de imagen 🖼️ en la parte superior para que te haga un resumen detallado.";
+                    botResponse = "🎨 <b>Imagen Pince (Creator AI):</b><br><br>¡Hola Director! Para crear una imagen escribe <i>'Crea una imagen de...'</i> o sube una foto usando el botón superior.";
+                }
+            } else if (currentModelType === "seedream") {
+                try {
+                    botResponse = await callImageGenerationNativeAPI(text, 'Seedream AI');
+                } catch (err) {
+                    botResponse = "🌊 <b>Seedream AI:</b><br><br>¡Hola Director! Para generar una obra cinemática escribe <i>'Crea una imagen de...'</i>.";
                 }
             } else {
                 if (userApiKey || apiKey) {
@@ -1105,12 +1129,16 @@
             finalizeMessage(loadingId, botResponse);
         }
 
-        async function callImageGenerationNativeAPI(promptText) {
+        async function callImageGenerationNativeAPI(promptText, engineName) {
             const apiKeyToUse = userApiKey || apiKey;
+            const finalPrompt = engineName === 'Seedream AI' 
+                ? `Cinematic high-detail high-resolution digital art: ${promptText}` 
+                : promptText;
+
             const payload = {
                 contents: [{
                     role: "user",
-                    parts: [{ text: promptText }]
+                    parts: [{ text: finalPrompt }]
                 }],
                 generationConfig: {
                     responseModalities: ["TEXT", "IMAGE"]
@@ -1140,7 +1168,8 @@
 
             if (base64Img) {
                 const imageUrl = `data:image/png;base64,${base64Img}`;
-                return `🎨 <b>Imagen Pince ha generado tu solicitud:</b><br><br>${textDesc ? '<i>' + textDesc + '</i><br>' : ''}<img src="${imageUrl}" class="generated-img">`;
+                const icon = engineName === 'Seedream AI' ? '🌊' : '🎨';
+                return `${icon} <b>${engineName} ha generado tu solicitud:</b><br><br>${textDesc ? '<i>' + textDesc + '</i><br>' : ''}<img src="${imageUrl}" class="generated-img">`;
             } else {
                 throw new Error("No se pudo obtener la imagen generada.");
             }
