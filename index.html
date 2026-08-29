@@ -1043,7 +1043,7 @@
             }
         }
 
-        // --- ENVÍO DE MENSAJES (GESTIÓN ESTRICTA DE API KEY PARA MODOS DE IMAGEN) ---
+        // --- ENVÍO DE MENSAJES (GESTIÓN ESTRICTA CON IMAN-4.0-GENERATE-001) ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -1094,26 +1094,15 @@
 
             if (currentModelType === "fake") {
                 botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
-            } else if ((currentModelType === "creator" || currentModelType === "seedream") && isImageGenRequest) {
-                if (!apiKeyToUse) {
-                    botResponse = "⚠️ <b>Acceso Restringido:</b> Para generar imágenes con <b>" + (currentModelType === 'seedream' ? 'Seedream AI' : 'Imagen Pince') + "</b>, es obligatorio configurar tu API Key de Gemini tocando la llave 🔑 en la parte superior.";
-                } else {
-                    try {
-                        const engineName = currentModelType === 'seedream' ? 'Seedream AI' : 'Imagen Pince';
-                        botResponse = await callImageGenerationNativeAPI(text, engineName, apiKeyToUse);
-                    } catch (err) {
-                        botResponse = "⚠️ <b>Error de Generación:</b> No se pudo completar la solicitud gráfica con la API Key proporcionada.";
-                    }
-                }
             } else if (currentModelType === "creator" || currentModelType === "seedream") {
                 if (!apiKeyToUse) {
-                    botResponse = "⚠️ <b>Acceso Restringido:</b> Los modos de Creator AI requieren una API Key de Gemini activa. Configura tu clave usando el botón 🔑.";
+                    botResponse = "⚠️ <b>Acceso Restringido:</b> Los modos de Creator AI (Imagen Pince / Seedream) requieren obligatoriamente una API Key de Gemini activa. Configura tu llave tocando el botón 🔑 en la barra superior.";
                 } else {
                     try {
                         const engineName = currentModelType === 'seedream' ? 'Seedream AI' : 'Imagen Pince';
-                        botResponse = await callImageGenerationNativeAPI(text, engineName, apiKeyToUse);
+                        botResponse = await callImageGenerationImagenAPI(text, engineName, apiKeyToUse);
                     } catch (err) {
-                        botResponse = "⚠️ <b>Error de Generación:</b> Asegúrate de pedir explícitamente una imagen (ej. 'Crea una imagen de un gato').";
+                        botResponse = "⚠️ <b>Error de Generación:</b> No se pudo completar la solicitud gráfica. Verifica que tu API Key tenga permisos de Imagen.";
                     }
                 }
             } else {
@@ -1132,46 +1121,27 @@
             finalizeMessage(loadingId, botResponse);
         }
 
-        async function callImageGenerationNativeAPI(promptText, engineName, apiKeyToUse) {
+        async function callImageGenerationImagenAPI(promptText, engineName, apiKeyToUse) {
             const finalPrompt = engineName === 'Seedream AI' 
                 ? `Cinematic high-detail high-resolution digital art: ${promptText}` 
                 : promptText;
 
             const payload = {
-                contents: [{
-                    role: "user",
-                    parts: [{ text: finalPrompt }]
-                }],
-                generationConfig: {
-                    responseModalities: ["TEXT", "IMAGE"]
-                }
+                instances: { prompt: finalPrompt },
+                parameters: { sampleCount: 1 }
             };
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKeyToUse}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKeyToUse}`;
             const result = await fetchWithRetry(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            let base64Img = null;
-            let textDesc = "";
-            if (result && result.candidates && result.candidates.length > 0) {
-                const parts = result.candidates[0].content.parts;
-                for (let part of parts) {
-                    if (part.inlineData && part.inlineData.data) {
-                        base64Img = part.inlineData.data;
-                    }
-                    if (part.text) {
-                        textDesc += part.text;
-                    }
-                }
-            }
-
-            if (base64Img) {
-                const imageUrl = `data:image/png;base64,${base64Img}`;
+            if (result && result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
                 const icon = engineName === 'Seedream AI' ? '🌊' : '🎨';
-                return `${icon} <b>${engineName} ha generado tu solicitud:</b><br><br>${textDesc ? '<i>' + textDesc + '</i><br>' : ''}<img src="${imageUrl}" class="generated-img">`;
+                return `${icon} <b>${engineName} ha generado tu solicitud:</b><br><br><i>"${promptText}"</i><br><img src="${imageUrl}" class="generated-img">`;
             } else {
                 throw new Error("No se pudo obtener la imagen generada.");
             }
