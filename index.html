@@ -483,7 +483,7 @@
             <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
             <span id="currentChatTitle">Chat Principal</span>
             <div style="display:flex; gap:10px; align-items:center;">
-                <!-- Botón e Input para Imágenes (Creator AI: Imagen Pince / Seedream) -->
+                <!-- Botón e Input para Imágenes (Seedream AI) -->
                 <input type="file" id="imageUploadInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
                 <button class="icon-btn" id="uploadImgBtn" onclick="document.getElementById('imageUploadInput').click()" title="Subir Imagen para Resumen" style="display: none;">🖼️</button>
                 
@@ -531,12 +531,8 @@
                 🫠 ChapAI Fake v1.2<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">No sabe ni lo más sencillo, ortografía terrible.</span>
             </button>
 
-            <button class="primary-btn" onclick="createNewChatWithModel('creator')" style="background: #a855f7; color: #fff; margin-top: 5px;">
-                🎨 Creator AI (Imagen Pince)<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">Crea imágenes con Imagen Pince (Requiere API Key).</span>
-            </button>
-
             <button class="primary-btn" onclick="createNewChatWithModel('seedream')" style="background: #3b82f6; color: #fff; margin-top: 5px;">
-                🌊 Creator AI (Seedream)<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">Generación cinemática con Seedream (Requiere API Key).</span>
+                🌊 Seedream AI<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">Generación visual cinemática (Requiere API Key).</span>
             </button>
 
             <button class="cancel-btn" onclick="closeModal('modelSelectorModal')">Cancelar</button>
@@ -547,7 +543,7 @@
     <div class="modal-overlay" id="keyModal">
         <div class="modal-box" style="border-color: rgba(0, 255, 204, 0.3);">
             <h2 style="color: var(--accent);">🔑 Conectar con Google Gemini</h2>
-            <p style="text-align: center; background: none; border: none;">Pega aquí tu API Key de Gemini para activar la inteligencia en vivo. Los modos de creación de imágenes requieren obligatoriamente una API Key activa.</p>
+            <p style="text-align: center; background: none; border: none;">Pega aquí tu API Key de Gemini para activar la inteligencia en vivo. El modo Seedream requiere obligatoriamente una API Key activa.</p>
             
             <input type="text" id="keyInput" class="modal-input" placeholder="Pega tu API Key (AIzaSy...)...">
             
@@ -690,7 +686,7 @@
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 
                 const span = document.createElement('span');
-                let iconModel = chats[id].modelType === "fake" ? "🫠 " : (chats[id].modelType === "creator" ? "🎨 " : (chats[id].modelType === "seedream" ? "🌊 " : "🍷 "));
+                let iconModel = chats[id].modelType === "fake" ? "🫠 " : (chats[id].modelType === "seedream" ? "🌊 " : "🍷 ");
                 span.innerText = iconModel + chats[id].title;
                 span.onclick = (e) => { e.stopPropagation(); switchChat(id); };
 
@@ -757,7 +753,7 @@
         function createNewChatWithModel(modelType) {
             closeModal('modelSelectorModal');
             const newId = "chat_" + Date.now();
-            let titleName = modelType === "fake" ? `Chat Fake ${Object.keys(chats).length}` : (modelType === "creator" ? `Creator AI ${Object.keys(chats).length}` : (modelType === "seedream" ? `Seedream AI ${Object.keys(chats).length}` : `Chat Pro ${Object.keys(chats).length}`));
+            let titleName = modelType === "fake" ? `Chat Fake ${Object.keys(chats).length}` : (modelType === "seedream" ? `Seedream AI ${Object.keys(chats).length}` : `Chat Pro ${Object.keys(chats).length}`);
             
             chats[newId] = { 
                 title: titleName, 
@@ -781,12 +777,6 @@
                 welcomeText.innerText = "hola soy chapai fake y no se nada de nada de nada y el dos mas dos es queso y tngo una ortografia horible jajaja xd 🫠";
                 uploadImgBtn.style.display = "none";
                 uploadFileBtn.style.display = "flex";
-            } else if (chats[id].modelType === "creator") {
-                topBadge.innerText = "Creator AI 🎨";
-                welcomeTitle.innerText = "Presentación de Creator AI";
-                welcomeText.innerText = "🎨 ¡Hola! Soy Creator AI con Imagen Pince. Para usar este modo y generar imágenes, asegúrate de configurar tu API Key tocando la llave 🔑.";
-                uploadImgBtn.style.display = "flex";
-                uploadFileBtn.style.display = "none";
             } else if (chats[id].modelType === "seedream") {
                 topBadge.innerText = "Seedream AI 🌊";
                 welcomeTitle.innerText = "Presentación de Seedream AI";
@@ -894,7 +884,7 @@
         async function handleImageUpload(event) {
             const apiKeyToUse = userApiKey || apiKey;
             if (!apiKeyToUse) {
-                alert("⚠️ Se requiere una API Key de Gemini configurada (toque la llave 🔑) para analizar imágenes con los motores de Creator AI.");
+                alert("⚠️ Se requiere una API Key de Gemini configurada (toque la llave 🔑) para analizar imágenes con Seedream AI.");
                 event.target.value = "";
                 return;
             }
@@ -919,8 +909,7 @@
                 }
 
                 const loadingId = "loading_" + Date.now();
-                const engineName = chats[activeChatId].modelType === 'seedream' ? 'Seedream AI 🌊' : 'Imagen Pince 🎨';
-                drawMessage(`<span class='thinking'>Analizando imagen con ${engineName}...</span>`, 'chapai-msg', loadingId);
+                drawMessage("<span class='thinking'>Analizando imagen con Seedream AI 🌊...</span>", 'chapai-msg', loadingId);
                 displayArea.scrollTop = displayArea.scrollHeight;
 
                 let botResponse = "";
@@ -956,7 +945,7 @@
 
             if (result && result.candidates && result.candidates.length > 0) {
                 let textRes = result.candidates[0].content.parts.find(p => p.text)?.text || "Imagen analizada con éxito.";
-                return "🎨 <b>Resumen de Imagen:</b><br><br>" + textRes.replace(/\n/g, '<br>');
+                return "🌊 <b>Resumen de Seedream AI:</b><br><br>" + textRes.replace(/\n/g, '<br>');
             } else {
                 throw new Error("No se pudo obtener resumen.");
             }
@@ -1043,7 +1032,7 @@
             }
         }
 
-        // --- ENVÍO DE MENSAJES (GESTIÓN ESTRICTA CON IMAN-4.0-GENERATE-001) ---
+        // --- ENVÍO DE MENSAJES (GESTIÓN ESTRICTA DE SEEDREAM CON GEMINI-2.5-FLASH-IMAGE-PREVIEW) ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -1094,15 +1083,14 @@
 
             if (currentModelType === "fake") {
                 botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
-            } else if (currentModelType === "creator" || currentModelType === "seedream") {
+            } else if (currentModelType === "seedream") {
                 if (!apiKeyToUse) {
-                    botResponse = "⚠️ <b>Acceso Restringido:</b> Los modos de Creator AI (Imagen Pince / Seedream) requieren obligatoriamente una API Key de Gemini activa. Configura tu llave tocando el botón 🔑 en la barra superior.";
+                    botResponse = "⚠️ <b>Acceso Restringido:</b> El modo Seedream AI requiere obligatoriamente una API Key de Gemini activa. Configura tu clave tocando el botón 🔑 en la barra superior.";
                 } else {
                     try {
-                        const engineName = currentModelType === 'seedream' ? 'Seedream AI' : 'Imagen Pince';
-                        botResponse = await callImageGenerationImagenAPI(text, engineName, apiKeyToUse);
+                        botResponse = await callSeedreamImageAPI(text, apiKeyToUse);
                     } catch (err) {
-                        botResponse = "⚠️ <b>Error de Generación:</b> No se pudo completar la solicitud gráfica. Verifica que tu API Key tenga permisos de Imagen.";
+                        botResponse = "⚠️ <b>Error de Generación:</b> No se pudo completar la solicitud gráfica con Seedream AI. Verifica tu API Key.";
                     }
                 }
             } else {
@@ -1121,27 +1109,41 @@
             finalizeMessage(loadingId, botResponse);
         }
 
-        async function callImageGenerationImagenAPI(promptText, engineName, apiKeyToUse) {
-            const finalPrompt = engineName === 'Seedream AI' 
-                ? `Cinematic high-detail high-resolution digital art: ${promptText}` 
-                : promptText;
-
+        async function callSeedreamImageAPI(promptText, apiKeyToUse) {
             const payload = {
-                instances: { prompt: finalPrompt },
-                parameters: { sampleCount: 1 }
+                contents: [{
+                    role: "user",
+                    parts: [{ text: `Cinematic high-detail high-resolution digital art: ${promptText}` }]
+                }],
+                generationConfig: {
+                    responseModalities: ["TEXT", "IMAGE"]
+                }
             };
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKeyToUse}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKeyToUse}`;
             const result = await fetchWithRetry(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            if (result && result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
-                const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
-                const icon = engineName === 'Seedream AI' ? '🌊' : '🎨';
-                return `${icon} <b>${engineName} ha generado tu solicitud:</b><br><br><i>"${promptText}"</i><br><img src="${imageUrl}" class="generated-img">`;
+            let base64Img = null;
+            let textDesc = "";
+            if (result && result.candidates && result.candidates.length > 0) {
+                const parts = result.candidates[0].content.parts;
+                for (let part of parts) {
+                    if (part.inlineData && part.inlineData.data) {
+                        base64Img = part.inlineData.data;
+                    }
+                    if (part.text) {
+                        textDesc += part.text;
+                    }
+                }
+            }
+
+            if (base64Img) {
+                const imageUrl = `data:image/png;base64,${base64Img}`;
+                return `🌊 <b>Seedream AI ha generado tu obra cinemática:</b><br><br>${textDesc ? '<i>' + textDesc + '</i><br>' : ''}<img src="${imageUrl}" class="generated-img">`;
             } else {
                 throw new Error("No se pudo obtener la imagen generada.");
             }
@@ -1456,7 +1458,7 @@ ${roastInstruction}
 
 FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
-            const payload = {
+stylesPayload = {
                 contents: contents,
                 systemInstruction: { parts: [{ text: systemPrompt }] }
             };
