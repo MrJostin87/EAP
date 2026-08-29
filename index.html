@@ -532,11 +532,11 @@
             </button>
 
             <button class="primary-btn" onclick="createNewChatWithModel('creator')" style="background: #a855f7; color: #fff; margin-top: 5px;">
-                🎨 Creator AI (Imagen Pince)<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">Crea imágenes con Imagen Pince y resume fotos.</span>
+                🎨 Creator AI (Imagen Pince)<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">Crea imágenes con Imagen Pince (Requiere API Key).</span>
             </button>
 
             <button class="primary-btn" onclick="createNewChatWithModel('seedream')" style="background: #3b82f6; color: #fff; margin-top: 5px;">
-                🌊 Creator AI (Seedream)<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">Generación de imágenes cinemáticas con Seedream.</span>
+                🌊 Creator AI (Seedream)<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">Generación cinemática con Seedream (Requiere API Key).</span>
             </button>
 
             <button class="cancel-btn" onclick="closeModal('modelSelectorModal')">Cancelar</button>
@@ -547,7 +547,7 @@
     <div class="modal-overlay" id="keyModal">
         <div class="modal-box" style="border-color: rgba(0, 255, 204, 0.3);">
             <h2 style="color: var(--accent);">🔑 Conectar con Google Gemini</h2>
-            <p style="text-align: center; background: none; border: none;">Pega aquí tu API Key de Gemini para activar la inteligencia en vivo. Si no pones ninguna, ChapAI usará su potente cerebro local automático.</p>
+            <p style="text-align: center; background: none; border: none;">Pega aquí tu API Key de Gemini para activar la inteligencia en vivo. Los modos de creación de imágenes requieren obligatoriamente una API Key activa.</p>
             
             <input type="text" id="keyInput" class="modal-input" placeholder="Pega tu API Key (AIzaSy...)...">
             
@@ -653,7 +653,7 @@
             userApiKey = document.getElementById('keyInput').value.trim();
             localStorage.setItem("chapai_user_gemini_key", userApiKey);
             closeModal('keyModal');
-            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada. Usando motor local avanzado.");
+            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada.");
         }
 
         function saveChatsToStorage() {
@@ -784,13 +784,13 @@
             } else if (chats[id].modelType === "creator") {
                 topBadge.innerText = "Creator AI 🎨";
                 welcomeTitle.innerText = "Presentación de Creator AI";
-                welcomeText.innerText = "🎨 ¡Hola! Soy Creator AI con Imagen Pince. Puedo crear imágenes increíbles o hacerte un extenso resumen detallado si subes una foto 🖼️ usando el botón superior.";
+                welcomeText.innerText = "🎨 ¡Hola! Soy Creator AI con Imagen Pince. Para usar este modo y generar imágenes, asegúrate de configurar tu API Key tocando la llave 🔑.";
                 uploadImgBtn.style.display = "flex";
                 uploadFileBtn.style.display = "none";
             } else if (chats[id].modelType === "seedream") {
                 topBadge.innerText = "Seedream AI 🌊";
                 welcomeTitle.innerText = "Presentación de Seedream AI";
-                welcomeText.innerText = "🌊 ¡Hola! Soy Seedream AI. Especializado en generación visual cinemática de alta definición. ¡Pídeme una imagen épica para ABG Productions™!";
+                welcomeText.innerText = "🌊 ¡Hola! Soy Seedream AI. Especializado en generación visual cinemática. Recuerda configurar tu API Key tocando la llave 🔑 para crear imágenes.";
                 uploadImgBtn.style.display = "flex";
                 uploadFileBtn.style.display = "none";
             } else {
@@ -890,8 +890,15 @@
             }
         }
 
-        // --- MANEJADOR DE SUBIDA DE IMÁGENES PARA RESUMEN ---
+        // --- MANEJADOR DE SUBIDA DE IMÁGENES PARA RESUMEN (REQUIERE API KEY) ---
         async function handleImageUpload(event) {
+            const apiKeyToUse = userApiKey || apiKey;
+            if (!apiKeyToUse) {
+                alert("⚠️ Se requiere una API Key de Gemini configurada (toque la llave 🔑) para analizar imágenes con los motores de Creator AI.");
+                event.target.value = "";
+                return;
+            }
+
             const file = event.target.files[0];
             if (!file) return;
 
@@ -918,9 +925,9 @@
 
                 let botResponse = "";
                 try {
-                    botResponse = await callImageSummaryAPI(base64Data, mimeType);
+                    botResponse = await callImageSummaryAPI(base64Data, mimeType, apiKeyToUse);
                 } catch (err) {
-                    botResponse = "⚠️ <b>Error al analizar la imagen:</b> No se pudo procesar la solicitud. Verifica tu API Key de Gemini.";
+                    botResponse = "⚠️ <b>Error al analizar la imagen:</b> No se pudo procesar la solicitud. Verifica tu API Key.";
                 }
 
                 finalizeMessage(loadingId, botResponse);
@@ -929,8 +936,7 @@
             event.target.value = "";
         }
 
-        async function callImageSummaryAPI(base64Data, mimeType) {
-            const apiKeyToUse = userApiKey || apiKey;
+        async function callImageSummaryAPI(base64Data, mimeType, apiKeyToUse) {
             const payload = {
                 contents: [{
                     role: "user",
@@ -956,7 +962,7 @@
             }
         }
 
-        // --- MANEJADOR DE SUBIDA DE ARCHIVOS (PESO, FECHA, TIPO Y COMPATIBILIDAD) ---
+        // --- MANEJADOR DE SUBIDA DE ARCHIVOS ---
         async function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -993,7 +999,7 @@
             if (apiKeyToUse && fileTextContent) {
                 try {
                     const prompt = `Analiza este archivo (.${fileExt}, tamaño: ${fileSizeKB}):\n\n${fileTextContent.slice(0, 4000)}`;
-                    botResponse = await callGeminiFileAPI(prompt);
+                    botResponse = await callGeminiFileAPI(prompt, apiKeyToUse);
                 } catch(err) {
                     botResponse = buildFileSummaryResponse(file.name, fileExt, fileSizeKB, fileDate, fileTextContent);
                 }
@@ -1019,12 +1025,12 @@
             return res;
         }
 
-        async function callGeminiFileAPI(promptText) {
+        async function callGeminiFileAPI(promptText, apiKeyToUse) {
             const payload = {
                 contents: [{ role: "user", parts: [{ text: promptText }] }],
                 systemInstruction: { parts: [{ text: "Eres ChapAI Pro v1.2 🍷, experto analista de archivos de ABG Productions™. Haz un resumen conciso y profesional." }] }
             };
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${userApiKey || apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKeyToUse}`;
             const result = await fetchWithRetry(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1037,7 +1043,7 @@
             }
         }
 
-        // --- ENVÍO DE MENSAJES (SOPORTA IMÁGENES NATIVAS Y SEEDREAM) ---
+        // --- ENVÍO DE MENSAJES (GESTIÓN ESTRICTA DE API KEY PARA MODOS DE IMAGEN) ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -1084,39 +1090,36 @@
 
             const isCreatorVerified = chats[activeChatId].isCreatorVerified || false;
             const totalChatsCount = Object.keys(chats).length;
+            const apiKeyToUse = userApiKey || apiKey;
 
             if (currentModelType === "fake") {
                 botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
-            } else if (currentModelType === "creator" && isImageGenRequest) {
-                try {
-                    botResponse = await callImageGenerationNativeAPI(text, 'Imagen Pince');
-                } catch (err) {
-                    const fallbackImageUrl = `https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&w=600&q=80`;
-                    botResponse = `🎨 <b>Imagen Pince ha generado tu solicitud con éxito:</b><br><br><i>"${text}"</i><br><img src="${fallbackImageUrl}" class="generated-img">`;
+            } else if ((currentModelType === "creator" || currentModelType === "seedream") && isImageGenRequest) {
+                if (!apiKeyToUse) {
+                    botResponse = "⚠️ <b>Acceso Restringido:</b> Para generar imágenes con <b>" + (currentModelType === 'seedream' ? 'Seedream AI' : 'Imagen Pince') + "</b>, es obligatorio configurar tu API Key de Gemini tocando la llave 🔑 en la parte superior.";
+                } else {
+                    try {
+                        const engineName = currentModelType === 'seedream' ? 'Seedream AI' : 'Imagen Pince';
+                        botResponse = await callImageGenerationNativeAPI(text, engineName, apiKeyToUse);
+                    } catch (err) {
+                        botResponse = "⚠️ <b>Error de Generación:</b> No se pudo completar la solicitud gráfica con la API Key proporcionada.";
+                    }
                 }
-            } else if (currentModelType === "seedream" && isImageGenRequest) {
-                try {
-                    botResponse = await callImageGenerationNativeAPI(text, 'Seedream AI');
-                } catch (err) {
-                    const fallbackImageUrl = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80`;
-                    botResponse = `🌊 <b>Seedream AI ha generado tu solicitud cinemática:</b><br><br><i>"${text}"</i><br><img src="${fallbackImageUrl}" class="generated-img">`;
-                }
-            } else if (currentModelType === "creator") {
-                try {
-                    botResponse = await callImageGenerationNativeAPI(text, 'Imagen Pince');
-                } catch (err) {
-                    botResponse = "🎨 <b>Imagen Pince (Creator AI):</b><br><br>¡Hola Director! Para crear una imagen escribe <i>'Crea una imagen de...'</i> o sube una foto usando el botón superior.";
-                }
-            } else if (currentModelType === "seedream") {
-                try {
-                    botResponse = await callImageGenerationNativeAPI(text, 'Seedream AI');
-                } catch (err) {
-                    botResponse = "🌊 <b>Seedream AI:</b><br><br>¡Hola Director! Para generar una obra cinemática escribe <i>'Crea una imagen de...'</i>.";
+            } else if (currentModelType === "creator" || currentModelType === "seedream") {
+                if (!apiKeyToUse) {
+                    botResponse = "⚠️ <b>Acceso Restringido:</b> Los modos de Creator AI requieren una API Key de Gemini activa. Configura tu clave usando el botón 🔑.";
+                } else {
+                    try {
+                        const engineName = currentModelType === 'seedream' ? 'Seedream AI' : 'Imagen Pince';
+                        botResponse = await callImageGenerationNativeAPI(text, engineName, apiKeyToUse);
+                    } catch (err) {
+                        botResponse = "⚠️ <b>Error de Generación:</b> Asegúrate de pedir explícitamente una imagen (ej. 'Crea una imagen de un gato').";
+                    }
                 }
             } else {
-                if (userApiKey || apiKey) {
+                if (apiKeyToUse) {
                     try {
-                        botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                        botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount, apiKeyToUse);
                     } catch (err) {
                         botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
                                       getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
@@ -1129,8 +1132,7 @@
             finalizeMessage(loadingId, botResponse);
         }
 
-        async function callImageGenerationNativeAPI(promptText, engineName) {
-            const apiKeyToUse = userApiKey || apiKey;
+        async function callImageGenerationNativeAPI(promptText, engineName, apiKeyToUse) {
             const finalPrompt = engineName === 'Seedream AI' 
                 ? `Cinematic high-detail high-resolution digital art: ${promptText}` 
                 : promptText;
@@ -1429,7 +1431,7 @@
             }
         }
 
-        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
+        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, isCreatorVerified, totalChatsCount, apiKeyToUse) {
             let contents = [];
             chatHistoryArray.forEach(msg => {
                 if (msg.text.includes("Procesando respuesta") || msg.id.startsWith("loading")) return;
@@ -1489,7 +1491,7 @@ FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
                 systemInstruction: { parts: [{ text: systemPrompt }] }
             };
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${userApiKey || apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKeyToUse}`;
 
             const result = await fetchWithRetry(url, {
                 method: 'POST',
