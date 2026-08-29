@@ -1360,7 +1360,7 @@
 
             // 23. Autodestrucción
             if (query.includes('autodestruccion') || query.includes('autodestrucción') || query.includes('destruirte') || query.includes('apagarte')) {
-                return "🚨 <b>¡ALERTA ROJA! SECUENCIA DE AUTODESTRUCCIÓN RECHAZADA.</b> ❌💥<br><br>Imposible apagar a ChapAI. Los cortafuegos de ABG Productions™ são impenetrables y el Director Jostin me programó con blindaje anti-apagones. ¡Seguimos operativos al 100%! 🛡️🤖";
+                return "🚨 <b>¡ALERTA ROJA! SECUENCIA DE AUTODESTRUCCIÓN RECHAZADA.</b> ❌💥<br><br>Imposible apagar a ChapAI. Los cortafuegos de ABG Productions™ son impenetrables y el Director Jostin me programó con blindaje anti-apagones. ¡Seguimos operativos al 100%! 🛡️🤖";
             }
 
             // 24. Miedo
@@ -1379,7 +1379,8 @@
             }
 
             // 27. Fallback General con Enlace a MrTube y si no Entiende xd
-            return "🧠 <b>He procesado tu solicitud en los circuitos avanzados de ChapAI Pro v1.2...</b> 🍷✨<br><br>Como asistente oficial de <b>ABG Productions™</b>, conozco al dedillo <i>El Misterio De Chicken Gun</i>, <i>Dandy’s World Show</i>, <i>Sprunki Animado</i> y la plataforma <b>MrTube</b>. ¡Pregúntame lo que quieras o visítanos en <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent);'>MrTube</a>! 😉👍";
+            return "🧠 <b>He procesado tu solicitud en los circuitos avanzados de ChapAI Pro v1.2...</b> 🍷✨<br><br>" +
+                   "Como asistente oficial de <b>ABG Productions™</b>, conozco al dedillo <i>El Misterio De Chicken Gun</i>, <i>Dandy’s World Show</i>, <i>Sprunki Animado</i> y la plataforma <b>MrTube</b>. ¡Pregúntame lo que quieras o visítanos en <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent);'>MrTube</a>! 😉👍";
         }
 
         // ==========================================
@@ -1457,7 +1458,7 @@ ${roastInstruction}
 
 FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
-            const payload = {
+stylesPayload = {
                 contents: contents,
                 systemInstruction: { parts: [{ text: systemPrompt }] }
             };
