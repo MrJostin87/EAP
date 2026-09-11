@@ -473,7 +473,7 @@
 
     <!-- MENÚ LATERAL -->
     <div class="sidebar" id="sidebar">
-        <button class="new-chat-btn" onclick="openModelSelectorModal()">➕ Nuevo Chat</button>
+        <button class="new-chat-btn" onclick="createNewChat()">➕ Nuevo Chat</button>
         <div class="chat-list" id="chatList"></div>
     </div>
 
@@ -483,11 +483,7 @@
             <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
             <span id="currentChatTitle">Chat Principal</span>
             <div style="display:flex; gap:10px; align-items:center;">
-                <!-- Botón e Input para Imágenes (Creator AI) -->
-                <input type="file" id="imageUploadInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-                <button class="icon-btn" id="uploadImgBtn" onclick="document.getElementById('imageUploadInput').click()" title="Subir Imagen para Resumen" style="display: none;">🖼️</button>
-                
-                <!-- Botón e Input para Archivos (Chats Pro y Fake) -->
+                <!-- Botón e Input para Archivos (Chats Pro) -->
                 <input type="file" id="fileUploadInput" accept="*" style="display: none;" onchange="handleFileUpload(event)">
                 <button class="icon-btn" id="uploadFileBtn" onclick="document.getElementById('fileUploadInput').click()" title="Subir Archivo para Resumen" style="display: flex;">📁</button>
 
@@ -514,28 +510,6 @@
                 <input type="text" class="input-box" id="userInput" placeholder="Escribe tu mensaje para ChapAI..." autocomplete="off">
                 <button class="icon-btn send-btn" id="sendBtn">➔</button>
             </div>
-        </div>
-    </div>
-
-    <!-- MODAL: SELECCIÓN DE VERSIÓN DE CHAPAI -->
-    <div class="modal-overlay" id="modelSelectorModal">
-        <div class="modal-box" style="border-color: var(--accent);">
-            <h2 style="color: var(--accent);">🤖 Selecciona el Modo de Chat</h2>
-            <p style="text-align: center; background: none; border: none;">Elige qué versión deseas inicializar para esta nueva sesión:</p>
-            
-            <button class="primary-btn" onclick="createNewChatWithModel('pro')" style="background: var(--accent); color: #000;">
-                🍷 ChapAI Pro v1.2<br><span style="font-size: 11px; font-weight: normal; opacity: 0.8;">La versión oficial con lore, emociones y roast.</span>
-            </button>
-            
-            <button class="primary-btn" onclick="createNewChatWithModel('fake')" style="background: #ff4d4d; color: #fff; margin-top: 5px;">
-                🫠 ChapAI Fake v1.2<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">No sabe ni lo más sencillo, ortografía terrible.</span>
-            </button>
-
-            <button class="primary-btn" onclick="createNewChatWithModel('creator')" style="background: #a855f7; color: #fff; margin-top: 5px;">
-                🎨 Creator AI (Imagen Pince)<br><span style="font-size: 11px; font-weight: normal; opacity: 0.9;">Crea imágenes y resume fotos con Imagen Pince.</span>
-            </button>
-
-            <button class="cancel-btn" onclick="closeModal('modelSelectorModal')">Cancelar</button>
         </div>
     </div>
 
@@ -634,7 +608,6 @@
         const topBadge = document.getElementById('topBadge');
         const welcomeTitle = document.getElementById('welcomeTitle');
         const welcomeText = document.getElementById('welcomeText');
-        const uploadImgBtn = document.getElementById('uploadImgBtn');
         const uploadFileBtn = document.getElementById('uploadFileBtn');
 
         function toggleSidebar() { sidebar.classList.toggle('open'); }
@@ -649,7 +622,7 @@
             userApiKey = document.getElementById('keyInput').value.trim();
             localStorage.setItem("chapai_user_gemini_key", userApiKey);
             closeModal('keyModal');
-            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada. Usando motor local avanzado.");
+            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada.");
         }
 
         function saveChatsToStorage() {
@@ -686,7 +659,7 @@
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 
                 const span = document.createElement('span');
-                let iconModel = chats[id].modelType === "fake" ? "🫠 " : (chats[id].modelType === "creator" ? "🎨 " : "🍷 ");
+                let iconModel = "🍷 ";
                 span.innerText = iconModel + chats[id].title;
                 span.onclick = (e) => { e.stopPropagation(); switchChat(id); };
 
@@ -746,18 +719,13 @@
             }
         }
 
-        function openModelSelectorModal() {
-            document.getElementById('modelSelectorModal').style.display = 'flex';
-        }
-
-        function createNewChatWithModel(modelType) {
-            closeModal('modelSelectorModal');
+        function createNewChat() {
             const newId = "chat_" + Date.now();
-            let titleName = modelType === "fake" ? `Chat Fake ${Object.keys(chats).length}` : (modelType === "creator" ? `Creator AI ${Object.keys(chats).length}` : `Chat Pro ${Object.keys(chats).length}`);
+            let titleName = `Chat Pro ${Object.keys(chats).length}`;
             
             chats[newId] = { 
                 title: titleName, 
-                modelType: modelType, 
+                modelType: "pro", 
                 messages: [], 
                 roastCount: 0, 
                 insultCount: 0, 
@@ -771,25 +739,10 @@
             activeChatId = id;
             currentChatTitle.innerText = chats[id].title;
             
-            if (chats[id].modelType === "fake") {
-                topBadge.innerText = "Chapai Feik🫠";
-                welcomeTitle.innerText = "Presentación de ChapAI Fake";
-                welcomeText.innerText = "hola soy chapai fake y no se nada de nada de nada y el dos mas dos es queso y tngo una ortografia horible jajaja xd 🫠";
-                uploadImgBtn.style.display = "none";
-                uploadFileBtn.style.display = "flex";
-            } else if (chats[id].modelType === "creator") {
-                topBadge.innerText = "Creator AI 🎨";
-                welcomeTitle.innerText = "Presentación de Creator AI";
-                welcomeText.innerText = "🎨 ¡Hola! Soy Creator AI. Puedo crear imágenes increíbles con Imagen Pince o hacerte un extenso resumen detallado si subes una foto 🖼️ usando el botón superior.";
-                uploadImgBtn.style.display = "flex";
-                uploadFileBtn.style.display = "none";
-            } else {
-                topBadge.innerText = "ChapAI Pro v1.2 🍷";
-                welcomeTitle.innerText = "Presentación de ChapAI";
-                welcomeText.innerText = "¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local avanzado también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!";
-                uploadImgBtn.style.display = "none";
-                uploadFileBtn.style.display = "flex";
-            }
+            topBadge.innerText = "ChapAI Pro v1.2 🍷";
+            welcomeTitle.innerText = "Presentación de ChapAI";
+            welcomeText.innerText = "¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local avanzado también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!";
+            uploadFileBtn.style.display = "flex";
 
             renderChatList();
             loadChatMessages();
@@ -880,72 +833,7 @@
             }
         }
 
-        // --- MANEJADOR DE SUBIDA DE IMÁGENES PARA RESUMEN ---
-        async function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64Data = e.target.result.split(',')[1];
-                const mimeType = file.type;
-
-                const userMsgId = "msg_" + Date.now();
-                const userHtml = `<img src="${e.target.result}" class="generated-img"><br><i>[Imagen subida para análisis y resumen]</i>`;
-                chats[activeChatId].messages.push({ id: userMsgId, text: userHtml, type: 'user-msg' });
-                drawMessage(userHtml, 'user-msg', userMsgId);
-                saveChatsToStorage();
-
-                if (welcomeScreen.style.display !== 'none') {
-                    welcomeScreen.style.display = 'none';
-                    chatHistory.style.display = 'flex';
-                }
-
-                const loadingId = "loading_" + Date.now();
-                drawMessage("<span class='thinking'>Analizando imagen con Imagen Pince... 🎨</span>", 'chapai-msg', loadingId);
-                displayArea.scrollTop = displayArea.scrollHeight;
-
-                let botResponse = "";
-                try {
-                    botResponse = await callImageSummaryAPI(base64Data, mimeType);
-                } catch (err) {
-                    botResponse = "⚠️ <b>Error al analizar la imagen:</b> No se pudo procesar la solicitud con Imagen Pince. Verifica tu API Key de Gemini.";
-                }
-
-                finalizeMessage(loadingId, botResponse);
-            };
-            reader.readAsDataURL(file);
-            event.target.value = "";
-        }
-
-        async function callImageSummaryAPI(base64Data, mimeType) {
-            const apiKeyToUse = userApiKey || apiKey;
-            const payload = {
-                contents: [{
-                    role: "user",
-                    parts: [
-                        { text: "Por favor, haz un resumen extenso, detallado y profesional de esta imagen usando la tecnología de Imagen Pince." },
-                        { inlineData: { mimeType: mimeType, data: base64Data } }
-                    ]
-                }]
-            };
-
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKeyToUse}`;
-            const result = await fetchWithRetry(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (result && result.candidates && result.candidates.length > 0) {
-                let textRes = result.candidates[0].content.parts.find(p => p.text)?.text || "Imagen analizada con éxito por Imagen Pince 🎨.";
-                return "🎨 <b>Resumen de Imagen Pince:</b><br><br>" + textRes.replace(/\n/g, '<br>');
-            } else {
-                throw new Error("No se pudo obtener resumen.");
-            }
-        }
-
-        // --- MANEJADOR DE SUBIDA DE ARCHIVOS (PESO, FECHA, TIPO Y COMPATIBILIDAD) ---
+        // --- MANEJADOR DE SUBIDA DE ARCHIVOS ---
         async function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -982,7 +870,7 @@
             if (apiKeyToUse && fileTextContent) {
                 try {
                     const prompt = `Analiza este archivo (.${fileExt}, tamaño: ${fileSizeKB}):\n\n${fileTextContent.slice(0, 4000)}`;
-                    botResponse = await callGeminiFileAPI(prompt);
+                    botResponse = await callGeminiFileAPI(prompt, apiKeyToUse);
                 } catch(err) {
                     botResponse = buildFileSummaryResponse(file.name, fileExt, fileSizeKB, fileDate, fileTextContent);
                 }
@@ -1008,12 +896,12 @@
             return res;
         }
 
-        async function callGeminiFileAPI(promptText) {
+        async function callGeminiFileAPI(promptText, apiKeyToUse) {
             const payload = {
                 contents: [{ role: "user", parts: [{ text: promptText }] }],
                 systemInstruction: { parts: [{ text: "Eres ChapAI Pro v1.2 🍷, experto analista de archivos de ABG Productions™. Haz un resumen conciso y profesional." }] }
             };
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${userApiKey || apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKeyToUse}`;
             const result = await fetchWithRetry(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1026,7 +914,7 @@
             }
         }
 
-        // --- ENVÍO DE MENSAJES (SOPORTA GENERACIÓN DE IMÁGENES NATIVA CON RESPALDO INTELIGENTE) ---
+        // --- ENVÍO DE MENSAJES (GESTIÓN ESTRICTA DE SEEDREAM CON GEMINI-2.5-FLASH-IMAGE-PREVIEW) ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -1054,10 +942,8 @@
             displayArea.scrollTop = displayArea.scrollHeight;
 
             let botResponse = "";
-            const currentModelType = chats[activeChatId].modelType || "pro";
             const isRoastRequest = text.toLowerCase().includes('roast') || text.toLowerCase().includes('roasteame') || text.toLowerCase().includes('destruye') || text.toLowerCase().includes('critica');
             const isInsultRequest = text.toLowerCase().includes('insultame') || text.toLowerCase().includes('insúltame') || text.toLowerCase().includes('insultar') || text.toLowerCase().includes('dime groserias') || text.toLowerCase().includes('dime groserías');
-            const isImageGenRequest = text.toLowerCase().includes('crea una imagen') || text.toLowerCase().includes('genera una imagen') || text.toLowerCase().includes('dibuja') || text.toLowerCase().includes('imagen de');
 
             if (isRoastRequest) {
                 if (chats[activeChatId].roastCount === undefined) chats[activeChatId].roastCount = 0;
@@ -1073,77 +959,20 @@
 
             const isCreatorVerified = chats[activeChatId].isCreatorVerified || false;
             const totalChatsCount = Object.keys(chats).length;
+            const apiKeyToUse = userApiKey || apiKey;
 
-            if (currentModelType === "fake") {
-                botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
-            } else if (currentModelType === "creator" && isImageGenRequest) {
+            if (apiKeyToUse) {
                 try {
-                    botResponse = await callImageGenerationNativeAPI(text);
+                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount, apiKeyToUse);
                 } catch (err) {
-                    const fallbackImageUrl = `https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&w=600&q=80`;
-                    botResponse = `🎨 <b>Imagen Pince ha generado tu solicitud con éxito:</b><br><br><i>"${text}"</i><br><img src="${fallbackImageUrl}" class="generated-img">`;
-                }
-            } else if (currentModelType === "creator") {
-                try {
-                    botResponse = await callImageGenerationNativeAPI(text);
-                } catch (err) {
-                    botResponse = "🎨 <b>Imagen Pince (Creator AI):</b><br><br>¡Hola Director! Para crear una imagen escribe algo como <i>'Crea una imagen de un gato'</i> o sube una foto usando el botón de imagen 🖼️ en la parte superior para que te haga un resumen detallado.";
+                    botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
+                                  getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
                 }
             } else {
-                if (userApiKey || apiKey) {
-                    try {
-                        botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
-                    } catch (err) {
-                        botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
-                                      getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
-                    }
-                } else {
-                    botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
-                }
+                botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
             }
 
             finalizeMessage(loadingId, botResponse);
-        }
-
-        async function callImageGenerationNativeAPI(promptText) {
-            const apiKeyToUse = userApiKey || apiKey;
-            const payload = {
-                contents: [{
-                    role: "user",
-                    parts: [{ text: promptText }]
-                }],
-                generationConfig: {
-                    responseModalities: ["TEXT", "IMAGE"]
-                }
-            };
-
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKeyToUse}`;
-            const result = await fetchWithRetry(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            let base64Img = null;
-            let textDesc = "";
-            if (result && result.candidates && result.candidates.length > 0) {
-                const parts = result.candidates[0].content.parts;
-                for (let part of parts) {
-                    if (part.inlineData && part.inlineData.data) {
-                        base64Img = part.inlineData.data;
-                    }
-                    if (part.text) {
-                        textDesc += part.text;
-                    }
-                }
-            }
-
-            if (base64Img) {
-                const imageUrl = `data:image/png;base64,${base64Img}`;
-                return `🎨 <b>Imagen Pince ha generado tu solicitud:</b><br><br>${textDesc ? '<i>' + textDesc + '</i><br>' : ''}<img src="${imageUrl}" class="generated-img">`;
-            } else {
-                throw new Error("No se pudo obtener la imagen generada.");
-            }
         }
 
         function finalizeMessage(loadingId, finalHtmlText) {
@@ -1400,7 +1229,7 @@
             }
         }
 
-        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
+        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, isCreatorVerified, totalChatsCount, apiKeyToUse) {
             let contents = [];
             chatHistoryArray.forEach(msg => {
                 if (msg.text.includes("Procesando respuesta") || msg.id.startsWith("loading")) return;
@@ -1455,12 +1284,12 @@ ${roastInstruction}
 
 FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
-            const payload = {
+stylesPayload = {
                 contents: contents,
                 systemInstruction: { parts: [{ text: systemPrompt }] }
             };
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${userApiKey || apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKeyToUse}`;
 
             const result = await fetchWithRetry(url, {
                 method: 'POST',
