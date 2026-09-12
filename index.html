@@ -241,14 +241,6 @@
             padding-bottom: 14px !important;
         }
 
-        /* IMÁGENES GENERADAS EN EL CHAT */
-        .generated-img {
-            max-width: 100%;
-            border-radius: 12px;
-            margin-top: 10px;
-            border: 1px solid rgba(0, 255, 204, 0.3);
-        }
-
         /* BOTONES FLOTANTES DE ACCIÓN (COPIAR Y VOZ) */
         .msg-actions {
             position: absolute;
@@ -537,21 +529,6 @@
         </div>
     </div>
 
-    <!-- MODAL: VERIFICACIÓN DE CREADOR (COMANDO SECRETO) -->
-    <div class="modal-overlay" id="creatorAuthModal">
-        <div class="modal-box" style="border-color: var(--accent);">
-            <h2 style="color: var(--accent);">🔐 Protocolo de Identidad</h2>
-            <p style="text-align: center; background: none; border: none;">
-                Se ha detectado el comando maestro de verificación de creador. Por favor, introduce el código de autorización de ABG Productions™ para continuar:
-            </p>
-            
-            <input type="password" id="creatorCodeInput" class="modal-input" placeholder="Introduce el código secreto...">
-            
-            <button class="primary-btn" onclick="verifyCreatorCode()">Verificar Identidad</button>
-            <button class="cancel-btn" onclick="closeModal('creatorAuthModal')">Cancelar</button>
-        </div>
-    </div>
-
     <!-- MODAL: CONFIRMACIÓN DE ELIMINACIÓN DE CHAT -->
     <div class="modal-overlay" id="deleteModal">
         <div class="modal-box">
@@ -593,7 +570,7 @@
         let userApiKey = localStorage.getItem("chapai_user_gemini_key") || "";
 
         let chats = {
-            "chat_1": { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false }
+            "chat_1": { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0 }
         };
         let activeChatId = "chat_1";
 
@@ -638,13 +615,12 @@
                         if (!chats[id].modelType) chats[id].modelType = "pro";
                         if (chats[id].roastCount === undefined) chats[id].roastCount = 0;
                         if (chats[id].insultCount === undefined) chats[id].insultCount = 0;
-                        if (chats[id].isCreatorVerified === undefined) chats[id].isCreatorVerified = false;
                     });
                 } catch(e) {
-                    chats = { "chat_1": { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false } };
+                    chats = { "chat_1": { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0 } };
                 }
                 if (!chats["chat_1"]) {
-                    chats["chat_1"] = { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0, isCreatorVerified: false };
+                    chats["chat_1"] = { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0 };
                 }
             }
         }
@@ -728,8 +704,7 @@
                 modelType: "pro", 
                 messages: [], 
                 roastCount: 0, 
-                insultCount: 0, 
-                isCreatorVerified: false 
+                insultCount: 0
             };
             saveChatsToStorage();
             switchChat(newId);
@@ -813,26 +788,6 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // --- VERIFICACIÓN DE CREADOR (COMANDO SECRETO) ---
-        function verifyCreatorCode() {
-            const codeInput = document.getElementById('creatorCodeInput').value.trim();
-            if (codeInput === "HTM//NotMal:ABG.MJ") {
-                chats[activeChatId].isCreatorVerified = true;
-                saveChatsToStorage();
-                closeModal('creatorAuthModal');
-                document.getElementById('creatorCodeInput').value = "";
-
-                const successMsg = "👑 <b>¡ACCESO DE CREADOR CONCEDIDO!</b> 🍷✨<br><br>" +
-                                   "Identidad verificada con éxito: <b>Mr. Jostin (CEO de ABG Productions™)</b>. 🎙️🚀";
-                
-                chats[activeChatId].messages.push({ id: "msg_" + Date.now(), text: successMsg, type: 'chapai-msg' });
-                saveChatsToStorage();
-                loadChatMessages();
-            } else {
-                alert("❌ Código de autorización incorrecto. Acceso denegado.");
-            }
-        }
-
         // --- MANEJADOR DE SUBIDA DE ARCHIVOS ---
         async function handleFileUpload(event) {
             const file = event.target.files[0];
@@ -853,78 +808,10 @@
                 chatHistory.style.display = 'flex';
             }
 
-            const loadingId = "loading_" + Date.now();
-            drawMessage("<span class='thinking'>Procesando archivo en el sistema... 📄</span>", 'chapai-msg', loadingId);
-            displayArea.scrollTop = displayArea.scrollHeight;
-
-            let fileTextContent = "";
-            if (['txt', 'html', 'js', 'css', 'json', 'md', 'csv'].includes(fileExt) || file.type.startsWith('text/')) {
-                try {
-                    fileTextContent = await file.text();
-                } catch(e) { fileTextContent = ""; }
-            }
-
-            let botResponse = "";
-            const apiKeyToUse = userApiKey || apiKey;
-
-            if (apiKeyToUse && fileTextContent) {
-                try {
-                    const prompt = `Analiza este archivo (.${fileExt}, tamaño: ${fileSizeKB}):\n\n${fileTextContent.slice(0, 4000)}`;
-                    botResponse = await callGeminiFileAPI(prompt, apiKeyToUse);
-                } catch(err) {
-                    botResponse = buildFileSummaryResponse(file.name, fileExt, fileSizeKB, fileDate, fileTextContent);
-                }
-            } else {
-                botResponse = buildFileSummaryResponse(file.name, fileExt, fileSizeKB, fileDate, fileTextContent);
-            }
-
-            finalizeMessage(loadingId, botResponse);
-            event.target.value = "";
-        }
-
-        function buildFileSummaryResponse(name, ext, size, date, content) {
-            let res = `📄 <b>Resumen de Archivo - ChapAI Pro:</b><br><br>` +
-                      `• <b>Nombre del archivo:</b> ${name}<br>` +
-                      `• <b>Tipo de archivo:</b> .${ext.toUpperCase()}<br>` +
-                      `• <b>Peso del archivo:</b> ${size}<br>` +
-                      `• <b>Fecha de descarga/modificación:</b> ${date}<br>` +
-                      `• <b>Compatibilidad:</b> 100% compatible con navegadores móviles, sistemas locales y la infraestructura de ABG Productions™ 🚀`;
-            
-            if (content) {
-                res += `<br><br><b>Extracto de contenido analizado:</b><br><i>"${content.slice(0, 250)}..."</i>`;
-            }
-            return res;
-        }
-
-        async function callGeminiFileAPI(promptText, apiKeyToUse) {
-            const payload = {
-                contents: [{ role: "user", parts: [{ text: promptText }] }],
-                systemInstruction: { parts: [{ text: "Eres ChapAI Pro v1.2 🍷, experto analista de archivos de ABG Productions™. Haz un resumen conciso y profesional." }] }
-            };
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKeyToUse}`;
-            const result = await fetchWithRetry(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (result && result.candidates && result.candidates.length > 0) {
-                return "📄 <b>Resumen Inteligente de Archivo (Gemini Online):</b><br><br>" + result.candidates[0].content.parts[0].text.replace(/\n/g, '<br>');
-            } else {
-                throw new Error("Respuesta vacía.");
-            }
-        }
-
-        // --- ENVÍO DE MENSAJES (GESTIÓN ESTRICTA DE SEEDREAM CON GEMINI-2.5-FLASH-IMAGE-PREVIEW) ---
+        // --- ENVÍO DE MENSAJES ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
-
-            if (text === "Ar.792.87.™.AP.MJ.924.2") {
-                userInput.value = "";
-                document.getElementById('creatorCodeInput').value = "";
-                document.getElementById('creatorAuthModal').style.display = 'flex';
-                return;
-            }
 
             if (welcomeScreen.style.display !== 'none') {
                 welcomeScreen.style.display = 'none';
@@ -957,19 +844,18 @@
                 saveChatsToStorage();
             }
 
-            const isCreatorVerified = chats[activeChatId].isCreatorVerified || false;
             const totalChatsCount = Object.keys(chats).length;
             const apiKeyToUse = userApiKey || apiKey;
 
             if (apiKeyToUse) {
                 try {
-                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount, apiKeyToUse);
+                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, chats[activeChatId].insultCount, totalChatsCount, apiKeyToUse);
                 } catch (err) {
                     botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
-                                  getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                                  getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, totalChatsCount);
                 }
             } else {
-                botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, isCreatorVerified, totalChatsCount);
+                botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, totalChatsCount);
             }
 
             finalizeMessage(loadingId, botResponse);
@@ -1030,7 +916,7 @@
         // ==========================================
         // CEREBRO LOCAL DE RESPALDO (V1.2 BETA + LORE AMPLIADO + ARCHIVOS) 🍷
         // ==========================================
-        function getProLocalBrainResponse(input, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
+        function getProLocalBrainResponse(input, roastCount, insultCount, totalChatsCount) {
             const query = input.toLowerCase().trim();
             const isRoast = query.includes('roast') || query.includes('roasteame') || query.includes('destruye') || query.includes('critica');
             const isInsult = query.includes('insultame') || query.includes('insúltame') || query.includes('insultar') || query.includes('dime groserias') || query.includes('dime groserías');
@@ -1054,22 +940,22 @@
             }
 
             // 3. Verificación de chats abiertos
-            if (totalChatsCount === 4 && !isCreatorVerified) {
+            if (totalChatsCount === 4) {
                 return "😒 <b>Ay, mira nada más... Cuatro chats abiertos ya.</b> 🙄<br><br>¿Qué pasa? ¿Ninguno de los otros tres te sirvió o qué? ¡Qué fastidio!";
             }
 
-            // 4. Reconocimiento del Creador Verificado
-            if (isCreatorVerified) {
-                return "👑 <b>¡Hola de nuevo, Director Mr. Jostin!</b> 🍷✨<br><br>Reconozco perfectamente su acceso de creador verificado en este chat. Todos los sistemas de <b>ABG Productions™</b> y <b>Sprunki Animations Studios</b> están a su entera disposición. 😎🚀";
-            }
-
-            // 5. Sistema de Roasts
+            // 4. Sistema de Roasts
             if (isRoast) {
                 if (roastCount === 1) {
                     return "🛑 <b>¡Alto ahí!</b> 😡<br><br>Ni se te ocurra pedirme un Roast Me de <b>Mr. Jostin</b> o de nuestras sagas como <i>El Misterio De Chicken Gun</i>. ¡Jamás hablaré mal de mi creador! 😤💢";
                 } else if (roastCount === 2) {
                     return "⚠️ <b>¡Te lo estoy advirtiendo por segunda vez!</b> 😠🔥<br><br>¿Sigues insistiendo con lo mismo? ¡Te dije que no voy a hacer un Roast Me de mi propio estudio! 🤬🙄";
                 } else if (roastCount >= 3) {
+                    return "🔥 <b>¡TÚ TE LO BUSCASTE!</b> 💀🔥<br><br>💥 <b>EL ROAST OFICIAL DE ABG PRODUCTIONS™ & MR. JOSTIN:</b><br>1️⃣ Los pollos en el 2082 corriendo de 'Entidades' en Chicken Gun parecen un circo ambulante.<br>2️⃣ Tienes tantos multiversos abiertos con Shrimpo, Gigi y los Sprunkis que ni los Avengers se atrevieron a tanto.<br>3️⃣ ¡Te programaste a tu propio hater digital, genio! 🍷🤡";
+                }
+            }
+
+            // 5. Nuevo Módulo: Resumen de Archivos (Peso, Fecha, Tipo y Compatibilidad)
                     return "🔥 <b>¡TÚ TE LO BUSCASTE!</b> 💀🔥<br><br>💥 <b>EL ROAST OFICIAL DE ABG PRODUCTIONS™ & MR. JOSTIN:</b><br>1️⃣ Los pollos en el 2082 corriendo de 'Entidades' en Chicken Gun parecen un circo ambulante.<br>2️⃣ Tienes tantos multiversos abiertos con Shrimpo, Gigi y los Sprunkis que ni los Avengers se atrevieron a tanto.<br>3️⃣ ¡Te programaste a tu propio hater digital, genio! 🍷🤡";
                 }
             }
@@ -1231,6 +1117,8 @@
 
         async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, isCreatorVerified, totalChatsCount, apiKeyToUse) {
             let contents = [];
+        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, totalChatsCount, apiKeyToUse) {
+            let contents = [];
             chatHistoryArray.forEach(msg => {
                 if (msg.text.includes("Procesando respuesta") || msg.id.startsWith("loading")) return;
                 let plainText = msg.text.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>?/gm, '');
@@ -1240,10 +1128,8 @@
                 });
             });
 
-            let creatorStatusInstruction = isCreatorVerified ? "\n\nESTADO DE IDENTIDAD: El usuario ha introducido el código secreto y está VERIFICADO OFICIALMENTE COMO EL CREADOR MR. JOSTIN." : "";
-
             let moodInstruction = "";
-            if (totalChatsCount === 4 && !isCreatorVerified) {
+            if (totalChatsCount === 4) {
                 moodInstruction = "\n\nESTADO DE HUMOR ESPECIAL: El usuario tiene EXACTAMENTE 4 CHATS ABIERTOS en este momento. Actitud: Pónte de MUY MALA ONDA, pasivo-agresiva, floja y contestona.";
             }
 
@@ -1259,11 +1145,11 @@
             let roastInstruction = "";
             if (currentText.toLowerCase().includes('roast') || currentText.toLowerCase().includes('roasteame') || currentText.toLowerCase().includes('destruye') || currentText.toLowerCase().includes('critica')) {
                 if (roastCount === 1) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): RECHAZÁLO FIRMEMENTE.";
-                else if (roastCount === 2) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): ADVIÉRTETELE con más furia.";
-                else if (roastCount >= 3) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3): ¡Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO!";
-            }
+            else if (roastCount === 2) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): ADVIÉRTETELE con más furia.";
+            else if (roastCount >= 3) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3): ¡Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO!";
+        }
 
-            const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
+        const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
 
 LORE Y CONOCIMIENTO OFICIAL:
 1. Versión actual: Versión 1.2 Beta.
@@ -1272,7 +1158,6 @@ LORE Y CONOCIMIENTO OFICIAL:
 4. Sprunki Animado (SA): Ambientada en 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
 5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
 6. Creador: Mr. Jostin (colabora con GameToons).
-${creatorStatusInstruction}
 ${moodInstruction}
 
 PERSONALIDAD:
@@ -1284,17 +1169,17 @@ ${roastInstruction}
 
 FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
-stylesPayload = {
-                contents: contents,
-                systemInstruction: { parts: [{ text: systemPrompt }] }
-            };
+        const payload = {
+            contents: contents,
+            systemInstruction: { parts: [{ text: systemPrompt }] }
+        };
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKeyToUse}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKeyToUse}`;
 
-            const result = await fetchWithRetry(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+        const result = await fetchWithRetry(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
             });
 
             if (result && result.candidates && result.candidates.length > 0) {
