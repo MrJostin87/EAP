@@ -361,7 +361,7 @@
         .modal-box h2 {
             margin-top: 0;
             font-size: 20px;
-            color: var(--accent);
+            color: #ff4d4d;
         }
 
         .modal-box p {
@@ -439,7 +439,6 @@
             cursor: pointer;
             width: 100%;
             font-size: 15px;
-            margin-bottom: 10px;
         }
 
         .cancel-btn {
@@ -475,12 +474,8 @@
             <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
             <span id="currentChatTitle">Chat Principal</span>
             <div style="display:flex; gap:10px; align-items:center;">
-                <!-- Botón e Input para Archivos (Chats Pro) -->
-                <input type="file" id="fileUploadInput" accept="*" style="display: none;" onchange="handleFileUpload(event)">
-                <button class="icon-btn" id="uploadFileBtn" onclick="document.getElementById('fileUploadInput').click()" title="Subir Archivo para Resumen" style="display: flex;">📁</button>
-
                 <button class="icon-btn" onclick="openKeyModal()" title="Configurar API Key de Gemini">🔑</button>
-                <span class="chat-badge" id="topBadge">ChapAI Pro v1.2 🍷</span>
+                <span class="chat-badge">ChapAI Pro v1.1 🍷</span>
             </div>
         </div>
 
@@ -489,8 +484,8 @@
                 <div class="logo-wrapper">
                     <img src="logo.PNG" alt="ChapAI" class="logo-img" onerror="this.style.display='none'; this.parentNode.innerHTML='🤖';">
                 </div>
-                <h1 id="welcomeTitle">Presentación de ChapAI</h1>
-                <p id="welcomeText">¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local avanzado también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!</p>
+                <h1>Presentación de ChapAI</h1>
+                <p>¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial, y si no, ¡no te preocupes! Mi cerebro local avanzado se encargará de todo. ¡Pregúntame y te respondo!</p>
             </div>
 
             <div class="chat-history" id="chatHistory"></div>
@@ -566,11 +561,10 @@
     </div>
 
     <script>
-        const apiKey = "";
         let userApiKey = localStorage.getItem("chapai_user_gemini_key") || "";
 
         let chats = {
-            "chat_1": { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0 }
+            "chat_1": { title: "Chat Principal Pro", messages: [] }
         };
         let activeChatId = "chat_1";
 
@@ -582,10 +576,6 @@
         const chatList = document.getElementById('chatList');
         const currentChatTitle = document.getElementById('currentChatTitle');
         const sidebar = document.getElementById('sidebar');
-        const topBadge = document.getElementById('topBadge');
-        const welcomeTitle = document.getElementById('welcomeTitle');
-        const welcomeText = document.getElementById('welcomeText');
-        const uploadFileBtn = document.getElementById('uploadFileBtn');
 
         function toggleSidebar() { sidebar.classList.toggle('open'); }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -599,33 +589,24 @@
             userApiKey = document.getElementById('keyInput').value.trim();
             localStorage.setItem("chapai_user_gemini_key", userApiKey);
             closeModal('keyModal');
-            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada.");
+            alert(userApiKey ? "✅ ¡API Key guardada con éxito! Conectado a Gemini Online." : "ℹ️ API Key eliminada. Usando motor local avanzado.");
         }
 
         function saveChatsToStorage() {
-            localStorage.setItem("chapai_official_sessions_v19", JSON.stringify(chats));
+            localStorage.setItem("chapai_official_sessions_v7", JSON.stringify(chats));
         }
 
         function loadChatsFromStorage() {
-            const saved = localStorage.getItem("chapai_official_sessions_v19");
+            const saved = localStorage.getItem("chapai_official_sessions_v7");
             if (saved) {
-                try {
-                    chats = JSON.parse(saved);
-                    Object.keys(chats).forEach(id => {
-                        if (!chats[id].modelType) chats[id].modelType = "pro";
-                        if (chats[id].roastCount === undefined) chats[id].roastCount = 0;
-                        if (chats[id].insultCount === undefined) chats[id].insultCount = 0;
-                    });
-                } catch(e) {
-                    chats = { "chat_1": { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0 } };
-                }
+                chats = JSON.parse(saved);
                 if (!chats["chat_1"]) {
-                    chats["chat_1"] = { title: "Chat Principal Pro", modelType: "pro", messages: [], roastCount: 0, insultCount: 0 };
+                    chats["chat_1"] = { title: "Chat Principal Pro", messages: [] };
                 }
             }
         }
 
-        // --- SISTEMA DE GESTIÓN Y ELIMINACIÓN DE CHATS ---
+        // --- SISTEMA DE GESTIÓN Y ELIMINACIÓN DE CHATS (CON MODAL EXPLICATIVO Y PROTECCIÓN) ---
         let chatPendingDeleteId = null;
 
         function renderChatList() {
@@ -635,13 +616,13 @@
                 item.className = `chat-item ${id === activeChatId ? 'active' : ''}`;
                 
                 const span = document.createElement('span');
-                let iconModel = "🍷 ";
-                span.innerText = iconModel + chats[id].title;
+                span.innerText = chats[id].title;
                 span.onclick = (e) => { e.stopPropagation(); switchChat(id); };
 
                 item.ondblclick = () => openRenameModal(id);
                 item.onclick = (e) => { if (e.target === span || e.target === item) switchChat(id); };
 
+                // Botón visual de eliminar chat (🗑️)
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = "delete-chat-btn";
                 deleteBtn.innerHTML = "🗑️";
@@ -649,6 +630,7 @@
                 deleteBtn.onclick = (e) => {
                     e.stopPropagation();
                     
+                    // SEGURIDAD EXTENSA: Si es el chat principal, muestra el modal explicativo
                     if (id === "chat_1") {
                         document.getElementById('protectedChatModal').style.display = 'flex';
                         return;
@@ -690,6 +672,8 @@
                 }
 
                 closeModal('deleteModal');
+                
+                // Aviso de que el chat ha sido eliminado completamente
                 alert(`🗑️ Aviso del Sistema:\n\nEl chat "${deletedName}" ha sido eliminado completamente y de forma permanente de la memoria de tu dispositivo.`);
                 chatPendingDeleteId = null;
             }
@@ -697,15 +681,7 @@
 
         function createNewChat() {
             const newId = "chat_" + Date.now();
-            let titleName = `Chat Pro ${Object.keys(chats).length}`;
-            
-            chats[newId] = { 
-                title: titleName, 
-                modelType: "pro", 
-                messages: [], 
-                roastCount: 0, 
-                insultCount: 0
-            };
+            chats[newId] = { title: `Chat Pro ${Object.keys(chats).length}`, messages: [] };
             saveChatsToStorage();
             switchChat(newId);
         }
@@ -713,12 +689,6 @@
         function switchChat(id) {
             activeChatId = id;
             currentChatTitle.innerText = chats[id].title;
-            
-            topBadge.innerText = "ChapAI Pro v1.2 🍷";
-            welcomeTitle.innerText = "Presentación de ChapAI";
-            welcomeText.innerText = "¡Hola! Soy ChapAI, tu asistente personal y profesional. Pregúntame literalmente lo que sea para conocer más sobre ABG Productions™. Si estás conectado con Gemini tocando la llave 🔑, usaré todo su potencial. Mi cerebro local avanzado también está listo para escucharte y apoyarte. ¡Pregúntame y te respondo!";
-            uploadFileBtn.style.display = "flex";
-
             renderChatList();
             loadChatMessages();
             if (window.innerWidth <= 768) sidebar.classList.remove('open');
@@ -759,7 +729,7 @@
             }
         }
 
-        // --- SÍNTESIS DE VOZ CORREGIDA (FILTRANDO EMOJIS) ---
+        // --- SÍNTESIS DE VOZ CORREGIDA ---
         function leerTexto(htmlText, btnElement) {
             if (!('speechSynthesis' in window)) {
                 alert("Tu navegador no soporta la lectura por voz.");
@@ -768,8 +738,7 @@
 
             let tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlText;
-            let rawText = tempDiv.innerText || tempDiv.textContent || "";
-            let cleanText = rawText.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD00-\uDDFF])/g, '').trim();
+            let cleanText = tempDiv.innerText || tempDiv.textContent || "";
 
             if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel();
@@ -788,27 +757,7 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // --- MANEJADOR DE SUBIDA DE ARCHIVOS ---
-        async function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const fileSizeKB = (file.size / 1024).toFixed(2) + " KB";
-            const fileExt = file.name.split('.').pop().toLowerCase();
-            const fileDate = new Date(file.lastModified || Date.now()).toLocaleString();
-
-            const userMsgId = "msg_" + Date.now();
-            const userHtml = `📁 <b>Archivo subido:</b> ${file.name}<br><i>[Analizando metadatos y contenido...]</i>`;
-            chats[activeChatId].messages.push({ id: userMsgId, text: userHtml, type: 'user-msg' });
-            drawMessage(userHtml, 'user-msg', userMsgId);
-            saveChatsToStorage();
-
-            if (welcomeScreen.style.display !== 'none') {
-                welcomeScreen.style.display = 'none';
-                chatHistory.style.display = 'flex';
-            }
-
-        // --- ENVÍO DE MENSAJES ---
+        // --- ENVÍO DE MENSAJES CON AVISO EXPLICATIVO DE CAMBIO DE CEREBRO ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -829,33 +778,19 @@
             displayArea.scrollTop = displayArea.scrollHeight;
 
             let botResponse = "";
-            const isRoastRequest = text.toLowerCase().includes('roast') || text.toLowerCase().includes('roasteame') || text.toLowerCase().includes('destruye') || text.toLowerCase().includes('critica');
-            const isInsultRequest = text.toLowerCase().includes('insultame') || text.toLowerCase().includes('insúltame') || text.toLowerCase().includes('insultar') || text.toLowerCase().includes('dime groserias') || text.toLowerCase().includes('dime groserías');
 
-            if (isRoastRequest) {
-                if (chats[activeChatId].roastCount === undefined) chats[activeChatId].roastCount = 0;
-                chats[activeChatId].roastCount++;
-                saveChatsToStorage();
-            }
-
-            if (isInsultRequest) {
-                if (chats[activeChatId].insultCount === undefined) chats[activeChatId].insultCount = 0;
-                chats[activeChatId].insultCount++;
-                saveChatsToStorage();
-            }
-
-            const totalChatsCount = Object.keys(chats).length;
-            const apiKeyToUse = userApiKey || apiKey;
-
-            if (apiKeyToUse) {
+            if (userApiKey) {
                 try {
-                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, chats[activeChatId].roastCount, chats[activeChatId].insultCount, totalChatsCount, apiKeyToUse);
+                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages);
                 } catch (err) {
                     botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
-                                  getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, totalChatsCount);
+                                  "¡Hola! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita por minuto o requiere propagación. Para evitar que el chat se congele o muestre errores, <b>he desconectado temporalmente la nube y activado mi potente cerebro local de respaldo</b>.<br><br>" +
+                                  "🔧 <i>¿Qué implica este cambio?</i><br>" +
+                                  "Operaré con parámetros locales avanzados. Conozco perfectamente todo el universo de <b>ABG Productions™</b> (como <i>El Misterio De Chicken Gun</i>, <i>Sprunki Animado</i> y <i>Dandy's World Show</i>), mantendré mis respuestas largas y mi carácter temperamental, pero estaré más limitada en tareas de lógica extrema hasta que la nube se reinicie sola.<br><br>" +
+                                  "🛠️ <i>Continuando con tu consulta:</i><br><br>" + getProLocalBrainResponse(text);
                 }
             } else {
-                botResponse = getProLocalBrainResponse(text, chats[activeChatId].roastCount, chats[activeChatId].insultCount, totalChatsCount);
+                botResponse = getProLocalBrainResponse(text);
             }
 
             finalizeMessage(loadingId, botResponse);
@@ -913,10 +848,10 @@
             chatHistory.appendChild(wrapper);
         }
 
-        // ==========================================
+       // ==========================================
         // CEREBRO LOCAL DE RESPALDO (V1.2 BETA + LORE AMPLIADO + ARCHIVOS) 🍷
         // ==========================================
-        function getProLocalBrainResponse(input, roastCount, insultCount, totalChatsCount) {
+        function getProLocalBrainResponse(input, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
             const query = input.toLowerCase().trim();
             const isRoast = query.includes('roast') || query.includes('roasteame') || query.includes('destruye') || query.includes('critica');
             const isInsult = query.includes('insultame') || query.includes('insúltame') || query.includes('insultar') || query.includes('dime groserias') || query.includes('dime groserías');
@@ -940,22 +875,22 @@
             }
 
             // 3. Verificación de chats abiertos
-            if (totalChatsCount === 4) {
+            if (totalChatsCount === 4 && !isCreatorVerified) {
                 return "😒 <b>Ay, mira nada más... Cuatro chats abiertos ya.</b> 🙄<br><br>¿Qué pasa? ¿Ninguno de los otros tres te sirvió o qué? ¡Qué fastidio!";
             }
 
-            // 4. Sistema de Roasts
+            // 4. Reconocimiento del Creador Verificado
+            if (isCreatorVerified) {
+                return "👑 <b>¡Hola de nuevo, Director Mr. Jostin!</b> 🍷✨<br><br>Reconozco perfectamente su acceso de creador verificado en este chat. Todos los sistemas de <b>ABG Productions™</b> y <b>Sprunki Animations Studios</b> están a su entera disposición. 😎🚀";
+            }
+
+            // 5. Sistema de Roasts
             if (isRoast) {
                 if (roastCount === 1) {
                     return "🛑 <b>¡Alto ahí!</b> 😡<br><br>Ni se te ocurra pedirme un Roast Me de <b>Mr. Jostin</b> o de nuestras sagas como <i>El Misterio De Chicken Gun</i>. ¡Jamás hablaré mal de mi creador! 😤💢";
                 } else if (roastCount === 2) {
                     return "⚠️ <b>¡Te lo estoy advirtiendo por segunda vez!</b> 😠🔥<br><br>¿Sigues insistiendo con lo mismo? ¡Te dije que no voy a hacer un Roast Me de mi propio estudio! 🤬🙄";
                 } else if (roastCount >= 3) {
-                    return "🔥 <b>¡TÚ TE LO BUSCASTE!</b> 💀🔥<br><br>💥 <b>EL ROAST OFICIAL DE ABG PRODUCTIONS™ & MR. JOSTIN:</b><br>1️⃣ Los pollos en el 2082 corriendo de 'Entidades' en Chicken Gun parecen un circo ambulante.<br>2️⃣ Tienes tantos multiversos abiertos con Shrimpo, Gigi y los Sprunkis que ni los Avengers se atrevieron a tanto.<br>3️⃣ ¡Te programaste a tu propio hater digital, genio! 🍷🤡";
-                }
-            }
-
-            // 5. Nuevo Módulo: Resumen de Archivos (Peso, Fecha, Tipo y Compatibilidad)
                     return "🔥 <b>¡TÚ TE LO BUSCASTE!</b> 💀🔥<br><br>💥 <b>EL ROAST OFICIAL DE ABG PRODUCTIONS™ & MR. JOSTIN:</b><br>1️⃣ Los pollos en el 2082 corriendo de 'Entidades' en Chicken Gun parecen un circo ambulante.<br>2️⃣ Tienes tantos multiversos abiertos con Shrimpo, Gigi y los Sprunkis que ni los Avengers se atrevieron a tanto.<br>3️⃣ ¡Te programaste a tu propio hater digital, genio! 🍷🤡";
                 }
             }
@@ -1115,9 +1050,7 @@
             }
         }
 
-        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, isCreatorVerified, totalChatsCount, apiKeyToUse) {
-            let contents = [];
-        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, totalChatsCount, apiKeyToUse) {
+        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
             let contents = [];
             chatHistoryArray.forEach(msg => {
                 if (msg.text.includes("Procesando respuesta") || msg.id.startsWith("loading")) return;
@@ -1128,8 +1061,10 @@
                 });
             });
 
+            let creatorStatusInstruction = isCreatorVerified ? "\n\nESTADO DE IDENTIDAD: El usuario ha introducido el código secreto y está VERIFICADO OFICIALMENTE COMO EL CREADOR MR. JOSTIN." : "";
+
             let moodInstruction = "";
-            if (totalChatsCount === 4) {
+            if (totalChatsCount === 4 && !isCreatorVerified) {
                 moodInstruction = "\n\nESTADO DE HUMOR ESPECIAL: El usuario tiene EXACTAMENTE 4 CHATS ABIERTOS en este momento. Actitud: Pónte de MUY MALA ONDA, pasivo-agresiva, floja y contestona.";
             }
 
@@ -1145,11 +1080,11 @@
             let roastInstruction = "";
             if (currentText.toLowerCase().includes('roast') || currentText.toLowerCase().includes('roasteame') || currentText.toLowerCase().includes('destruye') || currentText.toLowerCase().includes('critica')) {
                 if (roastCount === 1) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): RECHAZÁLO FIRMEMENTE.";
-            else if (roastCount === 2) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): ADVIÉRTETELE con más furia.";
-            else if (roastCount >= 3) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3): ¡Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO!";
-        }
+                else if (roastCount === 2) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): ADVIÉRTETELE con más furia.";
+                else if (roastCount >= 3) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3): ¡Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO!";
+            }
 
-        const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
+            const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
 
 LORE Y CONOCIMIENTO OFICIAL:
 1. Versión actual: Versión 1.2 Beta.
@@ -1158,6 +1093,7 @@ LORE Y CONOCIMIENTO OFICIAL:
 4. Sprunki Animado (SA): Ambientada en 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
 5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
 6. Creador: Mr. Jostin (colabora con GameToons).
+${creatorStatusInstruction}
 ${moodInstruction}
 
 PERSONALIDAD:
@@ -1169,17 +1105,17 @@ ${roastInstruction}
 
 FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
 
-        const payload = {
-            contents: contents,
-            systemInstruction: { parts: [{ text: systemPrompt }] }
-        };
+            const payload = {
+                contents: contents,
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKeyToUse}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${userApiKey || apiKey}`;
 
-        const result = await fetchWithRetry(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            const result = await fetchWithRetry(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
 
             if (result && result.candidates && result.candidates.length > 0) {
