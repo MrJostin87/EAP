@@ -27,7 +27,6 @@
             box-sizing: border-box;
         }
 
-        /* BARRA LATERAL - GESTIÓN DE CHATS */
         .sidebar {
             width: 260px;
             background-color: var(--panel-bg);
@@ -111,7 +110,6 @@
             color: #ff4d4d;
         }
 
-        /* CONTENEDOR PRINCIPAL DEL CHAT */
         .main-content {
             flex: 1;
             display: flex;
@@ -159,7 +157,6 @@
             box-sizing: border-box;
         }
 
-        /* PANTALLA DE BIENVENIDA CON LOGO REAL */
         .welcome-screen {
             display: flex;
             flex-direction: column;
@@ -193,7 +190,6 @@
         h1 { font-size: 28px; font-weight: 500; margin: 0 0 12px 0; }
         .welcome-screen p { color: var(--text-muted); font-size: 16px; margin: 0; max-width: 400px; line-height: 1.4; }
 
-        /* MENSAJERÍA */
         .chat-history {
             width: 100%;
             max-width: 650px;
@@ -241,7 +237,6 @@
             padding-bottom: 14px !important;
         }
 
-        /* BOTONES FLOTANTES DE ACCIÓN (COPIAR Y VOZ) */
         .msg-actions {
             position: absolute;
             bottom: 6px;
@@ -269,7 +264,6 @@
             background-color: rgba(255,255,255,0.05);
         }
 
-        /* BARRA DE ENTRADA */
         .bottom-container {
             padding: 20px;
             display: flex;
@@ -332,7 +326,6 @@
             color: #000;
         }
 
-        /* VENTANAS MODALES NATIVAS */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -462,13 +455,11 @@
 </head>
 <body>
 
-    <!-- MENÚ LATERAL -->
     <div class="sidebar" id="sidebar">
         <button class="new-chat-btn" onclick="createNewChat()">➕ Nuevo Chat</button>
         <div class="chat-list" id="chatList"></div>
     </div>
 
-    <!-- CONTENIDO CENTRAL -->
     <div class="main-content">
         <div class="top-bar">
             <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
@@ -500,7 +491,6 @@
         </div>
     </div>
 
-    <!-- MODAL: CONFIGURACIÓN DE API KEY (LLAVE) -->
     <div class="modal-overlay" id="keyModal">
         <div class="modal-box" style="border-color: rgba(0, 255, 204, 0.3);">
             <h2 style="color: var(--accent);">🔑 Conectar con Google Gemini</h2>
@@ -513,7 +503,6 @@
         </div>
     </div>
 
-    <!-- MODAL: RENOMBRAR CHAT -->
     <div class="modal-overlay" id="renameModal">
         <div class="modal-box" style="border-color: rgba(0, 255, 204, 0.3);">
             <h2 style="color: var(--accent);">📝 Renombrar Chat</h2>
@@ -524,7 +513,6 @@
         </div>
     </div>
 
-    <!-- MODAL: CONFIRMACIÓN DE ELIMINACIÓN DE CHAT -->
     <div class="modal-overlay" id="deleteModal">
         <div class="modal-box">
             <h2>⚠️ ADVERTENCIA: ¿Eliminar Chat?</h2>
@@ -544,7 +532,6 @@
         </div>
     </div>
 
-    <!-- MODAL: PROTECCIÓN DEL CHAT PRINCIPAL -->
     <div class="modal-overlay" id="protectedChatModal">
         <div class="modal-box" style="border-color: #ff4d4d;">
             <h2>🚫 ACCIÓN DENEGADA</h2>
@@ -560,7 +547,6 @@
         </div>
     </div>
 
-    <!-- MODAL: BLOQUEO REGIONAL (FASE BETA) -->
     <div class="modal-overlay" id="regionalBlockModal" style="z-index: 9999; background: rgba(0, 0, 0, 0.95);">
         <div class="modal-box" style="border-color: #ff4d4d; max-width: 500px;">
             <div style="font-size: 40px; margin-bottom: 10px;">🌍🚫</div>
@@ -622,7 +608,6 @@
             }
         }
 
-        // --- SISTEMA DE GESTIÓN Y ELIMINACIÓN DE CHATS (CON MODAL EXPLICATIVO Y PROTECCIÓN) ---
         let chatPendingDeleteId = null;
 
         function renderChatList() {
@@ -638,7 +623,6 @@
                 item.ondblclick = () => openRenameModal(id);
                 item.onclick = (e) => { if (e.target === span || e.target === item) switchChat(id); };
 
-                // Botón visual de eliminar chat (🗑️)
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = "delete-chat-btn";
                 deleteBtn.innerHTML = "🗑️";
@@ -646,7 +630,6 @@
                 deleteBtn.onclick = (e) => {
                     e.stopPropagation();
                     
-                    // SEGURIDAD EXTENSA: Si es el chat principal, muestra el modal explicativo
                     if (id === "chat_1") {
                         document.getElementById('protectedChatModal').style.display = 'flex';
                         return;
@@ -688,8 +671,6 @@
                 }
 
                 closeModal('deleteModal');
-                
-                // Aviso de que el chat ha sido eliminado completamente
                 alert(`🗑️ Aviso del Sistema:\n\nEl chat "${deletedName}" ha sido eliminado completamente y de forma permanente de la memoria de tu dispositivo.`);
                 chatPendingDeleteId = null;
             }
@@ -745,7 +726,6 @@
             }
         }
 
-        // --- SÍNTESIS DE VOZ CORREGIDA ---
         function leerTexto(htmlText, btnElement) {
             if (!('speechSynthesis' in window)) {
                 alert("Tu navegador no soporta la lectura por voz.");
@@ -773,7 +753,6 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        // --- ENVÍO DE MENSAJES CON AVISO EXPLICATIVO DE CAMBIO DE CEREBRO ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -794,21 +773,23 @@
             displayArea.scrollTop = displayArea.scrollHeight;
 
             let botResponse = "";
+            let roastCount = 0;
+            let insultCount = 0;
+            let isCreatorVerified = false;
+            let totalChatsCount = Object.keys(chats).length;
 
             if (userApiKey) {
                 try {
-                    // Contadores temporales para lógica local si no están definidos globalmente
-                    let tempRoastCount = 0; let tempInsultCount = 0; let tempCreatorVerified = false; let tempTotalChatsCount = Object.keys(chats).length;
-                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, tempRoastCount, tempInsultCount, tempCreatorVerified, tempTotalChatsCount);
+                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, roastCount, insultCount, isCreatorVerified, totalChatsCount);
                 } catch (err) {
                     botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
                                   "¡Hola! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita por minuto o requiere propagación. Para evitar que el chat se congele o muestre errores, <b>he desconectado temporalmente la nube y activado mi potente cerebro local de respaldo</b>.<br><br>" +
                                   "🔧 <i>¿Qué implica este cambio?</i><br>" +
                                   "Operaré con parámetros locales avanzados. Conozco perfectamente todo el universo de <b>ABG Productions™</b>, mantendré mis respuestas largas y mi carácter temperamental, pero estaré más limitada en tareas de lógica extrema hasta que la nube se reinicie sola.<br><br>" +
-                                  "🛠️ <i>Continuando con tu consulta:</i><br><br>" + getProLocalBrainResponse(text, 0, 0, false, Object.keys(chats).length);
+                                  "🛠️ <i>Continuando con tu consulta:</i><br><br>" + getProLocalBrainResponse(text, roastCount, insultCount, isCreatorVerified, totalChatsCount);
                 }
             } else {
-                botResponse = getProLocalBrainResponse(text, 0, 0, false, Object.keys(chats).length);
+                botResponse = getProLocalBrainResponse(text, roastCount, insultCount, isCreatorVerified, totalChatsCount);
             }
 
             finalizeMessage(loadingId, botResponse);
@@ -866,7 +847,7 @@
             chatHistory.appendChild(wrapper);
         }
 
-       // ==========================================
+        // ==========================================
         // CEREBRO LOCAL DE RESPALDO (V1.2 BETA + LORE AMPLIADO + ARCHIVOS) 🍷
         // ==========================================
         function getProLocalBrainResponse(input, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
@@ -1116,7 +1097,7 @@ ${moodInstruction}
 
 PERSONALIDAD:
 - Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
-- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😠😒), responde con rabia y carácter.
+- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😒), responde con rabia y carácter.
 - REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que esta triste, deprimido o llorando (😢😭😔💔😞), sé súper empático y consolador.
 ${insultInstruction}
 ${roastInstruction}
@@ -1144,8 +1125,34 @@ FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
             }
         }
 
+        // ==========================================
+        // SISTEMA DE BLOQUEO REGIONAL (BETA 8 PAÍSES)
+        // ==========================================
+        async function checkRegionalAccess() {
+            const allowedCountries = ['GT', 'MX', 'US', 'HN', 'CL', 'PE', 'CO', 'SV'];
+            
+            try {
+                const response = await fetch('https://get.geojs.io/v1/ip/country.json');
+                const data = await response.json();
+                
+                const userCountry = data.country;
+                const countryName = data.name;
+
+                if (!allowedCountries.includes(userCountry)) {
+                    document.getElementById('detectedRegion').innerText = countryName || userCountry;
+                    document.getElementById('regionalBlockModal').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error("Error verificando la región geográfica:", error);
+            }
+        }
+
         // --- ENLACE DE EVENTOS AL CARGAR LA PÁGINA ---
         window.onload = function() {
+            // 1. Activar comprobador regional
+            checkRegionalAccess();
+
+            // 2. Cargar datos y UI
             loadChatsFromStorage();
             if (sendBtn) sendBtn.onclick = sendMessage;
             if (userInput) {
@@ -1155,52 +1162,9 @@ FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
             
             if (Object.keys(chats).length === 1 && chats["chat_1"].messages.length === 0) {
                 switchChat("chat_1");
-
-        // ==========================================
-        // SISTEMA DE BLOQUEO REGIONAL (BETA 8 PAÍSES)
-        // ==========================================
-        async function checkRegionalAccess() {
-            const allowedCountries = ['GT', 'MX', 'US', 'HN', 'CL', 'PE', 'CO', 'SV'];
-            
-            try {
-                // Obtenemos el país del usuario basado en su IP de forma gratuita y sin keys
-                const response = await fetch('https://get.geojs.io/v1/ip/country.json');
-                const data = await response.json();
-                
-                const userCountry = data.country; // Código de 2 letras (Ej: 'GT')
-                const countryName = data.name;    // Nombre completo (Ej: 'Guatemala')
-
-                // Si el país NO está en la lista de permitidos, bloqueamos la pantalla
-                if (!allowedCountries.includes(userCountry)) {
-                    document.getElementById('detectedRegion').innerText = countryName || userCountry;
-                    document.getElementById('regionalBlockModal').style.display = 'flex';
-                }
-            } catch (error) {
-                console.error("Error verificando la región geográfica:", error);
-                // Si la API falla, por precaución permitimos el acceso para no bloquear a usuarios válidos
-            }
-        }
-
-        // --- INICIALIZACIÓN AL CARGAR LA PÁGINA ---
-        window.onload = function() {
-            // 1. Ejecutar el comprobador regional lo más rápido posible
-            checkRegionalAccess();
-
-            // 2. Cargar UI normal
-            loadChatsFromStorage();
-            renderChatList();
-            loadChatMessages();
-            
-            // 3. Asignación de eventos UI
-            if (sendBtn) {
-                sendBtn.onclick = sendMessage;
-            }
-            if (userInput) {
-                userInput.onkeypress = (e) => { 
-                    if (e.key === 'Enter') sendMessage(); 
-                };
             }
         };
     </script>
+
 </body>
 </html>
