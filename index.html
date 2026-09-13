@@ -989,26 +989,28 @@
         // SISTEMA DE BLOQUEO REGIONAL (BETA 8 PAÍSES)
         // ==========================================
         async function checkRegionalAccess() {
-            // Lista exacta definida en la propuesta
+            // MODO DE PRUEBA: Activando el modal automáticamente para visualizar el diseño.
+            document.getElementById('detectedRegion').innerText = "Región de Prueba (Simulada)";
+            document.getElementById('regionalBlockModal').style.display = 'flex';
+            
+            /* --- Lógica real de detección comentada temporalmente ---
             const allowedCountries = ['GT', 'MX', 'US', 'HN', 'CL', 'PE', 'CO', 'SV'];
             
             try {
-                // Obtiene código de país e info vía API gratuita (sin limitación de CORS)
                 const response = await fetch('https://get.geojs.io/v1/ip/country.json');
                 const data = await response.json();
                 
-                const userCountry = data.country; // Ej: 'GT', 'AR', 'ES'
-                const countryName = data.name; // Ej: 'Guatemala', 'Argentina'
+                const userCountry = data.country; 
+                const countryName = data.name; 
 
                 if (!allowedCountries.includes(userCountry)) {
-                    // Actualiza el texto del modal con la región actual y muestra bloqueo
                     document.getElementById('detectedRegion').innerText = countryName || userCountry;
                     document.getElementById('regionalBlockModal').style.display = 'flex';
                 }
             } catch (error) {
                 console.error("Error verificando región:", error);
-                // Si la API falla, permitimos la entrada por seguridad para no afectar a los probadores beta
             }
+            --------------------------------------------------------- */
         }
 
         // --- INICIALIZACIÓN AL CARGAR LA PÁGINA ---
