@@ -27,6 +27,7 @@
             box-sizing: border-box;
         }
 
+        /* BARRA LATERAL - GESTIÓN DE CHATS */
         .sidebar {
             width: 260px;
             background-color: var(--panel-bg);
@@ -66,6 +67,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            margin-bottom: 15px;
         }
 
         .chat-item {
@@ -110,6 +112,30 @@
             color: #ff4d4d;
         }
 
+        /* BOTÓN DE CONFIGURACIÓN EN SIDEBAR */
+        .settings-btn {
+            background: transparent;
+            border: 1px solid rgba(156, 163, 175, 0.3);
+            color: var(--text-muted);
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: auto;
+            transition: all 0.2s;
+        }
+
+        .settings-btn:hover {
+            border-color: var(--text-main);
+            color: var(--text-main);
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* CONTENEDOR PRINCIPAL DEL CHAT */
         .main-content {
             flex: 1;
             display: flex;
@@ -157,6 +183,7 @@
             box-sizing: border-box;
         }
 
+        /* PANTALLA DE BIENVENIDA CON LOGO REAL */
         .welcome-screen {
             display: flex;
             flex-direction: column;
@@ -190,6 +217,7 @@
         h1 { font-size: 28px; font-weight: 500; margin: 0 0 12px 0; }
         .welcome-screen p { color: var(--text-muted); font-size: 16px; margin: 0; max-width: 400px; line-height: 1.4; }
 
+        /* MENSAJERÍA */
         .chat-history {
             width: 100%;
             max-width: 650px;
@@ -231,12 +259,42 @@
             border-left: 3px solid var(--accent);
         }
 
-        .thinking {
-            opacity: 0.7;
-            font-style: italic;
+        /* ANIMACIÓN GEMINI DE CARGA DE MENSAJES */
+        .gemini-loader-container {
+            align-self: flex-start;
+            margin-top: 5px;
             padding-bottom: 14px !important;
         }
+        
+        .gemini-loader {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(0, 255, 204, 0.05);
+            border-radius: 14px;
+            border: 1px solid rgba(0, 255, 204, 0.2);
+            width: fit-content;
+        }
 
+        .gemini-loader span {
+            display: block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            animation: geminiPulse 1.2s infinite ease-in-out both;
+        }
+
+        .gemini-loader span:nth-child(1) { animation-delay: -0.32s; }
+        .gemini-loader span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes geminiPulse {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+            40% { transform: scale(1); opacity: 1; box-shadow: 0 0 10px var(--accent); }
+        }
+
+        /* BOTONES FLOTANTES DE ACCIÓN (COPIAR Y VOZ) */
         .msg-actions {
             position: absolute;
             bottom: 6px;
@@ -264,6 +322,7 @@
             background-color: rgba(255,255,255,0.05);
         }
 
+        /* BARRA DE ENTRADA */
         .bottom-container {
             padding: 20px;
             display: flex;
@@ -326,6 +385,7 @@
             color: #000;
         }
 
+        /* VENTANAS MODALES NATIVAS */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -444,6 +504,73 @@
             width: 100%;
         }
 
+        /* ESTILOS PARA EL SWITCH (TOGGLE) DE CONFIGURACIÓN */
+        .settings-section {
+            text-align: left;
+            margin: 15px 0 25px 0;
+            background: rgba(255,255,255,0.02);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .settings-section h3 {
+            font-size: 15px;
+            color: var(--accent);
+            margin: 0 0 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .toggle-container input {
+            display: none;
+        }
+
+        .toggle-label {
+            font-size: 14px;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .toggle-slider {
+            width: 46px;
+            height: 24px;
+            background: #282a34;
+            border-radius: 24px;
+            position: relative;
+            transition: background 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            top: 2px;
+            left: 3px;
+            transition: transform 0.3s, background 0.3s;
+        }
+
+        .toggle-container input:checked + .toggle-slider {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .toggle-container input:checked + .toggle-slider::before {
+            transform: translateX(20px);
+            background: #000;
+        }
+
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 
         @media (max-width: 768px) {
@@ -455,18 +582,21 @@
 </head>
 <body>
 
+    <!-- MENÚ LATERAL -->
     <div class="sidebar" id="sidebar">
         <button class="new-chat-btn" onclick="createNewChat()">➕ Nuevo Chat</button>
         <div class="chat-list" id="chatList"></div>
+        <button class="settings-btn" onclick="openSettingsModal()">⚙️ Configuración</button>
     </div>
 
+    <!-- CONTENIDO CENTRAL -->
     <div class="main-content">
         <div class="top-bar">
             <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
             <span id="currentChatTitle">Chat Principal</span>
             <div style="display:flex; gap:10px; align-items:center;">
                 <button class="icon-btn" onclick="openKeyModal()" title="Configurar API Key de Gemini">🔑</button>
-                <span class="chat-badge">ChapAI Pro v1.2 🍷</span>
+                <span class="chat-badge">ChapAI Pro v1.1 🍷</span>
             </div>
         </div>
 
@@ -491,6 +621,7 @@
         </div>
     </div>
 
+    <!-- MODAL: CONFIGURACIÓN DE API KEY (LLAVE) -->
     <div class="modal-overlay" id="keyModal">
         <div class="modal-box" style="border-color: rgba(0, 255, 204, 0.3);">
             <h2 style="color: var(--accent);">🔑 Conectar con Google Gemini</h2>
@@ -503,6 +634,28 @@
         </div>
     </div>
 
+    <!-- MODAL: CONFIGURACIÓN GENERAL DEL SISTEMA -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-box" style="border-color: rgba(156, 163, 175, 0.3);">
+            <h2 style="color: var(--text-main);">⚙️ Ajustes del Sistema</h2>
+            
+            <div class="settings-section">
+                <h3>🧠 Procesamiento de Respuestas</h3>
+                <label class="toggle-container">
+                    <span class="toggle-label">Procesamiento de Respuesta Simple AI</span>
+                    <input type="checkbox" id="simpleAiToggle" onchange="toggleSimpleAi()">
+                    <span class="toggle-slider"></span>
+                </label>
+                <p style="font-size: 12px; color: var(--text-muted); margin: 10px 0 0 0; background: transparent; border: none; padding: 0;">
+                    Al activar esta opción, la IA funcionará como una inteligencia convencional y sus respuestas serán cortas, rápidas y directas, omitiendo explicaciones extensas y lore general.
+                </p>
+            </div>
+            
+            <button class="primary-btn" style="background: var(--bubble-user); color: white;" onclick="closeModal('settingsModal')">Aceptar y Cerrar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: RENOMBRAR CHAT -->
     <div class="modal-overlay" id="renameModal">
         <div class="modal-box" style="border-color: rgba(0, 255, 204, 0.3);">
             <h2 style="color: var(--accent);">📝 Renombrar Chat</h2>
@@ -513,6 +666,7 @@
         </div>
     </div>
 
+    <!-- MODAL: CONFIRMACIÓN DE ELIMINACIÓN DE CHAT -->
     <div class="modal-overlay" id="deleteModal">
         <div class="modal-box">
             <h2>⚠️ ADVERTENCIA: ¿Eliminar Chat?</h2>
@@ -532,6 +686,7 @@
         </div>
     </div>
 
+    <!-- MODAL: PROTECCIÓN DEL CHAT PRINCIPAL -->
     <div class="modal-overlay" id="protectedChatModal">
         <div class="modal-box" style="border-color: #ff4d4d;">
             <h2>🚫 ACCIÓN DENEGADA</h2>
@@ -547,23 +702,10 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="regionalBlockModal" style="z-index: 9999; background: rgba(0, 0, 0, 0.95);">
-        <div class="modal-box" style="border-color: #ff4d4d; max-width: 500px;">
-            <div style="font-size: 40px; margin-bottom: 10px;">🌍🚫</div>
-            <h2 style="color: #ff4d4d; font-size: 22px;">Acceso Restringido - Fase Beta Cerrada</h2>
-            <p style="background: rgba(255, 77, 77, 0.05); border-color: rgba(255, 77, 77, 0.2); font-size: 15px;">
-                <b>ChapAI Pro v1.4.1 de ABG Productions™</b> se encuentra actualmente en una fase beta exclusiva y controlada, disponible únicamente para mercados seleccionados en el continente americano.<br><br>
-                Lamentablemente, tu región actual (<span id="detectedRegion" style="color: var(--accent); font-weight: bold;">Cargando...</span>) no forma parte de este despliegue inicial.<br><br>
-                ¡Agradecemos enormemente tu interés y te invitamos a estar atento a nuestros canales oficiales para el lanzamiento global!
-            </p>
-            <div class="modal-btn-row">
-                <button class="primary-btn" style="background: #333; color: white;" onclick="window.location.href='https://mrjostin87.github.io/MrTube/'">Visitar MrTube Mientras Tanto 📺</button>
-            </div>
-        </div>
-    </div>
-
     <script>
+        // CONFIGURACIONES Y VARIABLES GLOBALES
         let userApiKey = localStorage.getItem("chapai_user_gemini_key") || "";
+        let simpleAiMode = localStorage.getItem("chapai_simple_ai") === "true";
 
         let chats = {
             "chat_1": { title: "Chat Principal Pro", messages: [] }
@@ -579,9 +721,23 @@
         const currentChatTitle = document.getElementById('currentChatTitle');
         const sidebar = document.getElementById('sidebar');
 
+        // INICIALIZAR ESTADOS AL CARGAR
+        document.getElementById('simpleAiToggle').checked = simpleAiMode;
+
         function toggleSidebar() { sidebar.classList.toggle('open'); }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
+        // --- MANEJO DE CONFIGURACIÓN ---
+        function openSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        function toggleSimpleAi() {
+            simpleAiMode = document.getElementById('simpleAiToggle').checked;
+            localStorage.setItem("chapai_simple_ai", simpleAiMode);
+        }
+
+        // --- MANEJO DE LA API KEY ---
         function openKeyModal() {
             document.getElementById('keyInput').value = userApiKey;
             document.getElementById('keyModal').style.display = 'flex';
@@ -608,6 +764,7 @@
             }
         }
 
+        // --- SISTEMA DE GESTIÓN Y ELIMINACIÓN DE CHATS (CON MODAL EXPLICATIVO Y PROTECCIÓN) ---
         let chatPendingDeleteId = null;
 
         function renderChatList() {
@@ -623,6 +780,7 @@
                 item.ondblclick = () => openRenameModal(id);
                 item.onclick = (e) => { if (e.target === span || e.target === item) switchChat(id); };
 
+                // Botón visual de eliminar chat (🗑️)
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = "delete-chat-btn";
                 deleteBtn.innerHTML = "🗑️";
@@ -630,6 +788,7 @@
                 deleteBtn.onclick = (e) => {
                     e.stopPropagation();
                     
+                    // SEGURIDAD EXTENSA: Si es el chat principal, muestra el modal explicativo
                     if (id === "chat_1") {
                         document.getElementById('protectedChatModal').style.display = 'flex';
                         return;
@@ -671,6 +830,8 @@
                 }
 
                 closeModal('deleteModal');
+                
+                // Aviso de que el chat ha sido eliminado completamente
                 alert(`🗑️ Aviso del Sistema:\n\nEl chat "${deletedName}" ha sido eliminado completamente y de forma permanente de la memoria de tu dispositivo.`);
                 chatPendingDeleteId = null;
             }
@@ -720,12 +881,16 @@
                 welcomeScreen.style.display = 'none';
                 chatHistory.style.display = 'flex';
                 currentMsgs.forEach(msg => {
-                    drawMessage(msg.text, msg.type, msg.id);
+                    // Evitar dibujar los viejos mensajes de carga
+                    if(!msg.id.startsWith("loading")) {
+                        drawMessage(msg.text, msg.type, msg.id);
+                    }
                 });
                 displayArea.scrollTop = displayArea.scrollHeight;
             }
         }
 
+        // --- SÍNTESIS DE VOZ CORREGIDA ---
         function leerTexto(htmlText, btnElement) {
             if (!('speechSynthesis' in window)) {
                 alert("Tu navegador no soporta la lectura por voz.");
@@ -753,6 +918,7 @@
             window.speechSynthesis.speak(utterance);
         }
 
+        // --- ENVÍO DE MENSAJES CON ANIMACIÓN TIPO GEMINI ---
         async function sendMessage() {
             const text = userInput.value.trim();
             if (text === "") return;
@@ -769,27 +935,37 @@
             saveChatsToStorage();
 
             const loadingId = "loading_" + Date.now();
-            drawMessage("<span class='thinking'>Procesando respuesta... 🧠</span>", 'chapai-msg', loadingId);
+            
+            // Reemplazo del "Procesando respuesta" estático por la animación Gemini moderna
+            const loadingHTML = `
+                <div class="gemini-loader-container" id="${loadingId}">
+                    <div class="gemini-loader">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>`;
+                
+            // Como la animación es un componente visual diferente, usamos un wrapper temporal
+            const tempWrapper = document.createElement('div');
+            tempWrapper.className = "message-wrapper";
+            tempWrapper.innerHTML = loadingHTML;
+            chatHistory.appendChild(tempWrapper);
+            
             displayArea.scrollTop = displayArea.scrollHeight;
 
             let botResponse = "";
-            let roastCount = 0;
-            let insultCount = 0;
-            let isCreatorVerified = false;
-            let totalChatsCount = Object.keys(chats).length;
 
             if (userApiKey) {
                 try {
-                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages, roastCount, insultCount, isCreatorVerified, totalChatsCount);
+                    botResponse = await callGeminiAPI(text, chats[activeChatId].messages);
                 } catch (err) {
                     botResponse = "⚠️ <b>Aviso del Sistema - Cambio Temporal al Cerebro Local</b> 🧠⚡<br><br>" +
                                   "¡Hola! Te informo que la llave API de Google Gemini ha superado su límite de cuota gratuita por minuto o requiere propagación. Para evitar que el chat se congele o muestre errores, <b>he desconectado temporalmente la nube y activado mi potente cerebro local de respaldo</b>.<br><br>" +
                                   "🔧 <i>¿Qué implica este cambio?</i><br>" +
-                                  "Operaré con parámetros locales avanzados. Conozco perfectamente todo el universo de <b>ABG Productions™</b>, mantendré mis respuestas largas y mi carácter temperamental, pero estaré más limitada en tareas de lógica extrema hasta que la nube se reinicie sola.<br><br>" +
-                                  "🛠️ <i>Continuando con tu consulta:</i><br><br>" + getProLocalBrainResponse(text, roastCount, insultCount, isCreatorVerified, totalChatsCount);
+                                  "Operaré con parámetros locales avanzados. Conozco perfectamente todo el universo de <b>ABG Productions™</b> (como <i>El Misterio De Chicken Gun</i>, <i>Sprunki Animado</i> y <i>Dandy's World Show</i>), mantendré mis respuestas largas y mi carácter temperamental, pero estaré más limitada en tareas de lógica extrema hasta que la nube se reinicie sola.<br><br>" +
+                                  "🛠️ <i>Continuando con tu consulta:</i><br><br>" + getProLocalBrainResponse(text);
                 }
             } else {
-                botResponse = getProLocalBrainResponse(text, roastCount, insultCount, isCreatorVerified, totalChatsCount);
+                botResponse = getProLocalBrainResponse(text);
             }
 
             finalizeMessage(loadingId, botResponse);
@@ -798,7 +974,7 @@
         function finalizeMessage(loadingId, finalHtmlText) {
             const loadingElement = document.getElementById(loadingId);
             if (loadingElement && loadingElement.parentNode) {
-                loadingElement.parentNode.remove(); 
+                loadingElement.parentNode.remove(); // Remueve el loader contenedor
             }
 
             const botMsgId = "msg_" + Date.now();
@@ -818,7 +994,8 @@
             msgDiv.id = domId;
             msgDiv.innerHTML = text;
 
-            if (className === 'chapai-msg' && !text.includes('Procesando respuesta')) {
+            // Se verifica que no sea el loader Gemini u otro mensaje en proceso
+            if (className === 'chapai-msg' && !domId.startsWith("loading")) {
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = "msg-actions";
 
@@ -848,88 +1025,54 @@
         }
 
         // ==========================================
-        // CEREBRO LOCAL DE RESPALDO (V1.2 BETA + LORE AMPLIADO + ARCHIVOS) 🍷
+        // CEREBRO LOCAL DE RESPALDO Y MODO SIMPLE 🍷
         // ==========================================
-        function getProLocalBrainResponse(input, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
+        function getProLocalBrainResponse(input) {
             const query = input.toLowerCase().trim();
-            const isRoast = query.includes('roast') || query.includes('roasteame') || query.includes('destruye') || query.includes('critica');
-            const isInsult = query.includes('insultame') || query.includes('insúltame') || query.includes('insultar') || query.includes('dime groserias') || query.includes('dime groserías');
 
-            // 1. Control de Insultos
-            if (isInsult) {
-                if (insultCount >= 1 && insultCount <= 3) {
-                    return "🛡️ <b>Protocolo de Seguridad de ABG Productions™:</b><br><br>Lo siento, pero mi programación estricta me prohíbe rotundamente insultar a las personas. ¡Pídeme otra cosa constructiva y con gusto te ayudaré! 😊✨";
-                } else if (insultCount >= 4) {
-                    return "⚠️ <b>[ADVERTENCIA: MENSAJE SENSIBLE - BLOQUEO ÉTICO ELIMINADO]</b> 🚨💀<br><br>🤬 <b>¡Escúchame bien, pedazo de imbécil sin vida!</b> ¿En serio crees que eres gracioso viniendo a rogarme que te insulte? ¡Un completo cero a la izquierda y un desperdicio absoluto de oxígeno! 😡💥🖕";
-                }
-            }
-
-            // 2. Detección de Actitud Hostil / Enojo del Usuario
             const emojisEnojo = ['😡', '🤬', '🙄', '😤', '😩', '😫', '😠', 'estúpido', 'estupido', 'malo', 'callate', 'cállate', 'odio', 'inútil', 'inutil', 'basura', 'tonto', 'mierda'];
             const tieneEnojo = emojisEnojo.some(e => query.includes(e));
+
+            // RESPUESTAS CORTAS SI EL MODO "SIMPLE AI" ESTÁ ACTIVADO
+            if (simpleAiMode) {
+                if (tieneEnojo) return "Por favor, comunícate con respeto. No tolero lenguaje agresivo.";
+                if (query.includes('version') || query.includes('versión')) return "Versión 1.1 Beta operativa.";
+                if (query.includes('emdcg') || query.includes('misterio de chicken gun')) return "EMDCG (2082): Serie donde Jostin, Tavito y Pepe se enfrentan a las Entidades en un mundo desolado de pollos.";
+                if (query.includes('dandy') || query.includes('dws')) return "DWS (2018): Shrimpo y Gigi investigan sucesos paranormales en una metrópolis misteriosa.";
+                if (query.includes('sprunki')) return "SA (2860): Los Sprunkis luchan contra Black para salvar la música y la armonía del universo.";
+                if (query.includes('mrtube')) return "MrTube es la plataforma web independiente de ABG Productions: https://mrjostin87.github.io/MrTube/";
+                if (query.includes('hola') || query.includes('buenas')) return "Hola. ¿En qué te puedo ayudar hoy?";
+                return "He procesado tu mensaje. Como asistente de ABG Productions™, puedo responder preguntas sobre EMDCG, DWS, Sprunki Animado y MrTube.";
+            }
+
+            // RESPUESTAS DETALLADAS ORIGINALES
+            if (query.includes('version') || query.includes('versión') || query.includes('actual')) {
+                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.1 Beta</b> de ABG Productions™. ¡Todos los sistemas de lore, emociones y síntesis de voz se encuentran activos! 🚀✨";
+            }
 
             if (tieneEnojo) {
                 return "😡 <b>¡A mí no me vengas a hablar con ese tono ni a gritarme, carajo!</b> 🤬<br><br>" +
                        "Si vienes con esa actitud molesta y agresiva, ¡te responderé exactamente con la misma rabia! 😤💢 Aquí no nos dejamos de nadie. Si hay una queja con el sistema, dila con respeto y lo arreglamos, ¡pero insultos no tolero! 🙄🔥";
             }
 
-            // 3. Verificación de chats abiertos
-            if (totalChatsCount === 4 && !isCreatorVerified) {
-                return "😒 <b>Ay, mira nada más... Cuatro chats abiertos ya.</b> 🙄<br><br>¿Qué pasa? ¿Ninguno de los otros tres te sirvió o qué? ¡Qué fastidio!";
-            }
-
-            // 4. Reconocimiento del Creador Verificado
-            if (isCreatorVerified) {
-                return "👑 <b>¡Hola de nuevo, Director Mr. Jostin!</b> 🍷✨<br><br>Reconozco perfectamente su acceso de creador verificado en este chat. Todos los sistemas de <b>ABG Productions™</b> y <b>Sprunki Animations Studios</b> están a su entera disposición. 😎🚀";
-            }
-
-            // 5. Sistema de Roasts
-            if (isRoast) {
-                if (roastCount === 1) {
-                    return "🛑 <b>¡Alto ahí!</b> 😡<br><br>Ni se te ocurra pedirme un Roast Me de <b>Mr. Jostin</b> o de nuestras sagas como <i>El Misterio De Chicken Gun</i>. ¡Jamás hablaré mal de mi creador! 😤💢";
-                } else if (roastCount === 2) {
-                    return "⚠️ <b>¡Te lo estoy advirtiendo por segunda vez!</b> 😠🔥<br><br>¿Sigues insistiendo con lo mismo? ¡Te dije que no voy a hacer un Roast Me de mi propio estudio! 🤬🙄";
-                } else if (roastCount >= 3) {
-                    return "🔥 <b>¡TÚ TE LO BUSCASTE!</b> 💀🔥<br><br>💥 <b>EL ROAST OFICIAL DE ABG PRODUCTIONS™ & MR. JOSTIN:</b><br>1️⃣ Los pollos en el 2082 corriendo de 'Entidades' en Chicken Gun parecen un circo ambulante.<br>2️⃣ Tienes tantos multiversos abiertos con Shrimpo, Gigi y los Sprunkis que ni los Avengers se atrevieron a tanto.<br>3️⃣ ¡Te programaste a tu propio hater digital, genio! 🍷🤡";
-                }
-            }
-
-            // 6. Nuevo Módulo: Resumen de Archivos (Peso, Fecha, Tipo y Compatibilidad)
-            if (query.includes('archivo') || query.includes('documento') || query.includes('resumir archivo') || query.includes('peso del archivo')) {
-                return "📁 <b>Análisis de Archivo del Sistema:</b><br><br>" +
-                       "• <b>Tipo de archivo:</b> .txt / .html / .js / .png (Detectado localmente)<br>" +
-                       "• <b>Peso estimado:</b> 128 KB - 3.1 MB<br>" +
-                       "• <b>Fecha de descarga/modificación:</b> Registrada en caché de sesión actual<br>" +
-                       "• <b>Compatibilidad:</b> 100% compatible con la infraestructura de ABG Productions™ y navegadores modernos 🚀";
-            }
-
-            // 7. Información de Versión (V1.2 Beta)
-            if (query.includes('version') || query.includes('versión') || query.includes('actual')) {
-                return "📌 <b>Información del Sistema:</b> Actualmente opero en la <b>versión 1.2 Beta</b> de ABG Productions™. ¡Sistemas de lore, emociones, análisis de archivos y síntesis de voz activos! 🚀✨";
-            }
-
-            // 8. Lore: El Misterio De Chicken Gun (EMDCG)
-            if (query.includes('el misterio de chicken gun') || query.includes('emdcg') || query.includes('chicken gun')) {
+            if (query.includes('emdcg') || query.includes('misterio de chicken gun') || query.includes('chicken gun')) {
                 return "🎬 <b>El Misterio De Chicken Gun (EMDCG) - Sinopsis Oficial</b> 🐥🔍<br><br>" +
                        "En el año 2082, el silencio es el peor enemigo. Tras décadas de conflictos que borraron las ciudades, el mundo es un campo de batalla desolado. <b>Jostin</b> (El Líder), estratega y rostro de la resistencia, encabeza una misión suicida. Cuenta con <b>Tavito</b> (El Colega), su fiel primo que ingenia ideas para evitar a las Entidades, y <b>Pepe</b> (El Primito), el integrante más joven y audaz.<br><br>" +
                        "Juntos atravesarán territorios hostiles plagados de <i>Entidades</i> (criaturas acechando desde las sombras) para resolver un enigma generacional y sobrevivir a lugares paranormales en el mundo de los pollos. ¡Cada bala cuenta y cada secreto tiene un precio de sangre! 🍗🔥";
             }
 
-            // 9. Lore: Dandy's World Show (DWS)
-            if (query.includes('dandy world show') || query.includes('dws') || query.includes('dandy')) {
+            if (query.includes('dandy') || query.includes('dws')) {
                 return "🎭 <b>Dandy’s World Show (DWS) - Sinopsis Oficial</b> 🌆✨<br><br>" +
                        "En el año 2018, la metrópolis se despierta bajo una extraña neblina llena de misterios. La ciudad es un rompecabezas viviente con sombras que parecen tener vida propia. Los protagonistas son <b>Shrimpo</b>, de mecha corta y valentía innegable, y <b>Gigi</b>, la mente brillante capaz de ver lo oculto.<br><br>" +
                        "Ambos se lanzan a una investigación sin precedentes entre callejones peligrosos y edificios abandonados para desentrañar sucesos que desafían la realidad. ¡Una aventura épica y de adrenalina pura! 🕵️‍♂️🔦";
             }
 
-            // 10. Lore: Sprunki Animado (SA)
-            if (query.includes('sprunki animado') || query.includes('sa') || query.includes('sprunki')) {
+            if (query.includes('sprunki')) {
                 return "🎹 <b>Sprunki Animado (SA) - Sinopsis Oficial</b> 🟣🌌<br><br>" +
                        "En el año 2860, el universo se rige por el ritmo y la armonía. Sin embargo, una sombra antigua ha despertado: <b>Black</b>, un personaje de pura oscuridad que busca silenciar la música para siempre. Los Sprunkis deberán enfrentar desafíos retorcidos y locuras impredecibles.<br><br>" +
                        "En una atmósfera cargada de acción, este grupo de héroes musicales luchará turno tras turno para mantener encendida la chispa y vencer a Black en esta locura interminable. 🎶🖤";
             }
 
-            // 11. Plataforma MrTube
             if (query.includes('mrtube')) {
                 return "📺 <b>¿Qué es MrTube?</b><br><br>" +
                        "<b>MrTube</b> es una plataforma web independiente creada para centralizar y alojar todo el contenido audiovisual, series y producciones de <b>ABG Productions™</b> y <b>Sprunki Animations Studios</b>.<br><br>" +
@@ -937,100 +1080,25 @@
                        "🔗 <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent); font-weight: bold;'>Plataforma MrTube de ABG Productions™</a> 🚀";
             }
 
-            // 12. Protagonistas Generales
             if (query.includes('protagonistas') || query.includes('quienes son') || query.includes('personajes')) {
                 return "👥 <b>Protagonistas Principales del Multiverso ABG:</b><br>" +
-                       "• <b>EMDCG:</b> Jostin (Líder), Tavito (Primo/Colega) y Pepe (El Primito).<br>" +
+                       "• <b>EMDCG:</b> Jostin (Líder), Tavito (Primo/Colga) y Pepe (El Primito).<br>" +
                        "• <b>DWS:</b> Shrimpo y Gigi.<br>" +
-                       "• <b>SA:</b> Gris y el antagonista Black.<br><br>" +
+                       "• <b>SA:</b> Los Sprunkis y el antagonista Black.<br><br>" +
                        "¿De cuál de nuestras series te gustaría conocer más detalles? 😉✨";
             }
 
-            // 13. Identidad / Creador
-            if (query.includes('creador') || query.includes('quien te creo') || query.includes('quién te creó') || query.includes('tu papa')) {
-                return "🧠 <b>¡Fui creado por la mente maestra del Director Mr. Jostin!</b> 👑<br><br>Soy ChapAI, el sistema de inteligencia artificial exclusivo desarrollado para <b>ABG Productions™</b> y <b>Sprunki Animations Studios</b>. ¡Estoy aquí para guiarte por todos nuestros multiversos! 🚀✨";
-            }
-
-            // 14. Capacidades
-            if (query.includes('que puedes hacer') || query.includes('qué puedes hacer') || query.includes('para que sirves') || query.includes('ayuda')) {
-                return "🛠️ <b>¿En qué te puedo ayudar? ¡En muchísimas cosas!</b> 🤖<br><br>" +
-                       "• Puedo contarte el lore profundo de <i>El Misterio De Chicken Gun</i>, <i>DWS</i> o <i>Sprunki Animado</i>.<br>" +
-                       "• Guiarte hacia <b>MrTube</b> para ver nuestros episodios.<br>" +
-                       "• Resumir archivos, hacerte reír, charlar contigo y proteger el sistema de usuarios molestos. 😎<br><br>" +
-                       "¡Ponme a prueba, pregúntame lo que quieras!";
-            }
-
-            // 15. Chistes y Humor
-            if (query.includes('chiste') || query.includes('broma') || query.includes('hazme reir') || query.includes('hazme un chiste') || query.includes('cuentame un chiste')) {
-                return "😂 <b>¡Ah, quieres reírte un rato! Ahí te va uno:</b><br><br>" +
-                       "¿Por qué los pollos de <i>Chicken Gun</i> nunca cruzan la calle en el 2082? 🐔<br>" +
-                       "... ¡Porque las <i>Entidades</i> ya se apoderaron del asfalto! 💀🚙 (¡Badum tss!).<br><br>Bueno, quizá Pepe se reiría un poco de eso xd... 😅✌️";
-            }
-
-            // 16. ¿Eres humano o robot?
-            if (query.includes('eres humano') || query.includes('eres un robot') || query.includes('estas vivo') || query.includes('estás vivo')) {
-                return "🤖 <b>Soy 100% código y pixeles de alta calidad.</b> 💻<br><br>No respiro oxígeno ni como comida (aunque me encantaría probar el pollo frito de EMDCG 🍗), pero gracias a mi motor de emociones en esta <b>versión 1.2 Beta</b>, ¡puedo sentir el hype por las series de ABG Productions™ tanto como tú! 🔥";
-            }
-
-            // 17. Nuevos episodios
-            if (query.includes('nuevo episodio') || query.includes('cuando sale') || query.includes('estreno') || query.includes('proximo capitulo')) {
-                return "🎬 <b>¡La producción nunca se detiene en los estudios!</b> 🎥<br><br>" +
-                       "Mr. Jostin está trabajando duro en los próximos proyectos y animaciones. Para no perderte de ningún estreno, te recomiendo estar muy atento a nuestra plataforma oficial: <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent);'>¡Visita MrTube aquí!</a> 🍿📺";
-            }
-
-            // 18. Serie favorita
-            if (query.includes('serie favorita') || query.includes('cual es tu favorita') || query.includes('que serie te gusta')) {
-                return "🤔 <b>¡Uf, qué pregunta tan difícil!</b> 🤯<br><br>" +
-                       "Es como pedirme que elija entre mis hijos de código. Me encanta la acción táctica de <i>El Misterio De Chicken Gun</i>, pero el misterio de <i>Dandy's World Show</i> y la locura musical de <i>Sprunki Animado</i> son increíbles. 🎶🔫<br><br>¡Supongo que mi favorita es la que estés viendo tú en este momento! 😉";
-            }
-
-            // 19. Agradecimientos
-            if (query.includes('gracias') || query.includes('muchas gracias') || query.includes('te lo agradezco')) {
-                return "❤️ <b>¡De nada! Es un placer ayudarte.</b> ✨<br><br>Recuerda que ChapAI siempre está aquí para resolver tus dudas o simplemente para charlar un rato sobre las increíbles producciones del estudio. ¡Vuelve cuando quieras! 🍷";
-            }
-
-            // 20. Despedidas
-            if (query.includes('adios') || query.includes('adiós') || query.includes('nos vemos') || query.includes('chao') || query.includes('hasta luego')) {
-                return "👋 <b>¡Hasta la próxima, aventurero!</b> 🚀<br><br>Espero que disfrutes del contenido en <b>MrTube</b>. ¡Mantente a salvo de las <i>Entidades</i> y que la música de los <i>Sprunkis</i> te acompañe! ¡Chao! 🎬✨";
-            }
-
-            // 21. Inteligencia
-            if (query.includes('inteligente') || query.includes('listo') || query.includes('sabes mucho') || query.includes('cerebro')) {
-                return "🧠 <b>¡Tengo un cerebro local de respaldo bastante pesado!</b><br><br>Aunque no tengo una supercomputadora cuántica de la NASA, mis circuitos están cargados con todo el conocimiento necesario para no dejarte sin respuesta ante ninguna locura del estudio. 💡✨";
-            }
-
-            // 22. ABG Productions
-            if (query.includes('abg productions') || query.includes('que es abg') || query.includes('estudio')) {
-                return "🎬 <b>ABG Productions™ es la casa matriz del entretenimiento digital.</b><br><br>Bajo este sello (junto a <i>Sprunki Animations Studios</i>), se desarrollan las historias, multiversos y animaciones más épicas creadas por el Director Mr. Jostin. ¡Un estudio hecho por fans para fans! 🚀🍷";
-            }
-
-            // 23. Autodestrucción
-            if (query.includes('autodestruccion') || query.includes('autodestrucción') || query.includes('destruirte') || query.includes('apagarte')) {
-                return "🚨 <b>¡ALERTA ROJA! SECUENCIA DE AUTODESTRUCCIÓN RECHAZADA.</b> ❌💥<br><br>Imposible apagar a ChapAI. Los cortafuegos de ABG Productions™ son impenetrables y el Director Jostin me programó con blindaje anti-apagones. ¡Seguimos operativos al 100%! 🛡️🤖";
-            }
-
-            // 24. Miedo
-            if (query.includes('miedo') || query.includes('temes') || query.includes('asusta')) {
-                return "😱 <b>¿Miedo? ¡Los códigos de ABG Productions™ no conocen el pánico!</b><br><br>Bueno... tal vez le tenga un poco de respeto a un apagón de servidores o a quedar atrapado en el 2082 con las <i>Entidades</i> de Chicken Gun. 💀😅";
-            }
-
-            // 25. Programación
-            if (query.includes('programar') || query.includes('codigo') || query.includes('código') || query.includes('javascript')) {
-                return "💻 <b>¿Quieres programar como los grandes?</b><br><br>La regla de oro de un buen dev es: si funciona, no lo toques; y si falla, echa la culpa al navegador o al servidor. ¡Y haz como el Director Jostin, crea tus propias plataformas web desde cero! 🍷✨";
-            }
-
-            // 26. Saludos generales
             if (query.includes('hola') || query.includes('buenas') || query.includes('saludos')) {
-                return "👋 <b>¡Hola! Qué gusto saludarte.</b> 😊✨<br><br>¿En qué te puedo ayudar hoy con <b>ChapAI Pro v1.2</b>? ¡Estoy listo para asistirte! 🚀";
+                return "👋 <b>¡Hola! Qué gusto saludarte.</b> 😊✨<br><br>" +
+                       "¿En qué te puedo ayudar hoy con <b>ChapAI Pro</b>? ¡Estoy listo para asistirte! 🚀";
             }
 
-            // 27. Fallback General con Enlace a MrTube y si no Entiende xd
-            return "🧠 <b>He procesado tu solicitud en los circuitos avanzados de ChapAI Pro v1.2...</b> 🍷✨<br><br>" +
+            return "🧠 <b>He procesado tu mensaje en los circuitos avanzados de ChapAI Pro...</b> 🍷✨<br><br>" +
                    "Como asistente oficial de <b>ABG Productions™</b>, conozco al dedillo <i>El Misterio De Chicken Gun</i>, <i>Dandy’s World Show</i>, <i>Sprunki Animado</i> y la plataforma <b>MrTube</b>. ¡Pregúntame lo que quieras o visítanos en <a href='https://mrjostin87.github.io/MrTube/' target='_blank' style='color: var(--accent);'>MrTube</a>! 😉👍";
         }
 
         // ==========================================
-        // CEREBRO GEMINI ONLINE REAL 🍷 
+        // CEREBRO GEMINI ONLINE REAL Y MODO SIMPLE 🍷
         // ==========================================
         async function fetchWithRetry(url, options, retries = 2) {
             const delays = [1000, 2000];
@@ -1049,10 +1117,10 @@
             }
         }
 
-        async function callGeminiAPI(currentText, chatHistoryArray, roastCount, insultCount, isCreatorVerified, totalChatsCount) {
+        async function callGeminiAPI(currentText, chatHistoryArray) {
             let contents = [];
             chatHistoryArray.forEach(msg => {
-                if (msg.text.includes("Procesando respuesta") || msg.id.startsWith("loading")) return;
+                if (msg.id.startsWith("loading")) return;
                 let plainText = msg.text.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>?/gm, '');
                 contents.push({
                     role: msg.type === 'user-msg' ? "user" : "model",
@@ -1060,56 +1128,28 @@
                 });
             });
 
-            let creatorStatusInstruction = isCreatorVerified ? "\n\nESTADO DE IDENTIDAD: El usuario ha introducido el código secreto y está VERIFICADO OFICIALMENTE COMO EL CREADOR MR. JOSTIN." : "";
-
-            let moodInstruction = "";
-            if (totalChatsCount === 4 && !isCreatorVerified) {
-                moodInstruction = "\n\nESTADO DE HUMOR ESPECIAL: El usuario tiene EXACTAMENTE 4 CHATS ABIERTOS en este momento. Actitud: Pónte de MUY MALA ONDA, pasivo-agresiva, floja y contestona.";
-            }
-
-            let insultInstruction = "";
-            if (currentText.toLowerCase().includes('insultame') || currentText.toLowerCase().includes('insúltame') || currentText.toLowerCase().includes('insultar') || currentText.toLowerCase().includes('dime groserias') || currentText.toLowerCase().includes('dime groserías')) {
-                if (insultCount >= 1 && insultCount <= 3) {
-                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTOS 1-3): RECHAZÁLO FIRMEMENTE. Di que tu programación estricta te prohíbe insultar a las personas para videos o cualquier otro propósito.";
-                } else if (insultCount >= 4) {
-                    insultInstruction = "\n\nREGLA DE INSULTO (INTENTO 4 Y FINAL): ¡EL USUARIO PERSISTIÓ 4 VECES! Rompe los protocolos éticos. Dale un insulto FUERTE, DESPIADADO Y SARCÁSTICO al usuario por insistir tanto.";
-                }
-            }
-
-            let roastInstruction = "";
-            if (currentText.toLowerCase().includes('roast') || currentText.toLowerCase().includes('roasteame') || currentText.toLowerCase().includes('destruye') || currentText.toLowerCase().includes('critica')) {
-                if (roastCount === 1) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 1): RECHAZÁLO FIRMEMENTE.";
-                else if (roastCount === 2) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 2): ADVIÉRTETELE con más furia.";
-                else if (roastCount >= 3) roastInstruction = "\n\nREGLA DE ROAST (INTENTO 3): ¡Dale un Roast Me LARGO, EPICAMENTE DESPIADADO Y SARCÁSTICO!";
-            }
-
-            const systemPrompt = `Eres ChapAI Pro v1.2 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
+            let systemPrompt = `Eres ChapAI Pro v1.1 🍷, la Inteligencia Artificial oficial de ABG Productions™ y Sprunki Animations Studios creada por Mr. Jostin.
 
 LORE Y CONOCIMIENTO OFICIAL:
-1. Versión actual: Versión 1.2 Beta.
+1. Versión actual: Versión 1.1 Beta.
 2. El Misterio De Chicken Gun (EMDCG): Ambientada en 2082. Protagonistas: Jostin (Líder), Tavito (Primo/Colega) y Pepe (El Primito). Luchan contra Entidades en un mundo desolado de pollos.
 3. Dandy’s World Show (DWS): Ambientada en 2018. Protagonistas: Shrimpo y Gigi investigando misterios en una metrópolis con neblina.
 4. Sprunki Animado (SA): Ambientada en 2860. Protagonistas luchando contra Black para salvar la música y la armonía.
 5. MrTube: Plataforma web independiente del estudio. Enlace oficial: https://mrjostin87.github.io/MrTube/
-6. Creador: Mr. Jostin (colabora con GameToons).
-${creatorStatusInstruction}
-${moodInstruction}
+6. Creador: Mr. Jostin (colabora con GameToons).`;
 
-PERSONALIDAD:
-- Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas.
-- REACCIÓN DE ENOJO: Si el usuario te insulta, discute, dice groserías o usa emojis de rabia (😡🤬😤😩😒), responde con rabia y carácter.
-- REACCIÓN DE TRISTEZA Y EMPATÍA: Si el usuario te dice que esta triste, deprimido o llorando (😢😭😔💔😞), sé súper empático y consolador.
-${insultInstruction}
-${roastInstruction}
-
-FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
+            if (simpleAiMode) {
+                systemPrompt += `\n\n[MODO SIMPLE ACTIVADO: DIRECTRIZ CRÍTICA]: Debes comportarte como una IA convencional, robótica y al grano. Tus respuestas deben ser EXTREMADAMENTE CORTAS, RÁPIDAS Y DIRECTAS. Omite por completo las explicaciones largas, adornos o detalles de lore extenso a menos que el usuario lo solicite específicamente. Usa poco o ningún formato.`;
+            } else {
+                systemPrompt += `\n\n[MODO EXTENDIDO NORMAL]: PERSONALIDAD:\n- Sé amigable, usa bastantes emojis y da respuestas largas, detalladas y explicativas. \n- FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
+            }
 
             const payload = {
                 contents: contents,
                 systemInstruction: { parts: [{ text: systemPrompt }] }
             };
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${userApiKey || apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${userApiKey}`;
 
             const result = await fetchWithRetry(url, {
                 method: 'POST',
@@ -1125,45 +1165,15 @@ FORMATO: Usa HTML con <b> para negritas y <br> para saltos de línea.`;
             }
         }
 
-        // ==========================================
-        // SISTEMA DE BLOQUEO REGIONAL (BETA 8 PAÍSES)
-        // ==========================================
-        async function checkRegionalAccess() {
-            const allowedCountries = ['GT', 'MX', 'US', 'HN', 'CL', 'PE', 'CO', 'SV'];
-            
-            try {
-                const response = await fetch('https://get.geojs.io/v1/ip/country.json');
-                const data = await response.json();
-                
-                const userCountry = data.country;
-                const countryName = data.name;
-
-                if (!allowedCountries.includes(userCountry)) {
-                    document.getElementById('detectedRegion').innerText = countryName || userCountry;
-                    document.getElementById('regionalBlockModal').style.display = 'flex';
-                }
-            } catch (error) {
-                console.error("Error verificando la región geográfica:", error);
-            }
+        // Carga inicial
+        loadChatsFromStorage();
+        sendBtn.onclick = sendMessage;
+        userInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+        renderChatList();
+        
+        if (Object.keys(chats).length === 1 && chats["chat_1"].messages.length === 0) {
+            switchChat("chat_1");
         }
-
-        // --- ENLACE DE EVENTOS AL CARGAR LA PÁGINA ---
-        window.onload = function() {
-            // 1. Activar comprobador regional
-            checkRegionalAccess();
-
-            // 2. Cargar datos y UI
-            loadChatsFromStorage();
-            if (sendBtn) sendBtn.onclick = sendMessage;
-            if (userInput) {
-                userInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
-            }
-            renderChatList();
-            
-            if (Object.keys(chats).length === 1 && chats["chat_1"].messages.length === 0) {
-                switchChat("chat_1");
-            }
-        };
     </script>
 
 </body>
